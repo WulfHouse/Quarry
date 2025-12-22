@@ -74,41 +74,41 @@ This is the **Quarry** SDK repository, containing the **Pyrite** toolchain: **Fo
 
 ```
 pyrite/
-├── build/                        # Build artifacts (safe to delete)
-│   ├── bootstrap/                # Bootstrap compiler artifacts
-│   │   ├── stage1/               # Forge Stage1 (Pyrite compiled by Python)
-│   │   └── stage2/               # Forge Stage2 (Pyrite compiled by Stage1)
-│   ├── .coverage                 # Coverage data
-│   ├── coverage.json             # Coverage JSON report
-│   └── README.md                 # Build artifacts documentation
+├── build/                          # Build artifacts (safe to delete)
+│   ├── bootstrap/                  # Bootstrap compiler artifacts
+│   │   ├── stage1/                 # Forge Stage1 (Pyrite compiled by Python)
+│   │   └── stage2/                 # Forge Stage2 (Pyrite compiled by Stage1)
+│   ├── .coverage                   # Coverage data
+│   ├── coverage.json               # Coverage JSON report
+│   └── README.md                   # Build artifacts documentation
 │
-├── docs/                         # Documentation
-│   ├── SSOT.md                   # Language Specification (modular index, aspirational)
-│   ├── SSOT.txt                  # Original specification (preserved as backup, aspirational)
-│   └── specification/            # Modular specification files (aspirational)
-│   ├── bootstrap.md              # Bootstrap guide
-│   ├── performance/              # Performance documentation
-│   ├── quarry/                   # Quarry build system docs
-│   └── testing/                  # Testing documentation
+├── docs/                           # Documentation
+│   ├── SSOT.md                     # Language Specification (modular index, aspirational)
+│   ├── SSOT.txt                    # Original specification (preserved as backup, aspirational)
+│   └── specification/              # Modular specification files (aspirational)
+│   ├── bootstrap.md                # Bootstrap guide
+│   ├── performance/                # Performance documentation
+│   ├── quarry/                     # Quarry build system docs
+│   └── testing/                    # Testing documentation
 │
-├── forge/                        # Forge compiler implementation
-│   ├── src/                      # Forge Stage0 (Python implementation)
-│   │   ├── README.md             # Compiler pipeline documentation
-│   │   ├── compiler.py           # Main compiler entry point
-│   │   ├── ast.py                # Abstract Syntax Tree definitions
-│   │   ├── types.py              # Type system definitions
-│   │   ├── frontend/             # Lexical analysis & parsing
-│   │   │   ├── lexer.py          # Tokenization
-│   │   │   ├── parser.py         # Syntax parsing
-│   │   │   └── tokens.py         # Token definitions
-│   │   ├── middle/               # Type checking & analysis
-│   │   │   ├── type_checker.py   # Type checking
-│   │   │   ├── ownership.py      # Ownership analysis
-│   │   │   ├── borrow_checker.py # Borrow checking
-│   │   │   ├── symbol_table.py   # Symbol resolution
-│   │   │   └── module_system.py  # Module resolution
-│   │   ├── backend/              # Code generation & linking
-│   │   │   ├── codegen.py        # LLVM IR generation
+├── forge/                          # Forge compiler implementation
+│   ├── src/                        # Forge Stage0 (Python implementation)
+│   │   ├── README.md               # Compiler pipeline documentation
+│   │   ├── compiler.py             # Main compiler entry point
+│   │   ├── ast.py                  # Abstract Syntax Tree definitions
+│   │   ├── types.py                # Type system definitions
+│   │   ├── frontend/               # Lexical analysis & parsing
+│   │   │   ├── lexer.py            # Tokenization
+│   │   │   ├── parser.py           # Syntax parsing
+│   │   │   └── tokens.py           # Token definitions
+│   │   ├── middle/                 # Type checking & analysis
+│   │   │   ├── type_checker.py     # Type checking
+│   │   │   ├── ownership.py        # Ownership analysis
+│   │   │   ├── borrow_checker.py   # Borrow checking
+│   │   │   ├── symbol_table.py     # Symbol resolution
+│   │   │   └── module_system.py    # Module resolution
+│   │   ├── backend/                # Code generation & linking
+│   │   │   ├── codegen.py          # LLVM IR generation
 │   │   │   ├── linker.py           # Linking with stdlib
 │   │   │   └── monomorphization.py # Generic instantiation
 │   │   ├── passes/                 # Compiler passes
@@ -159,80 +159,80 @@ pyrite/
 │
 ├── pyrite/                         # Pyrite - Language-facing artifacts
 │   ├── README.md                   # Standard library documentation
-│   ├── core/                  # Core types and functions
-│   ├── collections/           # Collections (List, Map, Set)
-│   ├── io/                    # I/O operations
-│   ├── string/                # String operations
-│   └── [other modules]        # Additional stdlib modules
+│   ├── core/                       # Core types and functions
+│   ├── collections/                # Collections (List, Map, Set)
+│   ├── io/                         # I/O operations
+│   ├── string/                     # String operations
+│   └── [other modules]             # Additional stdlib modules
 │
-├── scripts/                   # Utility scripts
-│   ├── bootstrap/             # Bootstrap scripts
-│   │   ├── bootstrap_stage1.py      # Build Forge Stage1
-│   │   ├── bootstrap_stage2.py      # Build Forge Stage2
+├── scripts/                        # Utility scripts
+│   ├── bootstrap/                  # Bootstrap scripts
+│   │   ├── bootstrap_stage1.py     # Build Forge Stage1
+│   │   ├── bootstrap_stage2.py     # Build Forge Stage2
 │   │   └── check_bootstrap_determinism.py
-│   ├── diagnostics/           # Diagnostic scripts
+│   ├── diagnostics/                # Diagnostic scripts
 │   │   ├── diagnose_coverage_crash.py
 │   │   └── diagnose_coverage_timeout.py
-│   ├── setup/                 # Setup scripts
-│   │   ├── install.sh         # Unix/macOS installer
-│   │   ├── install.ps1        # Windows installer
-│   │   └── setup-dev.ps1      # Development environment setup
-│   ├── utils/                 # Utility scripts
+│   ├── setup/                      # Setup scripts
+│   │   ├── install.sh              # Unix/macOS installer
+│   │   ├── install.ps1             # Windows installer
+│   │   └── setup-dev.ps1           # Development environment setup
+│   ├── utils/                      # Utility scripts
 │   │   ├── incremental_coverage.py
 │   │   ├── split_large_test_file.py
 │   │   ├── test_coverage_safety.py
 │   │   └── verify_dev_env.py
-│   └── [wrappers]             # Entry point wrappers (pyrite, quarry, etc.)
+│   └── [wrappers]                      # Entry point wrappers (pyrite, quarry, etc.)
 │
-├── tools/                     # Development tools
-│   ├── coverage/              # Coverage analysis tools
+├── tools/                              # Development tools
+│   ├── coverage/                       # Coverage analysis tools
 │   │   ├── analyze_coverage.py
 │   │   ├── find_dead_code.py
 │   │   ├── get_coverage_percentage.py
 │   │   └── get_uncovered_lines.py
-│   ├── testing/               # Test runners
-│   │   ├── pytest.py          # Main test runner
-│   │   ├── pytest_fast.py     # Fast test suite
+│   ├── testing/                        # Test runners
+│   │   ├── pytest.py                   # Main test runner
+│   │   ├── pytest_fast.py              # Fast test suite
 │   │   ├── run_tests_batched.py
 │   │   ├── run_tests_local.py
 │   │   ├── run_tests_safe.py
 │   │   ├── run_tests_with_progress.py
 │   │   ├── test_timing.py
 │   │   └── check_test_timing.py
-│   ├── build/                 # Build tools
-│   │   ├── build_runtime.py   # Build runtime library
-│   │   └── rebuild.py         # Rebuild Forge
-│   ├── runtime/               # Runtime tools
-│   │   ├── pyrite.py          # Forge compiler wrapper
-│   │   ├── pyrite_lsp.py      # LSP server
-│   │   ├── pyrite_run.py      # Run Pyrite programs
-│   │   └── quarry.py          # Quarry build system
-│   ├── utils/                 # Utility tools
+│   ├── build/                          # Build tools
+│   │   ├── build_runtime.py            # Build runtime library
+│   │   └── rebuild.py                  # Rebuild Forge
+│   ├── runtime/                        # Runtime tools
+│   │   ├── pyrite.py                   # Forge compiler wrapper
+│   │   ├── pyrite_lsp.py               # LSP server
+│   │   ├── pyrite_run.py               # Run Pyrite programs
+│   │   └── quarry.py                   # Quarry build system
+│   ├── utils/                          # Utility tools
 │   │   ├── debug_try_operator.py
-│   │   ├── run_logged.ps1     # Command logging wrapper
-│   │   ├── run_safe.ps1       # Convenience wrapper
+│   │   ├── run_logged.ps1              # Command logging wrapper
+│   │   ├── run_safe.ps1                # Convenience wrapper
 │   │   └── validate_command_safety.ps1
-│   └── docs/                  # Tool documentation
+│   └── docs/                           # Tool documentation
 │       ├── DEVELOPER_COMMAND_POLICY.md
 │       └── README_COMMAND_POLICY.md
 │
-├── tests/                     # Integration and acceptance tests
-│   ├── acceptance/            # Acceptance tests
-│   ├── integration/           # Integration tests
-│   └── test-projects/         # Test projects
+├── tests/                               # Integration and acceptance tests
+│   ├── acceptance/                      # Acceptance tests
+│   ├── integration/                     # Integration tests
+│   └── test-projects/                   # Test projects
 │
-├── test-consumer/             # Test consumer project
+├── test-consumer/                       # Test consumer project
 │
-├── vscode-pyrite/             # VS Code extension
-│   ├── src/                   # Extension source
-│   ├── syntaxes/              # Syntax highlighting
-│   └── package.json           # Extension manifest
+├── vscode-pyrite/                       # VS Code extension
+│   ├── src/                             # Extension source
+│   ├── syntaxes/                        # Syntax highlighting
+│   └── package.json                     # Extension manifest
 │
-├── .logs/                     # Developer execution logs
+├── .logs/                               # Developer execution logs
 │
-├── .coveragerc                # Coverage configuration
-├── .gitignore                 # Git ignore rules
-└── pyproject.toml             # Python project configuration
+├── .coveragerc                          # Coverage configuration
+├── .gitignore                           # Git ignore rules
+└── pyproject.toml                       # Python project configuration
 ```
 
 ## Key Components
