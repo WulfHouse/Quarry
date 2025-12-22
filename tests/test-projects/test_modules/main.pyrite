@@ -1,0 +1,9 @@
+# Main module that imports math_utils
+
+import math_utils
+
+fn main():
+    let x = 5
+    print("Double:", math_utils.double(x))
+    print("Square:", math_utils.square(x))
+

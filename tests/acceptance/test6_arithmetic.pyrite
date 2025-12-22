@@ -1,0 +1,19 @@
+# Test 6: Arithmetic Operations
+
+fn main():
+    let a = 10
+    let b = 3
+    
+    print("Addition:", a + b)
+    print("Subtraction:", a - b)
+    print("Multiplication:", a * b)
+    print("Division:", a / b)
+    print("Modulo:", a % b)
+    
+    let x = 5
+    let y = 5
+    print("Equal:", x == y)
+    print("Not equal:", x != b)
+    print("Less than:", b < a)
+    print("Greater than:", a > b)
+

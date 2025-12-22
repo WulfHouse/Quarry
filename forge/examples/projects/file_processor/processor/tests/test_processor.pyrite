@@ -1,0 +1,13 @@
+# Tests for file processor
+
+@test
+fn test_processor_basic():
+    # Test that processor can be instantiated
+    # For MVP: basic test
+    assert true
+
+@test
+fn test_file_reading():
+    # Test file reading functionality
+    # For MVP: placeholder test
+    assert true

@@ -1,0 +1,11 @@
+# End-to-end workflow test
+# Using primitives to avoid compiler bugs
+
+fn add_one(x: int) -> int:
+    return x + 1
+
+fn main():
+    let number = 5
+    let result = add_one(number)
+    print("Original:", number)
+    print("Result:", result)

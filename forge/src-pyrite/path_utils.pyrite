@@ -1,0 +1,53 @@
+# Path utilities for Quarry
+#
+# This module provides path manipulation utilities for cross-platform path operations.
+# This is the Pyrite implementation replacing Python pathlib operations in:
+# - quarry/dependency.py: Path resolution and relative paths
+# - quarry/workspace.py: Path resolution and joining
+# - quarry/installer.py: Path resolution
+# - quarry/publisher.py: Relative path computation
+#
+# Implementation note: Path operations require OS-specific handling (Windows vs POSIX).
+# The core logic is implemented in C (path_utils.c) and called via FFI.
+# This Pyrite module provides the FFI declarations and wrapper functions.
+
+# FFI declarations for C implementation
+# Check if path is absolute
+# Input: path (UTF-8 bytes)
+# Output: Writes result to result pointer (1 = true, 0 = false)
+# Returns: 0 on success, -1 on error
+extern "C" fn is_absolute_c(path: *const u8, path_len: i64, result: *mut i32) -> i32
+
+# Resolve path to absolute
+# Input: path (UTF-8 bytes), base (UTF-8 bytes, can be NULL/empty for CWD)
+# Output: Writes resolved path to result buffer, sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn resolve_path_c(path: *const u8, path_len: i64, base: *const u8, base_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Join path components
+# Input: parts_json (JSON array of path strings)
+# Output: Writes joined path to result buffer, sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn join_paths_c(parts_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Get relative path from base to path
+# Input: path (UTF-8 bytes), base (UTF-8 bytes)
+# Output: Writes relative path to result buffer (or "null" if no relative path), sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn relative_path_c(path: *const u8, path_len: i64, base: *const u8, base_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Public API: Check if path is absolute
+extern "C" fn is_absolute(path: *const u8, path_len: i64, result: *mut i32) -> i32:
+    return is_absolute_c(path, path_len, result)
+
+# Public API: Resolve path to absolute
+extern "C" fn resolve_path(path: *const u8, path_len: i64, base: *const u8, base_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return resolve_path_c(path, path_len, base, base_len, result, result_cap, result_len)
+
+# Public API: Join path components
+extern "C" fn join_paths(parts_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return join_paths_c(parts_json, json_len, result, result_cap, result_len)
+
+# Public API: Get relative path
+extern "C" fn relative_path(path: *const u8, path_len: i64, base: *const u8, base_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return relative_path_c(path, path_len, base, base_len, result, result_cap, result_len)

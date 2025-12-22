@@ -1,0 +1,108 @@
+# Path - Cross-platform path manipulation
+#
+# Path type for handling file system paths in a cross-platform way
+#
+# API Documentation:
+#
+# struct Path:
+#   data: String  # Internal path representation
+#
+# Static Methods:
+#   new(path: String) -> Path
+#     Create new Path from string
+#
+# Instance Methods:
+#   join(&self, other: &String) -> Path
+#     Join path with another path component
+#
+#   parent(&self) -> Option[Path]
+#     Get parent directory. Returns None if no parent.
+#
+#   file_name(&self) -> Option[String]
+#     Get file name component. Returns None if no file name.
+#
+#   exists(&self) -> bool
+#     Check if path exists
+#
+#   is_file(&self) -> bool
+#     Check if path is a file
+#
+#   is_dir(&self) -> bool
+#     Check if path is a directory
+#
+# Example usage:
+#
+# fn main():
+#     let path = Path.new("src/main.pyrite")
+#     match path.parent():
+#         Option.Some(parent):
+#             print("Parent:", parent)
+#         Option.None:
+#             print("No parent")
+#     
+#     match path.file_name():
+#         Option.Some(name):
+#             print("File name:", name)
+#         Option.None:
+#             print("No file name")
+#     
+#     if path.exists():
+#         if path.is_file():
+#             print("Is a file")
+#         elif path.is_dir():
+#             print("Is a directory")
+
+# Path struct
+struct Path:
+    data: String
+
+# FFI declarations for C functions
+extern "C" fn path_join(base: *const u8, other: *const u8) -> String
+extern "C" fn path_parent(path: *const u8) -> String
+extern "C" fn path_file_name(path: *const u8) -> String
+extern "C" fn path_exists(path: *const u8) -> i8
+extern "C" fn path_is_file(path: *const u8) -> i8
+extern "C" fn path_is_dir(path: *const u8) -> i8
+extern "C" fn string_new(cstr: *const u8) -> String
+extern "C" fn string_empty() -> String
+
+# Path implementation
+impl Path:
+    fn new(path: String) -> Path:
+        return Path { data: path }
+    
+    # Join path with another component
+    fn join(&self, other: &String) -> Path:
+        result = path_join(self.data.data, other.data)
+        return Path { data: result }
+    
+    # Get parent directory
+    fn parent(&self) -> Option[Path]:
+        result = path_parent(self.data.data)
+        if result.len > 0:
+            return Option.Some(Path { data: result })
+        else:
+            return Option.None
+    
+    # Get file name
+    fn file_name(&self) -> Option[String]:
+        result = path_file_name(self.data.data)
+        if result.len > 0:
+            return Option.Some(result)
+        else:
+            return Option.None
+    
+    # Check if path exists
+    fn exists(&self) -> bool:
+        result = path_exists(self.data.data)
+        return result == 1
+    
+    # Check if path is a file
+    fn is_file(&self) -> bool:
+        result = path_is_file(self.data.data)
+        return result == 1
+    
+    # Check if path is a directory
+    fn is_dir(&self) -> bool:
+        result = path_is_dir(self.data.data)
+        return result == 1

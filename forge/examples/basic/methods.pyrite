@@ -1,0 +1,26 @@
+# Methods with impl blocks
+struct Rectangle:
+    width: int
+    height: int
+
+fn rectangle_new(width: int, height: int) -> Rectangle:
+    return Rectangle { width: width, height: height }
+
+fn rectangle_area(r: &Rectangle) -> int:
+    return r.width * r.height
+
+fn rectangle_perimeter(r: &Rectangle) -> int:
+    return 2 * (r.width + r.height)
+
+fn rectangle_is_square(r: &Rectangle) -> bool:
+    return r.width == r.height
+
+fn main():
+    let rect = rectangle_new(5, 10)
+    print("Area:", rectangle_area(&rect))
+    print("Perimeter:", rectangle_perimeter(&rect))
+    print("Is square:", rectangle_is_square(&rect))
+    
+    let square = Rectangle { width: 4, height: 4 }
+    print("Is square:", rectangle_is_square(&square))
+

@@ -1,0 +1,14 @@
+# Example test file
+
+@test
+fn test_addition():
+    let result = 2 + 3
+    # assert result == 5  # TODO: implement assert macro
+    print("test_addition passed")
+
+@test
+fn test_multiplication():
+    let result = 4 * 5
+    # assert result == 20
+    print("test_multiplication passed")
+

@@ -1,0 +1,23 @@
+fn demonstrate_parameter_closure():
+    let param_closure = fn[i: int] -> int: i * 2
+    print(42)
+
+fn demonstrate_runtime_closure():
+    let runtime_closure = fn(x: int) -> int: x * 2
+    print(runtime_closure(21))
+
+fn demonstrate_runtime_closure_no_params():
+    let callback = fn() -> int: 42
+    print(callback())
+
+fn demonstrate_multiple_params():
+    let param_add = fn[x: int, y: int] -> int: x + y
+    let runtime_add = fn(x: int, y: int) -> int: x + y
+    print(runtime_add(10, 20))
+
+fn main():
+    demonstrate_parameter_closure()
+    demonstrate_runtime_closure()
+    demonstrate_runtime_closure_no_params()
+    demonstrate_multiple_params()
+

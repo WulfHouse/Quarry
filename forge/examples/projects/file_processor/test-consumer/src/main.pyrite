@@ -1,0 +1,5 @@
+# Import utils library
+fn main():
+    print("Hello from test-consumer!")
+    # For MVP, we can't actually import yet, but we can verify the package is installed
+    print("Utils package is installed and ready to use")

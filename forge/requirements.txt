@@ -1,0 +1,20 @@
+# Pyrite Compiler Dependencies
+
+# LLVM bindings for code generation
+llvmlite>=0.40.0
+
+# Testing framework
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-xdist>=3.0.0  # Parallel test execution
+pytest-timeout>=2.1.0  # Per-test timeouts for fast lane
+
+# Development tools
+black>=23.0.0
+mypy>=1.0.0
+
+# Binary parsing for quarry bloat
+pyelftools>=0.29  # ELF parsing (Linux, embedded)
+pefile>=2023.2.7  # PE parsing (Windows)
+macholib>=1.16    # Mach-O parsing (macOS)
+

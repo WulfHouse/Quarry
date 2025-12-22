@@ -1,0 +1,27 @@
+# File processor - Sample CLI app using stdlib
+# This demonstrates File I/O, Path operations, and formatting
+
+fn main():
+    print("File Processor - Sample CLI App")
+    print("This app demonstrates stdlib usage:")
+    print("  - File I/O operations")
+    print("  - Path manipulation")
+    print("  - String formatting")
+    print("")
+    print("For MVP: This is a placeholder implementation")
+    print("Full implementation would:")
+    print("  1. Read files using File.read_to_string()")
+    print("  2. Process file content (e.g., count lines)")
+    print("  3. Use Path operations for file handling")
+    print("  4. Use format() for output messages")
+    print("  5. Use utils library for helper functions")
+    
+    # Example usage (when FFI is fully working):
+    # let path = Path.new("input.txt")
+    # match File.read_to_string(path.data):
+    #     Ok(content):
+    #         let line_count = count_lines(content)
+    #         let message = format("File has {} lines", [string_from_int(line_count)])
+    #         print(message)
+    #     Err(e):
+    #         print("Error reading file:", e)

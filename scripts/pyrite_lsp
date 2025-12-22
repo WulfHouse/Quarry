@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+r"""
+Pyrite LSP Server - repo root entry point
+Delegates to tools/runtime/pyrite_lsp.py wrapper
+
+Usage:
+    python scripts/pyrite_lsp              # From repo root
+    ./scripts/pyrite_lsp                   # From repo root (Unix)
+    .\scripts\pyrite_lsp.cmd               # From repo root (Windows)
+"""
+
+import sys
+import importlib.util
+from pathlib import Path
+
+# Find tools directory relative to this script (now in scripts/, so go up one level)
+script_dir = Path(__file__).parent.resolve()
+repo_root = script_dir.parent
+tools_lsp = repo_root / "tools" / "runtime" / "pyrite_lsp.py"
+
+if not tools_lsp.exists():
+    print("Error: Could not find tools/runtime/pyrite_lsp.py")
+    print("Please run this script from the Pyrite repository root.")
+    sys.exit(1)
+
+# Import and execute the tools wrapper
+spec = importlib.util.spec_from_file_location("pyrite_lsp_wrapper", tools_lsp)
+if spec is None or spec.loader is None:
+    print("Error: Could not load tools/runtime/pyrite_lsp.py")
+    sys.exit(1)
+
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+
+# Call main if it exists
+if hasattr(module, 'main'):
+    sys.exit(module.main())
+

@@ -1,0 +1,13 @@
+# Ownership and borrowing example
+fn process(list: &List[int]):
+    print("Processing list of length:", list.length())
+
+fn main():
+    var numbers = List[int]([1, 2, 3])
+    
+    # Borrow the list (doesn't move ownership)
+    process(&numbers)
+    
+    # Can still use numbers here
+    print("List still valid:", numbers.length())
+

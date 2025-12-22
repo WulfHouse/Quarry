@@ -1,0 +1,25 @@
+# Borrowing examples
+struct Data:
+    value: int
+
+fn read_data(d: &Data):
+    print("Reading:", d.value)
+
+fn modify_data(d: &mut Data):
+    d.value = d.value * 2
+
+fn main():
+    var data = Data { value: 42 }
+    
+    # Immutable borrow
+    read_data(&data)
+    
+    # Data still valid
+    print("After read:", data.value)
+    
+    # Mutable borrow
+    modify_data(&mut data)
+    
+    # Data still valid
+    print("After modify:", data.value)
+

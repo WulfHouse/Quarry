@@ -1,0 +1,13 @@
+# Test 9: Loop Constructs
+
+fn main():
+    # While loop
+    var i = 0
+    while i < 5:
+        print("While:", i)
+        i = i + 1
+    
+    # For loop
+    for j in 0..5:
+        print("For:", j)
+

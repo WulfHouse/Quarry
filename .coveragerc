@@ -1,0 +1,40 @@
+# Coverage configuration (backup to pyproject.toml)
+# This ensures coverage.py respects our scope even if pyproject.toml isn't read
+
+[run]
+source = forge/src
+omit =
+    */tests/*
+    */__pycache__/*
+    */test_*.py
+    */conftest.py
+    **/.venv/**
+    **/venv/**
+    **/node_modules/**
+    **/vscode-pyrite/**
+    **/dist/**
+    **/build/**
+    **/.eggs/**
+    **/.tox/**
+    **/.mypy_cache/**
+    **/.pytest_cache/**
+    **/htmlcov/**
+    **/.coverage*
+    **/tools/**
+    **/scripts/**
+    **/docs/**
+    **/examples/**
+    **/pyrite/**
+    **/quarry/**
+    **/lsp/**
+    **/runtime/**
+
+[report]
+fail_under = 80
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod

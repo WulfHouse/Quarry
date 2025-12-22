@@ -1,0 +1,2 @@
+[dependencies]
+utils = { version = "1.0.0", checksum = "sha256:b441f847eb54590f2a54dae0b07bdac6a159c55a55f0ce79758233adf8c726fa" }

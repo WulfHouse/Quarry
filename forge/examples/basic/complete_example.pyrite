@@ -1,0 +1,33 @@
+# Complete Pyrite program demonstrating key features
+
+struct Point:
+    x: int
+    y: int
+
+fn point_distance_squared(p1: &Point, p2: &Point) -> int:
+    let dx = p2.x - p1.x
+    let dy = p2.y - p1.y
+    return dx * dx + dy * dy
+
+fn test_value(x: int) -> int:
+    if x == 0:
+        return 100
+    elif x == 1:
+        return 200
+    else:
+        return x * 10
+
+fn main():
+    let origin = Point { x: 0, y: 0 }
+    let point = Point { x: 3, y: 4 }
+    let dist = point_distance_squared(&origin, &point)
+    print(dist)
+    let result = test_value(5)
+    print(result)
+    let sum = 10 + 20
+    print(sum)
+    let dist_copy = dist
+    if dist_copy > 20:
+        print(1)
+    else:
+        print(0)

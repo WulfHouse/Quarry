@@ -1,0 +1,32 @@
+# Option type - represents optional values
+
+enum Option[T]:
+    Some(value: T)
+    None
+
+impl Option[T]:
+    fn is_some(&self) -> bool:
+        match self:
+            Some(_):
+                return true
+            None:
+                return false
+    
+    fn is_none(&self) -> bool:
+        return not self.is_some()
+    
+    fn unwrap(self) -> T:
+        match self:
+            Some(value):
+                return value
+            None:
+                # TODO: panic
+                return value
+    
+    fn unwrap_or(self, default: T) -> T:
+        match self:
+            Some(value):
+                return value
+            None:
+                return default
+

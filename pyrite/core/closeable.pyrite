@@ -1,0 +1,14 @@
+# Closeable Trait - For with statement resource management
+
+trait Closeable:
+    """
+    Trait for resources that need cleanup.
+    
+    Types implementing Closeable can be used with the 'with' statement:
+    
+        with resource = try acquire():
+            use(resource)
+        # resource.close() called automatically
+    """
+    fn close(&mut self)
+

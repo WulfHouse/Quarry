@@ -1,0 +1,14 @@
+# Test 2: Ownership Error Detection
+# This should fail to compile with ownership error
+
+struct List:
+    length: int
+
+fn process(list: List):
+    print(list.length)
+
+fn main():
+    let data = List { length: 3 }
+    process(data)
+    print(data.length)  # ERROR: moved value
+

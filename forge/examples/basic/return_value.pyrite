@@ -1,0 +1,4 @@
+# Program that returns a value
+fn main() -> int:
+    return 42
+

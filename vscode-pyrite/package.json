@@ -1,0 +1,92 @@
+{
+  "name": "pyrite-lang",
+  "displayName": "Pyrite Language Support",
+  "description": "Language support for Pyrite - Memory-safe systems programming with Python syntax",
+  "version": "2.0.0",
+  "publisher": "pyrite-lang",
+  "author": "Alexander Rose Wulf",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wulfhq/pyrite"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "pyrite",
+    "systems programming",
+    "memory safety",
+    "ownership",
+    "python syntax"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "pyrite",
+        "aliases": [
+          "Pyrite",
+          "pyrite"
+        ],
+        "extensions": [
+          ".pyrite",
+          ".pyr"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "pyrite",
+        "scopeName": "source.pyrite",
+        "path": "./syntaxes/pyrite.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Pyrite",
+      "properties": {
+        "pyrite.lsp.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Pyrite Language Server"
+        },
+        "pyrite.lsp.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to pyrite-lsp executable (leave empty for auto-detect)"
+        },
+        "pyrite.lsp.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Trace communication between VSCode and language server"
+        }
+      }
+    }
+  },
+  "activationEvents": [
+    "onLanguage:pyrite"
+  ],
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  }
+}
+

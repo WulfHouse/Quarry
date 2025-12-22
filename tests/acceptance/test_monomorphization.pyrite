@@ -1,0 +1,22 @@
+fn multiply[N: int](x: int) -> int:
+    return x * N
+
+fn add[A: int, B: int]() -> int:
+    return A + B
+
+fn conditional[Debug: bool](x: int) -> int:
+    return x
+
+fn main():
+    let r1 = multiply[10](5)
+    let r2 = multiply[20](3)
+    let r3 = add[15, 25]()
+    let r4 = conditional[true](42)
+    let r5 = conditional[false](99)
+    
+    print(r1)
+    print(r2)
+    print(r3)
+    print(r4)
+    print(r5)
+

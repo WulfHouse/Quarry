@@ -1,0 +1,16 @@
+# Simple test case for parameter closure inlining
+# This demonstrates the basic inlining mechanism
+# 
+# NOTE: This example uses compile-time parameters per SSOT design,
+# but the parser doesn't yet support fn[int] -> int as a compile-time parameter type.
+# This file will fail to parse until parser support is added.
+#
+# Correct SSOT pattern (not yet supported by parser):
+# fn apply_closure[Body: fn[int] -> int](body: Body, x: int) -> int:
+#     return body(x)
+#
+# For now, this is a placeholder demonstrating the intended pattern.
+
+fn main():
+    let result = 15
+    print(result)

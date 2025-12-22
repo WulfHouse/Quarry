@@ -1,0 +1,108 @@
+# Quarry - Pyrite Development Suite
+# Forge - Pyrite Compiler
+# Pyrite Programming Language
+# Created by Alexander Rose Wulf
+# Copyright (c) 2025 Alexander Rose Wulf
+
+[tool.coverage.run]
+source = ["forge/src"]
+parallel = true  # Enable parallel mode for pytest-xdist
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/test_*.py",
+    "*/conftest.py",
+    # Exclude large directories that shouldn't be traced
+    "**/.venv/**",
+    "**/venv/**",
+    "**/node_modules/**",
+    "**/vscode-pyrite/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.eggs/**",
+    "**/.tox/**",
+    "**/.mypy_cache/**",
+    "**/.pytest_cache/**",
+    "**/htmlcov/**",
+    "**/.coverage*",
+    "**/tools/**",
+    "**/scripts/**",
+    "**/docs/**",
+    "**/examples/**",
+    "**/pyrite/**",
+    "**/quarry/**",
+    "**/lsp/**",
+    "**/runtime/**",
+]
+
+[tool.coverage.report]
+# Baseline: 69.26% (established 2025)
+# Current: 80% (updated 2025, coverage: 80.71%)
+# Goal: 100% (incremental improvement)
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+
+[tool.pytest.ini_options]
+# Prevent pytest from collecting from large directories
+testpaths = ["forge/tests"]
+norecursedirs = [
+    ".git",
+    ".venv",
+    "venv",
+    "node_modules",
+    "vscode-pyrite",
+    "dist",
+    "build",
+    ".eggs",
+    ".tox",
+    ".mypy_cache",
+    ".pytest_cache",
+    "htmlcov",
+    "__pycache__",
+    "*.egg-info",
+]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# Test markers for lane separation
+markers = [
+    "fast: Fast unit tests (Lane 1) - pure functions, no I/O, <100ms each",
+    "integration: Integration tests (Lane 2) - multiple components, <1s each",
+    "slow: Slow tests (Lane 3) - E2E, bootstrap, LSP, >1s each",
+    "bootstrap: Bootstrap validation tests (Stage0→Stage1→Stage2)",
+    "e2e: End-to-end tests (full compilation to executable)",
+    "legacy: Legacy tests marked for replacement",
+]
+# Parallel test execution (optional - use -n auto or -n 4)
+# Note: Coverage with xdist requires coverage parallel mode
+# Per-test timeout: 30 seconds (for fast lane, prevents runaway tests)
+addopts = "-ra --durations=10 -n auto --timeout=30"  # Show extra test summary info + 10 slowest tests, parallel execution by default, per-test timeout
+# Note: Determinism is ensured via PYTHONHASHSEED=0 in CI workflows
+# Note: Parallelization (-n auto) is default; use -n 0 to disable
+# Progress: Default shows dots (.), use -v for verbose (shows each test name)
+# For long runs, use: python tools/run_tests_with_progress.py
+
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''

@@ -1,0 +1,8 @@
+# Math utilities module
+
+fn double(x: int) -> int:
+    return x * 2
+
+fn square(x: int) -> int:
+    return x * x
+

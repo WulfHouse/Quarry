@@ -1,0 +1,55 @@
+# Workspace support - Minimal Pyrite implementation
+# This is a proof-of-concept using only available features
+
+# For MVP: Start with simplest function that uses only Path operations
+
+# Note: This assumes Path struct is available (from stdlib)
+# TODO: Add proper imports when module system supports it
+
+# Minimal implementation of find_workspace_root
+# Uses only Path operations which are available in stdlib
+
+fn find_workspace_root(start_path: Option[Path]) -> Option[Path]:
+    """Find workspace root by looking for Workspace.toml
+    
+    This is a minimal implementation using only Path operations.
+    Full implementation will require string/list operations for parsing.
+    """
+    # For MVP: Use current directory if start_path is None
+    # TODO: Get actual current directory when available
+    let current = match start_path:
+        Some(p):
+            p
+        None:
+            Path.new(".")  # Placeholder - needs proper current dir
+    
+    var search_path = current
+    
+    # Walk up directory tree
+    while true:
+        # Create path to Workspace.toml
+        # TODO: Use proper path joining when available
+        # For now, assume we can construct paths
+        let workspace_file_name = "Workspace.toml"
+        # TODO: Join paths properly
+        # let workspace_file = search_path.join(workspace_file_name)
+        
+        # Check if Workspace.toml exists
+        # For MVP, we'll need to construct the full path
+        # This is a placeholder - actual implementation needs path joining
+        # if workspace_file.exists():
+        #     return Option.Some(search_path)
+        
+        # Get parent directory
+        match search_path.parent():
+            Some(parent):
+                search_path = parent
+            None:
+                break
+    
+    return Option.None
+
+# TODO: Add other functions once string/list operations are available:
+# - parse_workspace_toml() - needs string parsing
+# - parse_workspace_simple() - needs string/list operations
+# - get_workspace_packages() - needs list operations

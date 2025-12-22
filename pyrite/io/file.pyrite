@@ -1,0 +1,101 @@
+# File - File I/O operations
+#
+# This module provides file I/O operations via FFI to C implementations
+# Note: Result type is available from core.result module
+
+# IOError enum for file operations
+enum IOError:
+    NotFound(path: String)
+    PermissionDenied(path: String)
+    AlreadyExists(path: String)
+    InvalidInput(message: String)
+    Other(message: String)
+
+# File handle type (opaque pointer)
+# For MVP: represented as *mut u8
+
+# FFI declarations for C functions
+extern "C" fn file_read_to_string(path: *const u8) -> String
+extern "C" fn file_write(path: *const u8, data: *const u8, len: i64) -> i32
+extern "C" fn string_empty() -> String
+extern "C" fn string_new(cstr: *const u8) -> String
+extern "C" fn file_open(path: *const u8, mode: *const u8) -> *mut u8
+extern "C" fn file_read_line(handle: *mut u8) -> String
+extern "C" fn file_write_bytes(handle: *mut u8, data: *const u8, len: i64) -> i32
+extern "C" fn file_close(handle: *mut u8)
+extern "C" fn file_read_dir(path: *const u8, count: *mut i32) -> *mut *const u8
+extern "C" fn file_read_dir_free(entries: *mut *const u8, count: i32)
+extern "C" fn file_walk_dir(path: *const u8, count: *mut i32) -> *mut *const u8
+
+# File module functions
+# For MVP: top-level functions (namespace can be added later)
+
+# Read entire file to string
+fn file_read_to_string_wrapper(path: &String) -> Result[String, IOError]:
+    # Call FFI function - returns String directly
+    # For MVP: empty string indicates error (simplified)
+    result = file_read_to_string(path.data)
+    
+    # Check if read was successful
+    # For MVP: check if string is non-empty
+    # In real implementation, would use proper error codes
+    if result.len > 0:
+        return Ok(result)
+    else:
+        # Return error - for MVP, use Other with path
+        return Err(IOError.Other(path.clone()))
+
+# Write string to file
+# For MVP: return Result[String, IOError] with empty string on success
+fn file_write_wrapper(path: &String, data: &String) -> Result[String, IOError]:
+    # Call FFI function - returns 1 on success, 0 on error
+    result = file_write(path.data, data.data, data.len)
+    
+    if result == 1:
+        # Return empty string as success indicator (unit type workaround)
+        return Ok(string_empty())
+    else:
+        # Return error - for MVP, use Other
+        return Err(IOError.Other(path.clone()))
+
+# File struct for file handles
+struct File:
+    handle: *mut u8
+
+# Open file with mode
+fn file_open_wrapper(path: &String, mode: &String) -> Result[File, IOError]:
+    # Call FFI function - returns handle (NULL on error)
+    handle = file_open(path.data, mode.data)
+    
+    # Check if handle is NULL (error)
+    if handle == 0:  # NULL pointer
+        return Err(IOError.Other(path.clone()))
+    else:
+        return Ok(File { handle: handle })
+
+# Read line from file
+fn file_read_line_wrapper(file: &mut File) -> Result[String, IOError]:
+    # Call FFI function
+    result = file_read_line(file.handle)
+    
+    # Check if result is empty (EOF or error)
+    if result.len > 0:
+        return Ok(result)
+    else:
+        # For MVP: assume EOF (could be error, but simplified)
+        return Err(IOError.Other(string_empty()))
+
+# Write bytes to file
+fn file_write_bytes_wrapper(file: &mut File, data: &String) -> Result[String, IOError]:
+    # Call FFI function
+    result = file_write_bytes(file.handle, data.data, data.len)
+    
+    if result == 1:
+        return Ok(string_empty())
+    else:
+        return Err(IOError.Other(string_empty()))
+
+# Close file
+fn file_close_wrapper(file: &mut File):
+    file_close(file.handle)
+    file.handle = 0  # Set to NULL

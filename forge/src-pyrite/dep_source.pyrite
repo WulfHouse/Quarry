@@ -1,0 +1,22 @@
+# Dependency source parsing for Quarry
+#
+# This module provides dependency source parsing from TOML values.
+# This is the Pyrite implementation replacing Python function in:
+# - quarry/dependency.py: _parse_dependency_source()
+#
+# Implementation note: Requires JSON parsing/generation for TOML value handling.
+# The core logic is implemented in C (dep_source.c) and called via FFI.
+# This Pyrite module provides the FFI declarations and wrapper functions.
+
+# FFI declarations for C implementation
+# Input: name (UTF-8 bytes), value_json (JSON string representing TOML value: string or dict)
+# Output: Writes JSON string to result buffer, sets result_len
+# Returns: 0 on success, -1 on error (invalid input)
+extern "C" fn parse_dependency_source_c(name: *const u8, name_len: i64, value_json: *const u8, value_json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Public API: Parse dependency source from TOML value
+# Input: name (UTF-8 bytes), value_json (JSON string: string or dict)
+# Output: Writes JSON string (DependencySource object or null) to result buffer, sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn parse_dependency_source(name: *const u8, name_len: i64, value_json: *const u8, value_json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return parse_dependency_source_c(name, name_len, value_json, value_json_len, result, result_cap, result_len)

@@ -1,0 +1,8 @@
+fn main():
+    let text = "Hello"
+    process(text)
+    print(text)
+
+fn process(value: String):
+    print(value)
+

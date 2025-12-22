@@ -1,0 +1,38 @@
+# Build graph algorithms for Quarry
+#
+# This module provides graph algorithms for build ordering:
+# - Cycle detection (DFS-based)
+# - Topological sorting (Kahn's algorithm)
+#
+# This is the Pyrite implementation replacing Python methods in:
+# - quarry/build_graph.py: BuildGraph.has_cycle(), BuildGraph.topological_sort()
+#
+# Implementation note: Graph algorithms require efficient dict/list operations.
+# The core logic is implemented in C (build_graph.c) and called via FFI.
+# This Pyrite module provides the FFI declarations and wrapper functions.
+
+# FFI declarations for C implementation
+# Input: edges_json - JSON string representing graph: {"node1": ["dep1", "dep2"], "node2": []}
+# Output: result - writes 1 for true, 0 for false
+# Returns: 0 on success, -1 on error
+extern "C" fn has_cycle_c(edges_json: *const u8, json_len: i64, result: *mut i32) -> i32
+
+# FFI declarations for C implementation
+# Input: edges_json - JSON string representing graph: {"node1": ["dep1", "dep2"], "node2": []}
+# Output: result - writes JSON array string to result buffer, sets result_len
+# Returns: 0 on success, -1 on error (including cycles)
+extern "C" fn topological_sort_c(edges_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Public API: Check if graph has cycles
+# Input: edges_json - JSON string: {"node1": ["dep1", "dep2"], "node2": []}
+# Output: Writes result to result pointer (1 = true, 0 = false)
+# Returns: 0 on success, -1 on error
+extern "C" fn has_cycle(edges_json: *const u8, json_len: i64, result: *mut i32) -> i32:
+    return has_cycle_c(edges_json, json_len, result)
+
+# Public API: Topological sort of graph nodes
+# Input: edges_json - JSON string: {"node1": ["dep1", "dep2"], "node2": []}
+# Output: Writes JSON array string to result buffer, sets result_len
+# Returns: 0 on success, -1 on error (including cycles)
+extern "C" fn topological_sort(edges_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return topological_sort_c(edges_json, json_len, result, result_cap, result_len)

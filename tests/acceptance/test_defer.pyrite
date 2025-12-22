@@ -1,0 +1,27 @@
+fn main():
+    print(1)
+    defer:
+        print(3)
+    defer:
+        print(4)
+    print(2)
+    # Should print: 1, 2, 4, 3 (defers execute in reverse order)
+
+fn test_early_return() -> int:
+    defer:
+        print(99)
+    
+    let x = 5
+    if x > 0:
+        return x  # defer should run before return
+    
+    return 0
+
+fn test_multiple_defers():
+    defer:
+        print(30)
+    print(10)
+    defer:
+        print(20)
+    # Should print: 10, 20, 30
+

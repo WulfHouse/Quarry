@@ -1,0 +1,14 @@
+# Enum and pattern matching example
+enum MyResult[T, E]:
+    Ok(value: T)
+    Err(error: E)
+
+fn divide(a: int, b: int) -> MyResult[int, String]:
+    if b == 0:
+        return MyResult.Err("Division by zero")
+    return MyResult.Ok(a / b)
+
+fn main():
+    let result1 = divide(10, 2)
+    let result2 = divide(10, 0)
+

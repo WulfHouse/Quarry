@@ -1,0 +1,9 @@
+fn sum_array[N: int](data: int) -> int:
+    return data * N
+
+fn main():
+    let result1 = sum_array[10](5)
+    let result2 = sum_array[20](3)
+    print(result1)
+    print(result2)
+

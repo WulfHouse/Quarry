@@ -1,0 +1,27 @@
+# Locked validation operations for Quarry
+#
+# This module provides validation of lockfile consistency.
+# This is the Pyrite implementation replacing Python validation logic in:
+# - quarry/main.py: cmd_build() validation when --locked flag is set
+#
+# Implementation note: Requires JSON parsing for dependency data.
+# The core logic is implemented in C (locked_validate.c) and called via FFI.
+# This Pyrite module provides the FFI declarations and wrapper functions.
+
+# FFI declarations for C implementation
+# Validate lockfile matches TOML dependencies (structural checks only)
+# Version constraint checking is done in Python bridge (calls version_bridge)
+# Input: toml_deps_json (JSON string: {"name": DependencySource, ...})
+#        lockfile_deps_json (JSON string: {"name": DependencySource, ...})
+# Output: Writes validation result JSON to result buffer, sets result_len
+#         Result: {"valid": true/false, "errors": [...], "warnings": [...]}
+# Returns: 0 on success, -1 on error
+extern "C" fn validate_locked_deps_c(toml_deps_json: *const u8, toml_json_len: i64,
+                                      lockfile_deps_json: *const u8, lockfile_json_len: i64,
+                                      result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Public API: Validate locked dependencies
+extern "C" fn validate_locked_deps(toml_deps_json: *const u8, toml_json_len: i64,
+                                    lockfile_deps_json: *const u8, lockfile_json_len: i64,
+                                    result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return validate_locked_deps_c(toml_deps_json, toml_json_len, lockfile_deps_json, lockfile_json_len, result, result_cap, result_len)

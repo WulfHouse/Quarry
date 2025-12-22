@@ -1,0 +1,10 @@
+fn main():
+    let x = 5
+    let y = 10
+    let z = x + y
+    let text = "Hello"
+    let pi = 3.14
+    let result = process_owned(x)
+
+fn process_owned(value: int) -> int:
+    return value * 2

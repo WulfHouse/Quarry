@@ -1,0 +1,284 @@
+# Workspace support for multi-package projects
+# Pyrite implementation of quarry/workspace.py
+
+# Note: This uses simple TOML parsing (no full TOML library)
+# For full TOML support, FFI to Python tomllib/tomli would be needed
+
+# Import stdlib types
+import std::string
+import std::io::path
+import std::collections::list
+import std::core::option
+
+# FFI declarations
+extern "C" fn file_read_to_string(path: *const u8) -> String
+# string_new, string_empty, string_builder_* are defined in std::string
+# path_* functions are defined in std::io::path (imported above)
+
+# Helper: Read file to string (simplified wrapper)
+fn file_read_to_string_wrapper(path: &String) -> String:
+    return file_read_to_string(path.data)
+
+# StringBuilder is defined in std::string (imported above)
+# Path implementation is in std::io::path
+
+# Simple TOML parser for workspace members
+fn parse_workspace_simple(workspace_text: String) -> List:
+    """Simple parser for Workspace.toml (fallback)
+    
+    Parses basic format:
+    [workspace]
+    members = ["pkg1", "pkg2"]
+    """
+    var members = List.new(8)  # elem_size = 8 for String pointer
+    var in_workspace = false
+    var in_members = false
+    
+    # Split into lines using String.split()
+    let newline_str = String.new("\n")
+    let lines_list = workspace_text.split(&newline_str)
+    
+    # Convert List to usable form (for MVP, we'll iterate manually)
+    # Note: split() returns *u8 (opaque pointer) for MVP
+    # For now, we'll use a workaround: parse character by character
+    # TODO: When List support is complete, use proper iteration
+    
+    # For MVP: Parse character by character to find lines
+    var i = 0
+    var current_line = StringBuilder.new()
+    
+    while i < workspace_text.len():
+        # Get character at index (for MVP, we'll use a workaround)
+        # TODO: Add String character access method
+        # For now, we'll use substring to get single characters
+        if i + 1 <= workspace_text.len():
+            let ch_str = workspace_text.substring(i, i + 1)
+            # Check if it's newline (compare with "\n")
+            let newline = String.new("\n")
+            if ch_str.len() == 1 and workspace_text.substring(i, i + 1).len() > 0:
+                # Simplified: just check if we hit newline by position
+                # For MVP, we'll use a different approach
+                # Continue loop
+        
+        i = i + 1
+    
+    # Simplified parsing: use string methods directly
+    let newline = String.new("\n")
+    let lines_result = workspace_text.split(&newline)
+    # lines_result is *u8 (opaque), so we can't use it directly yet
+    # For MVP, fall back to character-by-character parsing
+    # Note: split() returns *u8 for MVP, so we'll parse manually
+    # For MVP, use contains() and substring() to find lines
+    
+    # Find [workspace] section
+    let workspace_marker = String.new("[workspace]")
+    if workspace_text.contains(&workspace_marker):
+        in_workspace = true
+        
+        # Find members line
+        let members_marker = String.new("members")
+        if workspace_text.contains(&members_marker):
+            in_members = true
+            # Extract members array using extract_quoted_strings
+            # Find the line containing "members = [...]"
+            # For MVP, simplified: search for members line
+            let members_line_start = workspace_text.substring(0, workspace_text.len())
+            # TODO: Extract the actual members array when List support is complete
+            # For now, return empty list
+    
+    return members
+
+# Helper: Split string into lines using String.split()
+fn split_lines(text: String) -> List:
+    """Split string into lines"""
+    let newline = String.new("\n")
+    let lines_result = text.split(&newline)
+    # Note: split() returns *u8 (opaque pointer) for MVP
+    # For now, we'll use a character-by-character approach
+    # TODO: When List support is complete, use split() result directly
+    
+    var lines = List.new(8)  # elem_size = 8 for String pointer size
+    var current = StringBuilder.new()
+    
+    # Parse character by character (simplified for MVP)
+    # TODO: Use proper String iteration when available
+    var i = 0
+    while i < text.len():
+        # For MVP: use substring to get single character
+        if i + 1 <= text.len():
+            let ch_str = text.substring(i, i + 1)
+            let newline_str = String.new("\n")
+            if ch_str.len() == 1 and text.substring(i, i + 1).len() > 0:
+                # Check if it's newline by comparing
+                # Simplified: just check position
+                if i < text.len() - 1:
+                    # Not at end, continue building line
+                    # For MVP, we'll use a different approach
+                    # Continue loop
+        
+        i = i + 1
+    
+    # Simplified: return empty list for now
+    # TODO: Implement proper line splitting when String iteration is available
+    return lines
+
+# Helper: Trim whitespace using String.trim()
+fn trim(s: String) -> String:
+    """Trim leading and trailing whitespace"""
+    return s.trim()
+
+# Helper: Check if string starts with prefix using String.starts_with()
+fn starts_with(s: String, prefix: String) -> bool:
+    """Check if string starts with prefix"""
+    return s.starts_with(&prefix)
+
+# Helper: Check if string contains substring using String.contains()
+fn contains(s: String, substr: String) -> bool:
+    """Check if string contains substring"""
+    return s.contains(&substr)
+
+# Helper: Split string at first occurrence
+# Note: Tuples not fully supported yet, using workaround
+# fn split_once(s: String, delimiter: String) -> (String, String):
+fn split_once(s: String, delimiter: String) -> String:
+    """Split string at first occurrence of delimiter"""
+    # Use String.split() and get first element
+    let parts = s.split(&delimiter)
+    # Note: split() returns *u8 for MVP, so we can't use it directly
+    # For MVP, use contains() and substring() to find delimiter position
+    if s.contains(&delimiter):
+        # Find delimiter position (simplified)
+        var pos = 0
+        while pos <= s.len() - delimiter.len():
+            let candidate = s.substring(pos, pos + delimiter.len())
+            if candidate == delimiter:
+                let before = s.substring(0, pos)
+                let after = s.substring(pos + delimiter.len(), s.len())
+                return after  # Return part after delimiter
+            pos = pos + 1
+    return String.new("")
+
+# Helper: Extract quoted strings from array literal
+fn extract_quoted_strings(text: String) -> List:
+    """Extract quoted strings from array literal like ["pkg1", "pkg2"]"""
+    var strings = List.new(8)  # elem_size for String
+    var in_quotes = false
+    var current = StringBuilder.new()
+    
+    var i = 0
+    while i < text.len():
+        # Get character using substring
+        let ch_str = text.substring(i, i + 1)
+        let quote = String.new("\"")
+        
+        if ch_str == quote and not in_quotes:
+            in_quotes = true
+            current = StringBuilder.new()
+        elif ch_str == quote and in_quotes:
+            in_quotes = false
+            let str_val = current.to_string()
+            strings.push(str_val.data, 8)  # Push String pointer (size 8 for pointer)
+            current = StringBuilder.new()
+        elif in_quotes:
+            # Get byte value from ch_str (simplified)
+            # For MVP, we'll use a workaround
+            # TODO: Add proper character/byte access to String
+            current.append_char(0)  # Placeholder (u8 not supported in literals)
+        
+        i = i + 1
+    
+    return strings
+
+# Helper: Get substring using String.substring()
+fn substring(s: String, start: int, end: int) -> String:
+    """Get substring from start to end"""
+    return s.substring(start, end)
+
+# Main function: Parse workspace TOML
+fn parse_workspace_toml(workspace_path: String) -> List:
+    """Parse Workspace.toml and extract workspace members
+    
+    Args:
+        workspace_path: Path to Workspace.toml file
+        
+    Returns:
+        List of workspace member package paths
+    """
+    let path = Path.new(workspace_path)
+    
+    if not path.exists():
+        return List.new(8)  # elem_size = 8 for String pointer
+    
+    # Read file
+    let read_result = file_read_to_string_wrapper(&path.data)
+    # For MVP: simplified error handling (Result matching not fully supported)
+    # TODO: Use proper Result matching when available
+    # For now, assume read succeeds if result is Ok variant
+    # Simplified: just call parse_workspace_simple with empty string on error
+    # This is a workaround until Result matching is fully supported
+    return parse_workspace_simple(String.new(""))  # Placeholder
+
+# Find workspace root
+fn find_workspace_root(start_path: Option) -> Option:
+    """Find workspace root by looking for Workspace.toml
+    
+    Args:
+        start_path: Path to start searching from (None = current directory)
+        
+    Returns:
+        Path to workspace root, or None if not found
+    """
+    # For MVP: simplified Option handling
+    # TODO: Use proper Option matching when available
+    let current = Path.new(".")  # Placeholder - use current directory
+    
+    var search_path = current
+    
+    # Walk up directory tree
+    while true:
+        let workspace_file = search_path.join(&String.new("Workspace.toml"))
+        if workspace_file.exists():
+            return Option.Some(search_path)
+        
+        # Get parent
+        # For MVP: simplified parent handling
+        # TODO: Use proper Option matching when available
+        # Simplified: call parent() and check if result is valid
+        let parent_result = search_path.parent()
+        # For MVP: assume we can continue (will break on root naturally)
+        # TODO: Add proper None check when Option matching is available
+        break  # Placeholder - will be fixed when Option matching is available
+    
+    return Option.None
+
+# Get workspace packages
+fn get_workspace_packages(workspace_root: Path) -> List:
+    """Get all package paths in workspace
+    
+    Args:
+        workspace_root: Path to workspace root
+        
+    Returns:
+        List of package directory paths
+    """
+    let workspace_toml = workspace_root.join(&String.new("Workspace.toml"))
+    let members = parse_workspace_toml(workspace_toml.data)
+    
+    var packages = List.new(8)  # elem_size = 8 for Path pointer
+    
+    var i = 0
+    while i < members.length():
+        let member_ptr = members.get(i, 8)  # Get String pointer (size 8 for pointer) - returns *const u8 (opaque)
+        # For MVP: List.get() returns opaque pointer, can't use directly
+        # TODO: Add proper String conversion from opaque pointer when List API is complete
+        # For now, skip this iteration (workaround for MVP limitation)
+        # let member = ...  # Would need FFI function to convert *const u8 to String
+        # let member_path = workspace_root.join(&member)
+        
+        # let quarry_toml = member_path.join(&String.new("Quarry.toml"))
+        # if member_path.exists() and quarry_toml.exists():
+        #     packages.push(member_path.data.data, 8)  # Push Path's String's data pointer (size 8)
+        
+        i = i + 1
+    
+    return packages

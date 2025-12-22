@@ -1,0 +1,30 @@
+# Lockfile operations for Quarry
+#
+# This module provides lockfile generation and reading operations.
+# This is the Pyrite implementation replacing Python functions in:
+# - quarry/dependency.py: generate_lockfile(), read_lockfile()
+#
+# Implementation note: Requires TOML serialization/deserialization.
+# The core logic is implemented in C (lockfile.c) and called via FFI.
+# This Pyrite module provides the FFI declarations and wrapper functions.
+
+# FFI declarations for C implementation
+# Generate lockfile TOML from resolved dependencies
+# Input: deps_json (JSON string: {"name": {"type": "...", "version": "...", ...}, ...})
+# Output: Writes TOML lockfile text to result buffer, sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn generate_lockfile_c(deps_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Read lockfile and parse dependencies
+# Input: lockfile_text (TOML text)
+# Output: Writes JSON string to result buffer, sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn read_lockfile_c(lockfile_text: *const u8, text_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Public API: Generate lockfile TOML
+extern "C" fn generate_lockfile(deps_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return generate_lockfile_c(deps_json, json_len, result, result_cap, result_len)
+
+# Public API: Read lockfile and parse dependencies
+extern "C" fn read_lockfile(lockfile_text: *const u8, text_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return read_lockfile_c(lockfile_text, text_len, result, result_cap, result_len)

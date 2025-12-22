@@ -1,0 +1,7 @@
+# Main entry point for pyritec compiler
+# Minimal stub for MVP - allows linking to succeed
+
+fn main() -> int:
+    # For MVP, just return 0 (success)
+    # Full compiler integration will be added later
+    return 0

@@ -1,0 +1,16 @@
+# Generic functions
+fn max[T](a: T, b: T) -> T:
+    if a > b:
+        return a
+    return b
+
+fn min[T](a: T, b: T) -> T:
+    return a if a < b else b
+
+fn main():
+    let max_int = max(5, 10)
+    let min_int = min(5, 10)
+    
+    print("Max:", max_int)
+    print("Min:", min_int)
+

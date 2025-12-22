@@ -1,0 +1,167 @@
+# String - Immutable UTF-8 string
+#
+# This is a wrapper for the C implementation in string.c
+# For MVP, this documents the API. Full FFI integration coming in Phase 2.
+
+# API Documentation:
+#
+# String - Immutable UTF-8 encoded string
+#
+# Methods:
+#   len(&self) -> int
+#     Get byte length. O(1)
+#
+#   is_empty(&self) -> bool
+#     Check if string is empty. O(1)
+#
+#   chars(&self) -> CharIterator
+#     Get iterator over Unicode characters. O(1)
+#
+#   bytes(&self) -> ByteIterator
+#     Get iterator over bytes. O(1)
+#
+#   clone(&self) -> String
+#     Create copy of string. O(n)
+
+# Example usage (when FFI is implemented):
+#
+# fn main():
+#     let s = "Hello, Pyrite!"
+#     print("Length:", s.len())
+#     print("Empty:", s.is_empty())
+#     
+#     for ch in s.chars():
+#         print("Char:", ch)
+
+# Memory layout:
+# struct String {
+#     data: *u8,   // UTF-8 bytes
+#     len: int     // Byte length
+# }
+
+# Ownership:
+# - String owns its heap allocation
+# - Dropping a String frees its buffer
+# - Move-only (not Copy)
+# - String literals are 'static lifetime
+
+# StringBuilder - Mutable string builder
+#
+# Methods:
+#   new() -> StringBuilder
+#     Create empty builder. O(1)
+#
+#   with_capacity(n: int) -> StringBuilder
+#     Create builder with capacity. O(1)
+#
+#   append(&mut self, s: &String)
+#     Append string. O(m) where m is length of s
+#
+#   to_string(&self) -> String
+#     Convert to String. O(n)
+
+# Example:
+# fn main():
+#     var builder = StringBuilder.new()
+#     builder.append("Hello")
+#     builder.append(" ")
+#     builder.append("World")
+#     let result = builder.to_string()
+#     print(result)  # "Hello World"
+
+# String Formatting
+#
+# format(fmt: String, args: List[String]) -> String
+#   Format string with {} placeholders
+#
+# Example:
+# fn main():
+#     let name = "Pyrite"
+#     let value = 42
+#     let result = format("Hello {}, value: {}", [name, string_from_int(value)])
+#     print(result)  # "Hello Pyrite, value: 42"
+#
+# Helper functions:
+#   string_from_int(value: int) -> String
+#   string_from_float(value: f64) -> String
+#   string_from_bool(value: bool) -> String
+#
+# FFI declarations for C functions
+# Note: split() returns opaque pointer (*u8) for MVP - full List support in M32
+# Note: String is passed by value (struct { data: *u8, len: i64 })
+extern "C" fn string_new(cstr: *const u8) -> String
+extern "C" fn string_empty() -> String
+extern "C" fn string_clone(s: *const String) -> String
+extern "C" fn string_length(s: *const String) -> int
+extern "C" fn string_drop(s: *mut String)
+extern "C" fn string_split(s: *const String, delimiter: *const String) -> *u8
+extern "C" fn string_trim(s: *const String) -> String
+extern "C" fn string_starts_with(s: *const String, prefix: *const String) -> int
+extern "C" fn string_contains(s: *const String, substr: *const String) -> int
+extern "C" fn string_substring(s: *const String, start: i64, end: i64) -> String
+extern "C" fn string_format(fmt: *const u8, argc: int, argv: *const *const u8) -> String
+extern "C" fn string_from_int(value: i64) -> String
+extern "C" fn string_from_float(value: f64) -> String
+extern "C" fn string_from_bool(value: i8) -> String
+
+# StringBuilder struct (matches C implementation)
+struct StringBuilder:
+    _data: *u8  # Opaque pointer (char* in C)
+    len: i64
+    cap: i64
+
+# StringBuilder FFI declarations
+extern "C" fn string_builder_new() -> StringBuilder
+extern "C" fn string_builder_append_char(sb: *mut StringBuilder, ch: u8)
+extern "C" fn string_builder_to_string(sb: *mut StringBuilder) -> String
+extern "C" fn string_builder_drop(sb: *mut StringBuilder)
+
+# List FFI declarations (for split return type - will be used in M32)
+# For now, split returns opaque pointer
+
+# String implementation
+impl String:
+    fn len(self: &String) -> int:
+        return string_length(self)
+    
+    fn is_empty(self: &String) -> bool:
+        let len_val = string_length(self)
+        return len_val == 0
+    
+    fn clone(self: &String) -> String:
+        return string_clone(self)
+    
+    fn split(self: &String, delimiter: &String) -> *u8:
+        # For MVP: return opaque pointer to List (heap-allocated)
+        # Full List support with proper return type will be added in M32
+        let result_ptr = string_split(self, delimiter)
+        return result_ptr
+    
+    fn trim(self: &String) -> String:
+        return string_trim(self)
+    
+    fn starts_with(self: &String, prefix: &String) -> bool:
+        let result = string_starts_with(self, prefix)
+        return result == 1
+    
+    fn contains(self: &String, substr: &String) -> bool:
+        let result = string_contains(self, substr)
+        return result == 1
+    
+    fn substring(self: &String, start: i64, end: i64) -> String:
+        return string_substring(self, start, end)
+
+# StringBuilder implementation
+impl StringBuilder:
+    fn new() -> StringBuilder:
+        return string_builder_new()
+    
+    fn append_char(&mut self, ch: u8):
+        string_builder_append_char(self, ch)
+    
+    fn to_string(&mut self) -> String:
+        return string_builder_to_string(self)
+    
+    fn drop(&mut self):
+        string_builder_drop(self)
+

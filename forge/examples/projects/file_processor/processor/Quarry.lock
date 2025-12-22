@@ -1,0 +1,2 @@
+[dependencies]
+utils = { path = "../utils", hash = "sha256:d8e19767cc0775dbea11b73f2041768fa4bcbdaa575588960de9edf7608054de" }

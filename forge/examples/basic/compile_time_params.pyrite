@@ -1,0 +1,18 @@
+# Compile-Time Parameters Example
+# Demonstrates [N: int] syntax for fixed-size arrays and specialization
+
+fn sum_array[N: int](data: int) -> int:
+    return data * N
+
+fn conditional_debug[DebugMode: bool](value: int) -> int:
+    print(value)
+    return value
+
+fn main():
+    let result1 = sum_array[10](5)
+    print(result1)
+    let result2 = sum_array[20](3)
+    print(result2)
+    let x = conditional_debug[true](42)
+    let y = conditional_debug[false](99)
+

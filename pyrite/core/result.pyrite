@@ -1,0 +1,32 @@
+# Result type - for error handling
+
+enum Result[T, E]:
+    Ok(value: T)
+    Err(error: E)
+
+impl Result[T, E]:
+    fn is_ok(&self) -> bool:
+        match self:
+            Ok(_):
+                return true
+            Err(_):
+                return false
+    
+    fn is_err(&self) -> bool:
+        return not self.is_ok()
+    
+    fn unwrap(self) -> T:
+        match self:
+            Ok(value):
+                return value
+            Err(error):
+                # TODO: panic with error
+                return value
+    
+    fn unwrap_or(self, default: T) -> T:
+        match self:
+            Ok(value):
+                return value
+            Err(_):
+                return default
+

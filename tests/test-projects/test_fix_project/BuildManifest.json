@@ -1,0 +1,16 @@
+{
+  "build_hash": "56d0cf119d47dbf7e0bd3a95a6a9c2e8ed93e771efbbb5f4eaa8e79cd9a9a173",
+  "timestamp": "2021-12-20T11:33:20Z",
+  "compiler_version": "2.0.0",
+  "target": "native",
+  "build_flags": [
+    "--deterministic"
+  ],
+  "source_files": {
+    "src\\main.pyrite": {
+      "hash": "bf36e322682723166e84f6e6e45fd5514b93ad8870aa7dc4d1d096544a05465c",
+      "size": 54
+    }
+  },
+  "dependencies": {}
+}

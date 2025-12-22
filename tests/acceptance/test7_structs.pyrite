@@ -1,0 +1,20 @@
+# Test 7: Struct Definition and Usage
+
+struct Point:
+    x: int
+    y: int
+
+struct Rectangle:
+    top_left: Point
+    width: int
+    height: int
+
+fn main():
+    let p1 = Point { x: 10, y: 20 }
+    print("Point:", p1.x, p1.y)
+    
+    let p2 = Point { x: 0, y: 0 }
+    let rect = Rectangle { top_left: p2, width: 100, height: 50 }
+    print("Rectangle:", rect.width, rect.height)
+    print("Top-left:", rect.top_left.x, rect.top_left.y)
+

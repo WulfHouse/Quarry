@@ -1,0 +1,49 @@
+# String formatting implementation
+#
+# This module provides string formatting functionality using {} placeholders
+#
+# Usage:
+#   let result = format("Hello {}, value: {}", ["world", "42"])
+#   let int_str = string_from_int(42)
+#   let float_str = string_from_float(3.14)
+#   let bool_str = string_from_bool(true)
+
+# FFI declarations for C implementation
+extern "C" fn string_format(fmt: *const u8, argc: int, argv: *const *const u8) -> String
+extern "C" fn string_from_int(value: i64) -> String
+extern "C" fn string_from_float(value: f64) -> String
+extern "C" fn string_from_bool(value: i8) -> String
+
+# Format function - basic implementation
+# For MVP: simplified to work with C function directly
+# The C function requires a C array, which is complex to construct from Pyrite
+# For now, we provide the extern declaration and document usage
+
+# Note: Direct usage of string_format via FFI would require:
+# 1. Converting format string to C string (fmt.data)
+# 2. Constructing C array of string pointers from arguments
+# 3. Calling string_format with argc and argv
+# 4. Returning the result String
+
+# For MVP: The format function is available via FFI
+# Full Pyrite wrapper would require List[String] to C array conversion
+# which is complex and may require compiler support
+
+# Example usage (when FFI is fully integrated):
+# extern "C" fn string_format(fmt: *const u8, argc: i32, argv: *const *const u8) -> String
+# 
+# fn format_example():
+#     # Would construct C array and call string_format
+#     return
+
+# Helper functions to convert values to strings
+# These would wrap the C functions:
+#
+# fn format_int(value: int) -> String:
+#     return string_from_int(value)
+#
+# fn format_float(value: f64) -> String:
+#     return string_from_float(value)
+#
+# fn format_bool(value: bool) -> String:
+#     return string_from_bool(if value then 1 else 0)

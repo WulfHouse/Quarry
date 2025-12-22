@@ -1,0 +1,9 @@
+fn main():
+    print(1)
+    defer:
+        print(3)
+    defer:
+        print(4)
+    print(2)
+    # Should print: 1, 2, 4, 3 (defers execute in reverse order)
+

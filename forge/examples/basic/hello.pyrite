@@ -1,0 +1,4 @@
+# Hello World in Pyrite
+fn main():
+    print("Hello, Pyrite!")
+

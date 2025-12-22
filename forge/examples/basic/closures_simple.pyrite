@@ -1,0 +1,5 @@
+fn main():
+    let double = fn(x: int) -> int: x * 2
+    let factor = 3
+    let multiply = fn(x: int) -> int: x * factor
+    print(42)

@@ -1,0 +1,186 @@
+# Token definitions for Pyrite lexer
+#
+# This module provides token types, token structures, and keyword mappings
+# for the Pyrite lexer. This is the Pyrite implementation of tokens.py.
+
+# Note: Option type is from stdlib/core/option.pyrite
+# The type checker may not fully support Option enum constructors yet,
+# but the code structure is correct for when type checking is enhanced.
+
+# Token type enumeration
+enum TokenType:
+    FN
+    LET
+    VAR
+    CONST
+    IF
+    ELIF
+    ELSE
+    WHILE
+    FOR
+    IN
+    MATCH
+    RETURN
+    BREAK
+    CONTINUE
+    STRUCT
+    ENUM
+    IMPL
+    TRAIT
+    IMPORT
+    AS
+    FROM
+    TRUE
+    FALSE
+    NONE
+    UNSAFE
+    DEFER
+    WITH
+    TRY
+    EXTERN
+    AND
+    OR
+    NOT
+    
+    # Identifiers and Literals
+    IDENTIFIER
+    INTEGER
+    FLOAT
+    STRING
+    CHAR
+    
+    # Operators
+    PLUS
+    MINUS
+    STAR
+    SLASH
+    PERCENT
+    EQ
+    NE
+    LT
+    LE
+    GT
+    GE
+    ASSIGN
+    AMPERSAND
+    PIPE
+    CARET
+    DOT
+    COMMA
+    COLON
+    SEMICOLON
+    HASH
+    ARROW
+    DOUBLE_COLON
+    DOUBLE_DOT
+    TRIPLE_DOT
+    
+    # Delimiters
+    LPAREN
+    RPAREN
+    LBRACKET
+    RBRACKET
+    LBRACE
+    RBRACE
+    
+    # Indentation
+    INDENT
+    DEDENT
+    NEWLINE
+    
+    # Special
+    EOF
+    ERROR
+
+# Source location information
+struct Span:
+    filename: String
+    start_line: int
+    start_column: int
+    end_line: int
+    end_column: int
+
+# A single token
+struct Token:
+    type: TokenType
+    value: Option[String]  # Token value (for identifiers, literals, etc.) - None if no value
+    span: Span
+
+# Keyword checking functions
+# Note: For MVP, keyword lookup uses if-else chains
+# Full Map-based implementation will be added when Map FFI is complete
+
+# Check if a string is a keyword
+fn is_keyword(s: String) -> bool:
+    if s == "fn" or s == "let" or s == "var" or s == "const" or s == "if" or s == "elif" or s == "else" or s == "while" or s == "for" or s == "in" or s == "match" or s == "return" or s == "break" or s == "continue" or s == "struct" or s == "enum" or s == "impl" or s == "trait" or s == "import" or s == "as" or s == "from" or s == "true" or s == "false" or s == "None" or s == "unsafe" or s == "defer" or s == "with" or s == "try" or s == "extern" or s == "and" or s == "or" or s == "not":
+        return true
+    return false
+
+# Get token type for a keyword string
+fn get_keyword_type(s: String) -> Option[TokenType]:
+    if s == "fn":
+        return Option.Some(TokenType.FN)
+    elif s == "let":
+        return Option.Some(TokenType.LET)
+    elif s == "var":
+        return Option.Some(TokenType.VAR)
+    elif s == "const":
+        return Option.Some(TokenType.CONST)
+    elif s == "if":
+        return Option.Some(TokenType.IF)
+    elif s == "elif":
+        return Option.Some(TokenType.ELIF)
+    elif s == "else":
+        return Option.Some(TokenType.ELSE)
+    elif s == "while":
+        return Option.Some(TokenType.WHILE)
+    elif s == "for":
+        return Option.Some(TokenType.FOR)
+    elif s == "in":
+        return Option.Some(TokenType.IN)
+    elif s == "match":
+        return Option.Some(TokenType.MATCH)
+    elif s == "return":
+        return Option.Some(TokenType.RETURN)
+    elif s == "break":
+        return Option.Some(TokenType.BREAK)
+    elif s == "continue":
+        return Option.Some(TokenType.CONTINUE)
+    elif s == "struct":
+        return Option.Some(TokenType.STRUCT)
+    elif s == "enum":
+        return Option.Some(TokenType.ENUM)
+    elif s == "impl":
+        return Option.Some(TokenType.IMPL)
+    elif s == "trait":
+        return Option.Some(TokenType.TRAIT)
+    elif s == "import":
+        return Option.Some(TokenType.IMPORT)
+    elif s == "as":
+        return Option.Some(TokenType.AS)
+    elif s == "from":
+        return Option.Some(TokenType.FROM)
+    elif s == "true":
+        return Option.Some(TokenType.TRUE)
+    elif s == "false":
+        return Option.Some(TokenType.FALSE)
+    elif s == "None":
+        return Option.Some(TokenType.NONE)
+    elif s == "unsafe":
+        return Option.Some(TokenType.UNSAFE)
+    elif s == "defer":
+        return Option.Some(TokenType.DEFER)
+    elif s == "with":
+        return Option.Some(TokenType.WITH)
+    elif s == "try":
+        return Option.Some(TokenType.TRY)
+    elif s == "extern":
+        return Option.Some(TokenType.EXTERN)
+    elif s == "and":
+        return Option.Some(TokenType.AND)
+    elif s == "or":
+        return Option.Some(TokenType.OR)
+    elif s == "not":
+        return Option.Some(TokenType.NOT)
+    else:
+        return Option.None

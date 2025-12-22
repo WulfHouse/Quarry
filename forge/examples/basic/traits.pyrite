@@ -1,0 +1,22 @@
+trait Display:
+    fn to_string(&self) -> String
+    
+    fn print(&self):
+        print("default")
+
+struct Point:
+    x: int
+    y: int
+
+impl Display for Point:
+    fn to_string(&self) -> String:
+        return "Point"
+
+impl Point:
+    fn new(x: int, y: int) -> Point:
+        return Point { x: x, y: y }
+
+fn main():
+    let p = Point.new(10, 20)
+    p.print()
+

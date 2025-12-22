@@ -1,0 +1,7 @@
+[package]
+name = "test-consumer"
+version = "0.1.0"
+edition = "2025"
+
+[dependencies]
+utils = "1.0.0"

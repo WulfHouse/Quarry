@@ -1,0 +1,41 @@
+# Dependency normalization and fingerprinting for Quarry
+#
+# This module provides dependency normalization and fingerprinting operations.
+# This is the Pyrite implementation replacing Python logic in:
+# - quarry/dependency.py: dependency sorting, normalization
+# - New: resolution fingerprint computation
+#
+# Implementation note: Requires JSON serialization and SHA-256 hashing.
+# The core logic is implemented in C (dep_fingerprint.c) and called via FFI.
+# This Pyrite module provides the FFI declarations and wrapper functions.
+
+# FFI declarations for C implementation
+# Normalize a single dependency source to canonical form
+# Input: dep_json (JSON string: {"type": "...", "version": "...", ...})
+# Output: Writes canonical JSON to result buffer, sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn normalize_dependency_source_c(dep_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Normalize dependency set (sort and canonicalize)
+# Input: deps_json (JSON string: {"name": {"type": "...", ...}, ...})
+# Output: Writes canonical JSON to result buffer, sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn normalize_dependency_set_c(deps_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Compute resolution fingerprint
+# Input: deps_json (JSON string: {"name": {"type": "...", ...}, ...})
+# Output: Writes hex fingerprint to result buffer, sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn compute_resolution_fingerprint_c(deps_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Public API: Normalize a single dependency source
+extern "C" fn normalize_dependency_source(dep_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return normalize_dependency_source_c(dep_json, json_len, result, result_cap, result_len)
+
+# Public API: Normalize dependency set
+extern "C" fn normalize_dependency_set(deps_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return normalize_dependency_set_c(deps_json, json_len, result, result_cap, result_len)
+
+# Public API: Compute resolution fingerprint
+extern "C" fn compute_resolution_fingerprint(deps_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return compute_resolution_fingerprint_c(deps_json, json_len, result, result_cap, result_len)

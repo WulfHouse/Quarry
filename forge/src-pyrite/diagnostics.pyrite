@@ -1,0 +1,137 @@
+# Proof of Concept: Diagnostics module rewritten in Pyrite
+#
+# This demonstrates rewriting a compiler module from Python to Pyrite.
+# The diagnostics module provides error code definitions and diagnostic creation.
+
+# Span type (from tokens)
+struct Span:
+    filename: String
+    start_line: int
+    start_column: int
+    end_line: int
+    end_column: int
+
+# Diagnostic level
+enum DiagnosticLevel:
+    Error
+    Warning
+    Note
+    Help
+
+# Related span with note (must be defined before Diagnostic)
+struct RelatedSpan:
+    note: String
+    span: Span
+
+# Diagnostic structure
+struct Diagnostic:
+    code: String
+    message: String
+    span: Span
+    level: DiagnosticLevel
+    notes: List[String]
+    help_messages: List[String]
+    related_spans: List[RelatedSpan]
+
+# Error code definitions
+struct ErrorCode:
+    code: String
+    title: String
+    description: String
+
+# Common error codes
+# Note: Simplified for MVP - Map[String, ErrorCode] generic type not fully supported yet
+# This function is a placeholder until generic types are fully implemented
+fn get_error_codes() -> void:
+    # TODO: Implement when Map[String, ErrorCode] is fully supported
+    return
+
+# Create ownership error diagnostic
+# Note: Using simplified messages without string concatenation until string + is supported
+fn create_ownership_error(
+    var_name: String,
+    moved_to: String,
+    use_span: Span,
+    move_span: Span,
+    alloc_span: Span
+) -> Diagnostic:
+    return Diagnostic {
+        code: "P0234",
+        message: "cannot use moved value",
+        span: use_span,
+        level: DiagnosticLevel.Error(),
+        notes: ["value was moved and can no longer be used"],
+        help_messages: [
+            "Consider:",
+            "  1. Pass a reference instead",
+            "  2. Clone the value",
+            "  3. Restructure your code to avoid the move"
+        ],
+        related_spans: [
+            RelatedSpan { note: "value allocated here", span: alloc_span },
+            RelatedSpan { note: "value moved here", span: move_span }
+        ]
+    }
+
+# Create borrow conflict error
+# Note: Using simplified messages without string concatenation until string + is supported
+fn create_borrow_conflict_error(
+    var_name: String,
+    new_borrow_span: Span,
+    existing_borrow_span: Span,
+    new_is_mut: bool,
+    existing_is_mut: bool
+) -> Diagnostic:
+    var code = if new_is_mut and existing_is_mut:
+        "P0499"
+    elif new_is_mut:
+        "P0502"
+    else:
+        "P0503"
+    
+    var message = if new_is_mut and existing_is_mut:
+        "cannot borrow as mutable more than once at a time"
+    elif new_is_mut:
+        "cannot borrow as mutable because it is also borrowed as immutable"
+    else:
+        "cannot borrow as immutable because it is also borrowed as mutable"
+    
+    return Diagnostic {
+        code: code,
+        message: message,
+        span: new_borrow_span,
+        level: DiagnosticLevel.Error(),
+        related_spans: [
+            RelatedSpan { note: "first borrow occurs here", span: existing_borrow_span }
+        ],
+        help_messages: [
+            "Consider:",
+            "  1. Reduce the scope of the first borrow",
+            "  2. Use the borrows sequentially instead of simultaneously"
+        ],
+        notes: ["no additional notes"]
+    }
+
+# Create type mismatch error
+# Note: Using simplified messages without string concatenation until string + is supported
+fn create_type_mismatch_error(
+    expected: String,
+    got: String,
+    span: Span
+) -> Diagnostic:
+    return Diagnostic {
+        code: "P0308",
+        message: "mismatched types",
+        span: span,
+        level: DiagnosticLevel.Error(),
+        notes: [
+            "expected type does not match found type"
+        ],
+        help_messages: [
+            "Consider converting the value to the expected type",
+            "Or change the expected type to match"
+        ],
+        related_spans: [
+            RelatedSpan { note: "", span: span }
+        ]
+    }

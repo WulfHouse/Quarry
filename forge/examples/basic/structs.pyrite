@@ -1,0 +1,11 @@
+# Struct example
+struct Point:
+    x: int
+    y: int
+
+fn main():
+    let origin = Point { x: 0, y: 0 }
+    let point = Point { x: 3, y: 4 }
+    
+    print("Point:", point.x, point.y)
+

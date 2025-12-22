@@ -1,0 +1,64 @@
+# Version comparison functions for Quarry
+#
+# This module provides version comparison utilities for dependency resolution.
+# This is the Pyrite implementation replacing Python functions in:
+# - quarry/main.py: _compare_versions, _version_satisfies_constraint  
+# - quarry/dependency.py: _compare_versions, _latest_version
+#
+# Implementation note: Due to current Pyrite string manipulation limitations,
+# the core logic is implemented in C (version.c) and called via FFI.
+# This Pyrite module provides the FFI declarations and wrapper functions.
+
+# FFI declarations for C implementation
+extern "C" fn version_compare_c(v1: *const u8, v1_len: i64, v2: *const u8, v2_len: i64) -> i32
+extern "C" fn version_satisfies_c(version: *const u8, version_len: i64, constraint: *const u8, constraint_len: i64) -> i32
+extern "C" fn version_latest_c(versions_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+extern "C" fn version_select_c(constraint: *const u8, constraint_len: i64, versions_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+extern "C" fn is_semver_c(version: *const u8, version_len: i64, result: *mut i32) -> i32
+extern "C" fn is_valid_package_name_c(name: *const u8, name_len: i64, result: *mut i32) -> i32
+extern "C" fn normalize_string_c(s: *const u8, s_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+# Public API: Compare two version strings
+# Returns: -1 if v1 < v2, 0 if v1 == v2, 1 if v1 > v2
+extern "C" fn compare_versions(v1: *const u8, v1_len: i64, v2: *const u8, v2_len: i64) -> i32:
+    return version_compare_c(v1, v1_len, v2, v2_len)
+
+# Public API: Check if version satisfies constraint
+# Returns: 1 if true, 0 if false
+extern "C" fn version_satisfies_constraint(version: *const u8, version_len: i64, constraint: *const u8, constraint_len: i64) -> i32:
+    return version_satisfies_c(version, version_len, constraint, constraint_len)
+
+# Public API: Get latest version from JSON array
+# Input: JSON string with array of version strings
+# Output: Writes result to result buffer, sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn latest_version(versions_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return version_latest_c(versions_json, json_len, result, result_cap, result_len)
+
+# Public API: Select version from available versions based on constraint
+# Input: constraint (UTF-8 bytes), available_versions_json (JSON array string)
+# Output: Writes JSON string (version or null) to result buffer, sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn select_version(constraint: *const u8, constraint_len: i64, versions_json: *const u8, json_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return version_select_c(constraint, constraint_len, versions_json, json_len, result, result_cap, result_len)
+
+# Public API: Check if version string is valid semantic version format
+# Input: version (UTF-8 bytes)
+# Output: Writes result to result pointer (1 = true, 0 = false)
+# Returns: 0 on success, -1 on error
+extern "C" fn is_semver(version: *const u8, version_len: i64, result: *mut i32) -> i32:
+    return is_semver_c(version, version_len, result)
+
+# Public API: Check if package name is valid
+# Input: name (UTF-8 bytes)
+# Output: Writes result to result pointer (1 = true, 0 = false)
+# Returns: 0 on success, -1 on error
+extern "C" fn is_valid_package_name(name: *const u8, name_len: i64, result: *mut i32) -> i32:
+    return is_valid_package_name_c(name, name_len, result)
+
+# Public API: Normalize string (trim and lowercase)
+# Input: s (UTF-8 bytes)
+# Output: Writes normalized string to result buffer, sets result_len
+# Returns: 0 on success, -1 on error
+extern "C" fn normalize_string(s: *const u8, s_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32:
+    return normalize_string_c(s, s_len, result, result_cap, result_len)

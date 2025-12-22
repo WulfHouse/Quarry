@@ -1,0 +1,13 @@
+# Test 3: Borrowing Works
+
+struct List:
+    length: int
+
+fn process(list: &List):
+    print(list.length)
+
+fn main():
+    let data = List { length: 3 }
+    process(&data)
+    print(data.length)  # Should work - data not moved
+

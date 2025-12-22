@@ -1,0 +1,102 @@
+# Abstract Syntax Tree node definitions for Pyrite
+#
+# This is the Pyrite implementation of ast.py, providing all AST node
+# definitions for the Pyrite compiler.
+#
+# Note: This module uses recursive types (Box[ASTNode]) which may have
+# type checking limitations. The file parses successfully, which is the
+# main requirement. Type checking improvements will be addressed as the
+# type system matures.
+
+# Span type for source locations (from tokens)
+struct Span:
+    filename: String
+    start_line: int
+    start_column: int
+    end_line: int
+    end_column: int
+
+# Base AST node - all nodes have a span
+# Note: In Pyrite, we use an enum for all AST nodes instead of inheritance
+enum ASTNode:
+    Program(imports: List[Box[ASTNode]], items: List[Box[ASTNode]], span: Span)
+    ImportStmt(path: List[String], alias: Option[String], span: Span)
+    FunctionDef(name: String, generic_params: List[Box[ASTNode]], compile_time_params: List[Box[ASTNode]], params: List[Box[ASTNode]], return_type: Option[Box[ASTNode]], body: Box[ASTNode], is_unsafe: bool, is_extern: bool, extern_abi: Option[String], where_clause: List[Box[ASTNode]], span: Span)
+    StructDef(name: String, generic_params: List[Box[ASTNode]], compile_time_params: List[Box[ASTNode]], fields: List[Box[ASTNode]], attributes: List[Box[ASTNode]], where_clause: List[Box[ASTNode]], span: Span)
+    EnumDef(name: String, generic_params: List[Box[ASTNode]], compile_time_params: List[Box[ASTNode]], variants: List[Box[ASTNode]], span: Span)
+    TraitDef(name: String, generic_params: List[Box[ASTNode]], methods: List[Box[ASTNode]], associated_types: List[Box[ASTNode]], where_clause: List[Box[ASTNode]], span: Span)
+    ImplBlock(trait_name: Option[String], type_name: String, generic_params: List[Box[ASTNode]], where_clause: List[Box[ASTNode]], methods: List[Box[ASTNode]], associated_type_impls: List[Box[ASTNode]], span: Span)
+    ConstDecl(name: String, type_annotation: Option[Box[ASTNode]], value: Box[ASTNode], span: Span)
+    OpaqueTypeDecl(name: String, span: Span)
+    GenericParam(name: String, trait_bounds: List[String], span: Span)
+    CompileTimeIntParam(name: String, span: Span)
+    CompileTimeBoolParam(name: String, span: Span)
+    CompileTimeFunctionParam(name: String, param_types: List[Box[ASTNode]], return_type: Option[Box[ASTNode]], span: Span)
+    Param(name: String, type_annotation: Box[ASTNode], span: Span)
+    Field(name: String, type_annotation: Box[ASTNode], span: Span)
+    Attribute(name: String, args: List[String], span: Span)
+    Variant(name: String, fields: Option[List[Box[ASTNode]]], span: Span)
+    TraitMethod(name: String, params: List[Box[ASTNode]], return_type: Option[Box[ASTNode]], default_body: Option[Box[ASTNode]], span: Span)
+    AssociatedType(name: String, bounds: List[String], span: Span)
+    VarDecl(name: String, mutable: bool, type_annotation: Option[Box[ASTNode]], initializer: Box[ASTNode], span: Span)
+    Assignment(target: Box[ASTNode], value: Box[ASTNode], span: Span)
+    ExpressionStmt(expression: Box[ASTNode], span: Span)
+    ReturnStmt(value: Option[Box[ASTNode]], span: Span)
+    BreakStmt(span: Span)
+    ContinueStmt(span: Span)
+    IfStmt(condition: Box[ASTNode], then_block: Box[ASTNode], elif_clauses: List[Box[ASTNode]], else_block: Option[Box[ASTNode]], span: Span)
+    WhileStmt(condition: Box[ASTNode], body: Box[ASTNode], span: Span)
+    ForStmt(variable: String, iterable: Box[ASTNode], body: Box[ASTNode], span: Span)
+    MatchStmt(scrutinee: Box[ASTNode], arms: List[Box[ASTNode]], span: Span)
+    MatchArm(pattern: Box[ASTNode], guard: Option[Box[ASTNode]], body: Box[ASTNode], span: Span)
+    DeferStmt(body: Box[ASTNode], span: Span)
+    WithStmt(variable: String, value: Box[ASTNode], body: Box[ASTNode], span: Span)
+    UnsafeBlock(body: Box[ASTNode], span: Span)
+    Block(statements: List[Box[ASTNode]], span: Span)
+    IntLiteral(value: int, span: Span)
+    FloatLiteral(value: float, span: Span)
+    StringLiteral(value: String, span: Span)
+    CharLiteral(value: String, span: Span)
+    BoolLiteral(value: bool, span: Span)
+    NoneLiteral(span: Span)
+    Identifier(name: String, span: Span)
+    BinOp(left: Box[ASTNode], op: String, right: Box[ASTNode], span: Span)
+    UnaryOp(op: String, operand: Box[ASTNode], span: Span)
+    TernaryExpr(true_expr: Box[ASTNode], condition: Box[ASTNode], false_expr: Box[ASTNode], span: Span)
+    FunctionCall(function: Box[ASTNode], compile_time_args: List[Box[ASTNode]], arguments: List[Box[ASTNode]], span: Span)
+    MethodCall(object: Box[ASTNode], method: String, arguments: List[Box[ASTNode]], span: Span)
+    FieldAccess(object: Box[ASTNode], field: String, span: Span)
+    IndexAccess(object: Box[ASTNode], index: Box[ASTNode], span: Span)
+    SliceAccess(object: Box[ASTNode], start: Option[Box[ASTNode]], end: Option[Box[ASTNode]], span: Span)
+    StructLiteral(struct_name: String, fields: List[Box[ASTNode]], span: Span)
+    ListLiteral(elements: List[Box[ASTNode]], span: Span)
+    TryExpr(expression: Box[ASTNode], span: Span)
+    ParameterClosure(params: List[Box[ASTNode]], return_type: Option[Box[ASTNode]], body: Box[ASTNode], can_inline: bool, allocates: bool, escapes: bool, span: Span)
+    RuntimeClosure(params: List[Box[ASTNode]], return_type: Option[Box[ASTNode]], body: Box[ASTNode], is_move: bool, environment_size: int, captures: List[String], span: Span)
+    LiteralPattern(literal: Box[ASTNode], span: Span)
+    IdentifierPattern(name: String, span: Span)
+    WildcardPattern(span: Span)
+    EnumPattern(enum_name: String, variant_name: String, fields: Option[List[Box[ASTNode]]], span: Span)
+    OrPattern(patterns: List[Box[ASTNode]], span: Span)
+    PrimitiveType(name: String, span: Span)
+    ReferenceType(mutable: bool, inner: Box[ASTNode], span: Span)
+    PointerType(mutable: bool, inner: Box[ASTNode], span: Span)
+    ArrayType(element_type: Box[ASTNode], size: Box[ASTNode], span: Span)
+    SliceType(element_type: Box[ASTNode], span: Span)
+    GenericType(name: String, type_args: List[Box[ASTNode]], span: Span)
+    FunctionType(param_types: List[Box[ASTNode]], return_type: Option[Box[ASTNode]], span: Span)
+    TupleType(element_types: List[Box[ASTNode]], span: Span)
+    AssociatedTypeRef(trait_name: String, associated_type_name: String, span: Span)
+
+# Note: Type checking limitations:
+# 1. Recursive types (Box[ASTNode]) may not be fully supported yet
+# 2. Option type recognition needs improvement
+# 3. Enum constructor calls return ? instead of ASTNode
+# 4. Complex nested structures may have type inference issues
+#
+# The file parses successfully, which is the main requirement. Type checking
+# improvements will be addressed as the type system matures.
+#
+# Type aliases (Item, Statement, Expression, Pattern, Type) are conceptual
+# and would be represented as union types or match patterns in Pyrite code
+# that uses these AST nodes.

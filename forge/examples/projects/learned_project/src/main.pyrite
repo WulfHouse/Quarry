@@ -1,0 +1,16 @@
+# Learning: Basic ownership concepts
+# - Primitives (int) are Copy types, so they don't move
+# - Ownership rules apply even for simple operations
+
+fn add_one(x: int) -> int:
+    return x + 1
+
+fn main():
+    let number = 5
+    
+    # int is Copy, so this doesn't move
+    let result = add_one(number)
+    
+    # number is still usable because int is Copy
+    print("Original:", number)
+    print("Result:", result)
