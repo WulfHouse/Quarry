@@ -70,95 +70,95 @@ python tools/testing/pytest.py
 
 ## Repository Structure
 
-This is the **Quarry** SDK repository, containing the Pyrite toolchain (in alpha): **Forge** (the Pyrite compiler), Quarry build system and package manager, language server, development tools, tests, and documentation.
+This is the **Quarry** SDK repository, containing the **Pyrite** toolchain: **Forge** (the Pyrite compiler), Quarry build system and package manager, language server, development tools, tests, and documentation.
 
 ```
 pyrite/
-├── build/                      # Build artifacts (safe to delete)
-│   ├── bootstrap/              # Bootstrap compiler artifacts
-│   │   ├── stage1/            # Forge Stage1 (Pyrite compiled by Python)
-│   │   └── stage2/            # Forge Stage2 (Pyrite compiled by Stage1)
-│   ├── .coverage              # Coverage data
-│   ├── coverage.json          # Coverage JSON report
-│   └── README.md              # Build artifacts documentation
+├── build/                        # Build artifacts (safe to delete)
+│   ├── bootstrap/                # Bootstrap compiler artifacts
+│   │   ├── stage1/               # Forge Stage1 (Pyrite compiled by Python)
+│   │   └── stage2/               # Forge Stage2 (Pyrite compiled by Stage1)
+│   ├── .coverage                 # Coverage data
+│   ├── coverage.json             # Coverage JSON report
+│   └── README.md                 # Build artifacts documentation
 │
-├── docs/                       # Documentation
-│   ├── SSOT.md                # Language Specification (modular index, aspirational)
-│   ├── SSOT.txt               # Original specification (preserved as backup, aspirational)
-│   └── specification/         # Modular specification files (aspirational)
-│   ├── bootstrap.md            # Bootstrap guide
-│   ├── performance/            # Performance documentation
-│   ├── quarry/                 # Quarry build system docs
-│   └── testing/                # Testing documentation
+├── docs/                         # Documentation
+│   ├── SSOT.md                   # Language Specification (modular index, aspirational)
+│   ├── SSOT.txt                  # Original specification (preserved as backup, aspirational)
+│   └── specification/            # Modular specification files (aspirational)
+│   ├── bootstrap.md              # Bootstrap guide
+│   ├── performance/              # Performance documentation
+│   ├── quarry/                   # Quarry build system docs
+│   └── testing/                  # Testing documentation
 │
-├── forge/                     # Forge compiler implementation
-│   ├── src/                   # Forge Stage0 (Python implementation)
-│   │   ├── README.md          # Compiler pipeline documentation
-│   │   ├── compiler.py        # Main compiler entry point
-│   │   ├── ast.py             # Abstract Syntax Tree definitions
-│   │   ├── types.py           # Type system definitions
-│   │   ├── frontend/          # Lexical analysis & parsing
-│   │   │   ├── lexer.py       # Tokenization
-│   │   │   ├── parser.py      # Syntax parsing
-│   │   │   └── tokens.py      # Token definitions
-│   │   ├── middle/            # Type checking & analysis
-│   │   │   ├── type_checker.py # Type checking
-│   │   │   ├── ownership.py   # Ownership analysis
+├── forge/                        # Forge compiler implementation
+│   ├── src/                      # Forge Stage0 (Python implementation)
+│   │   ├── README.md             # Compiler pipeline documentation
+│   │   ├── compiler.py           # Main compiler entry point
+│   │   ├── ast.py                # Abstract Syntax Tree definitions
+│   │   ├── types.py              # Type system definitions
+│   │   ├── frontend/             # Lexical analysis & parsing
+│   │   │   ├── lexer.py          # Tokenization
+│   │   │   ├── parser.py         # Syntax parsing
+│   │   │   └── tokens.py         # Token definitions
+│   │   ├── middle/               # Type checking & analysis
+│   │   │   ├── type_checker.py   # Type checking
+│   │   │   ├── ownership.py      # Ownership analysis
 │   │   │   ├── borrow_checker.py # Borrow checking
-│   │   │   ├── symbol_table.py # Symbol resolution
-│   │   │   └── module_system.py # Module resolution
-│   │   ├── backend/           # Code generation & linking
-│   │   │   ├── codegen.py     # LLVM IR generation
-│   │   │   ├── linker.py      # Linking with stdlib
+│   │   │   ├── symbol_table.py   # Symbol resolution
+│   │   │   └── module_system.py  # Module resolution
+│   │   ├── backend/              # Code generation & linking
+│   │   │   ├── codegen.py        # LLVM IR generation
+│   │   │   ├── linker.py           # Linking with stdlib
 │   │   │   └── monomorphization.py # Generic instantiation
-│   │   ├── passes/            # Compiler passes
+│   │   ├── passes/                 # Compiler passes
 │   │   │   ├── closure_inline_pass.py
 │   │   │   └── with_desugar_pass.py
-│   │   ├── bridge/            # Pyrite↔Python interop
+│   │   ├── bridge/                 # Pyrite↔Python interop
 │   │   │   ├── ast_bridge.py
 │   │   │   └── tokens_bridge.py
-│   │   ├── utils/             # Utilities & diagnostics
+│   │   ├── utils/                  # Utilities & diagnostics
 │   │   │   ├── diagnostics.py
 │   │   │   ├── error_formatter.py
 │   │   │   └── incremental.py
-│   ├── src-pyrite/            # Forge Stage1/Stage2 (Pyrite implementation)
+│   ├── src-pyrite/                 # Forge Stage1/Stage2 (Pyrite implementation)
 │   │   ├── diagnostics.pyrite
 │   │   ├── ast.pyrite
 │   │   ├── types.pyrite
 │   │   ├── tokens.pyrite
 │   │   └── symbol_table.pyrite
-│   ├── runtime/               # Runtime library
-│   │   └── libpyrite.a        # Compiled runtime library
-│   ├── tests/                 # Compiler tests
-│   │   ├── README.md          # Test organization guide
-│   │   ├── frontend/          # Frontend tests
-│   │   ├── middle/            # Middle-end tests
-│   │   ├── backend/           # Backend tests
-│   │   ├── passes/            # Pass tests
-│   │   ├── bridge/            # Bridge tests
-│   │   ├── utils/             # Utility tests
-│   │   ├── integration/       # Integration tests
-│   │   ├── quarry/            # Quarry tests
-│   │   ├── stdlib/            # Standard library tests
-│   │   ├── fixtures/          # Test fixtures
-│   │   └── legacy/            # Legacy test files
-│   ├── examples/              # Example Pyrite programs
-│   │   ├── README.md          # Examples guide
-│   │   ├── basic/             # Simple single-file examples
-│   │   ├── projects/          # Full project examples
-│   │   └── test/              # Test/example files
-│   └── lsp/                   # Language Server Protocol
+│   ├── runtime/                    # Runtime library
+│   │   └── libpyrite.a             # Compiled runtime library
+│   ├── tests/                      # Compiler tests
+│   │   ├── README.md               # Test organization guide
+│   │   ├── frontend/               # Frontend tests
+│   │   ├── middle/                 # Middle-end tests
+│   │   ├── backend/                # Backend tests
+│   │   ├── passes/                 # Pass tests
+│   │   ├── bridge/                 # Bridge tests
+│   │   ├── utils/                  # Utility tests
+│   │   ├── integration/            # Integration tests
+│   │   ├── quarry/                 # Quarry tests
+│   │   ├── stdlib/                 # Standard library tests
+│   │   ├── fixtures/               # Test fixtures
+│   │   └── legacy/                 # Legacy test files
+│   ├── examples/                   # Example Pyrite programs
+│   │   ├── README.md               # Examples guide
+│   │   ├── basic/                  # Simple single-file examples
+│   │   ├── projects/               # Full project examples
+│   │   └── test/                   # Test/example files
+│   └── lsp/                        # Language Server Protocol
 │
-├── quarry/                    # Quarry - Build system and package manager
-│   ├── README.md              # Quarry documentation
-│   ├── main.py                # Main entry point
-│   ├── workspace.py           # Workspace management
-│   ├── dependency.py          # Dependency resolution
-│   ├── build_graph.py         # Build graph
-│   └── bridge/                # FFI bridges to Pyrite stdlib
+├── quarry/                         # Quarry - Build system and package manager
+│   ├── README.md                   # Quarry documentation
+│   ├── main.py                     # Main entry point
+│   ├── workspace.py                # Workspace management
+│   ├── dependency.py               # Dependency resolution
+│   ├── build_graph.py              # Build graph
+│   └── bridge/                     # FFI bridges to Pyrite stdlib
 │
-├── pyrite/                    # Pyrite - Language-facing artifacts
-│   ├── README.md              # Standard library documentation
+├── pyrite/                         # Pyrite - Language-facing artifacts
+│   ├── README.md                   # Standard library documentation
 │   ├── core/                  # Core types and functions
 │   ├── collections/           # Collections (List, Map, Set)
 │   ├── io/                    # I/O operations
