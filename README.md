@@ -12,7 +12,7 @@
 
 *Conceptualized: December 12, 2025*
 
-*Conceptualized: December 22, 2025*
+*Published: December 22, 2025*
 
 ## Overview
 
