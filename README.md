@@ -10,7 +10,9 @@
 
 **Created by Alexander Rose Wulf** (also known as **Aeowulf** and **WulfHouse**)
 
-*First invented: December 12, 2025*
+*Conceptualized: December 12, 2025*
+
+*Conceptualized: December 22, 2025*
 
 ## Overview
 
