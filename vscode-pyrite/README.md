@@ -79,7 +79,7 @@ fn main():
 
 ## Contributing
 
-Report issues at: [https://github.com/wulfhq/pyrite/issues](https://github.com/WulfHouse/Quarry/issues)
+Report issues at: [https://github.com/WulfHouse/Quarry/issues](https://github.com/WulfHouse/Quarry/issues)
 
 ## License
 
