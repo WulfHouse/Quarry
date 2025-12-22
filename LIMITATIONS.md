@@ -9,14 +9,14 @@ This document lists known limitations and incomplete features in **Forge** (the 
 ## Language Features
 
 ### Tuple Destructuring
-**Status:** Not fully implemented
-**Location:** `src/frontend/parser.py:991`
-**Description:** Proper tuple destructuring in variable declarations is not yet supported. The AST node structure exists but needs full implementation.
+**Status:** ✅ Implemented
+**Location:** `forge/src/frontend/parser.py:1152`, `forge/src/middle/type_checker.py:952`, `forge/src/backend/codegen.py:733`
+**Description:** Tuple destructuring in variable declarations is now supported. You can use `let (a, b) = tuple_value` to destructure tuples.
 
 ### Tuple Literals
-**Status:** Not implemented
-**Location:** `src/frontend/parser.py:1833`
-**Description:** Tuple literal syntax (e.g., `(1, 2, 3)`) is not yet supported. A proper `TupleLiteral` AST node needs to be added.
+**Status:** ✅ Implemented
+**Location:** `forge/src/frontend/parser.py:2006`, `forge/src/backend/codegen.py:1573`
+**Description:** Tuple literal syntax (e.g., `(1, 2, 3)`) is now supported. The parser, type checker, and code generator all handle tuple literals.
 
 ### Enum Variant Field Binding
 **Status:** Partial implementation

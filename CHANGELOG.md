@@ -12,8 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned for Beta Release (1.0.0-beta) - 2026
-- Full tuple destructuring support
-- Tuple literal syntax
 - Complete iterator protocol implementation
 - Result type error propagation
 - Enhanced mutability checking
@@ -34,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic compiler functionality
 - Core language features
 - Standard library foundation
+- Tuple patterns in variable declarations (e.g., `let (a, b) = value`)
+- Tuple literal syntax (e.g., `(1, 2, 3)`)
+- Pattern matching support in variable declarations
 
 ### Acknowledgments
 

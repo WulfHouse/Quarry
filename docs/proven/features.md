@@ -20,6 +20,7 @@ This document lists language features, compiler capabilities, and toolchain feat
 | Generic functions | ✅ | `forge/examples/basic/generics.pyrite` |
 | Immutable variables (`let`) | ✅ | `test_parse_let_statement()`, `forge/examples/basic/simple.pyrite` |
 | Mutable variables (`var`) | ✅ | `test_parse_var_statement()` |
+| Tuple patterns in variable declarations (`let (a, b) = value`) | ✅ | Parser: `parse_var_decl()` in `forge/src/frontend/parser.py:1152`, Type checker: `check_pattern()` in `forge/src/middle/type_checker.py:952`, Codegen: `gen_pattern_binding()` in `forge/src/backend/codegen.py:733` |
 | Struct definitions | ✅ | `test_parse_struct()`, `forge/examples/basic/structs.pyrite` |
 | Struct literals | ✅ | `test_parse_struct_literal()`, examples |
 | Enum definitions | ✅ | `test_parse_enum()`, `forge/examples/basic/enums.pyrite` |
@@ -60,6 +61,7 @@ This document lists language features, compiler capabilities, and toolchain feat
 | Slice types (`[T]`) | ✅ | `test_parse_slice_type()` |
 | Generic types (`List[T]`, `Map[K, V]`) | ✅ | `test_parse_generic_type()`, `test_parse_nested_generic_type()` |
 | Tuple types (`(T, U)`) | ✅ | `test_parse_tuple_type()` |
+| Tuple literals (`(1, 2, 3)`) | ✅ | Parser: `parse_primary()` in `forge/src/frontend/parser.py:2006`, Codegen: `gen_tuple_literal()` in `forge/src/backend/codegen.py:1573` |
 | Function types (`fn(T) -> U`) | ✅ | `test_parse_function_type()` |
 | Associated type references | ✅ | `test_parse_associated_type_ref()` |
 
@@ -71,6 +73,7 @@ This document lists language features, compiler capabilities, and toolchain feat
 | Boolean literals | ✅ | Used throughout tests and examples |
 | String literals | ✅ | Used throughout tests and examples |
 | List literals | ✅ | `test_parse_list_literal()`, `tests/acceptance/test8_arrays.pyrite` |
+| Tuple literals | ✅ | Parser: `parse_primary()` in `forge/src/frontend/parser.py:2006`, Codegen: `gen_tuple_literal()` in `forge/src/backend/codegen.py:1573` |
 | Binary operations | ✅ | `test_parse_binary_op()`, `tests/acceptance/test6_arithmetic.pyrite` |
 | Function calls | ✅ | `test_parse_function_call()`, examples |
 | Method calls | ✅ | `test_parse_method_call()` |
@@ -93,8 +96,6 @@ This document lists language features, compiler capabilities, and toolchain feat
 
 | Feature | Status | Evidence |
 |---------|--------|----------|
-| Tuple literals `(1, 2, 3)` | ❌ | `LIMITATIONS.md`: Not implemented, `src/frontend/parser.py:1833` |
-| Tuple destructuring | ❌ | `LIMITATIONS.md`: Not fully implemented, `src/frontend/parser.py:991` |
 | Enum variant field binding (ownership) | ⚠️ | `LIMITATIONS.md`: Partial, `src/middle/ownership.py:478` |
 | Iterator protocol | ⚠️ | `LIMITATIONS.md`: Partial, `src/middle/type_checker.py:783`, `src/backend/codegen.py:951` |
 | Result error propagation | ⚠️ | `LIMITATIONS.md`: Partial, `src/backend/codegen.py:1202` |

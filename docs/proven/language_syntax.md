@@ -300,6 +300,29 @@ let pair: (int, String) = ...
 **Evidence:**
 - Test: `test_parse_tuple_type()` in `forge/tests/frontend/test_parser.py`
 
+### Tuple Literals
+
+```pyrite
+let tuple = (1, 2, 3)
+let pair = ("hello", 42)
+```
+
+**Evidence:**
+- Parser method: `parse_primary()` in `forge/src/frontend/parser.py:2006`
+- Codegen method: `gen_tuple_literal()` in `forge/src/backend/codegen.py:1573`
+
+### Tuple Patterns in Variable Declarations
+
+```pyrite
+let (a, b) = (1, 2)
+let (x, y, z) = get_tuple()
+```
+
+**Evidence:**
+- Parser method: `parse_var_decl()` in `forge/src/frontend/parser.py:1152`
+- Type checker: `check_pattern()` in `forge/src/middle/type_checker.py:952`
+- Codegen: `gen_pattern_binding()` in `forge/src/backend/codegen.py:733`
+
 ### Function Types
 
 ```pyrite
@@ -495,8 +518,6 @@ import std::collections as coll
 
 The following syntax elements are **not** fully implemented (see `LIMITATIONS.md`):
 
-- ❌ Tuple literals: `(1, 2, 3)` - Not implemented
-- ❌ Tuple destructuring in variable declarations - Not fully implemented
 - ⚠️ Enum variant field binding in ownership analysis - Partial implementation
 
 ## Validation
