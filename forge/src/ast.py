@@ -212,11 +212,34 @@ class TypeAlias(ASTNode):
 # Statements
 @dataclass
 class VarDecl(ASTNode):
-    """Variable declaration: let/var x = value"""
-    name: str
+    """Variable declaration: let/var pattern = value"""
+    pattern: 'Pattern'
     mutable: bool  # True for 'var', False for 'let'
     type_annotation: Optional['Type']
     initializer: 'Expression'
+
+    def __init__(self, pattern: 'Pattern' = None, mutable: bool = False, 
+                 type_annotation: Optional['Type'] = None, initializer: 'Expression' = None,
+                 span: Span = None, name: str = None):
+        super().__init__(span)
+        if name is not None and pattern is None:
+            self.pattern = IdentifierPattern(name=name, span=span)
+        else:
+            self.pattern = pattern
+        self.mutable = mutable
+        self.type_annotation = type_annotation
+        self.initializer = initializer
+
+    @property
+    def name(self) -> str:
+        """Legacy access for simple identifier patterns"""
+        if isinstance(self.pattern, IdentifierPattern):
+            return self.pattern.name
+        elif isinstance(self.pattern, TuplePattern):
+            # Return first element name if possible, for legacy code that expects a name
+            if self.pattern.elements and isinstance(self.pattern.elements[0], IdentifierPattern):
+                return self.pattern.elements[0].name
+        return "_"
 
 
 @dataclass
@@ -427,6 +450,12 @@ class StructLiteral(ASTNode):
 
 
 @dataclass
+class TupleLiteral(ASTNode):
+    """Tuple literal: (1, "a")"""
+    elements: List['Expression']
+
+
+@dataclass
 class ListLiteral(ASTNode):
     """List literal: [1, 2, 3]"""
     elements: List['Expression']
@@ -483,6 +512,12 @@ class LiteralPattern(ASTNode):
 class IdentifierPattern(ASTNode):
     """Identifier pattern (binds variable)"""
     name: str
+
+
+@dataclass
+class TuplePattern(ASTNode):
+    """Tuple pattern: (a, b)"""
+    elements: List['Pattern']
 
 
 @dataclass
@@ -575,9 +610,9 @@ Statement = (VarDecl | Assignment | ExpressionStmt | ReturnStmt |
 Expression = (IntLiteral | FloatLiteral | StringLiteral | CharLiteral |
               BoolLiteral | NoneLiteral | Identifier | BinOp | UnaryOp |
               TernaryExpr | FunctionCall | MethodCall | FieldAccess |
-              IndexAccess | SliceAccess | StructLiteral | ListLiteral | TryExpr |
+              IndexAccess | SliceAccess | StructLiteral | ListLiteral | TupleLiteral | TryExpr |
               GenericType)  # Allow GenericType as expression for Type[Args].method() syntax
-Pattern = (LiteralPattern | IdentifierPattern | WildcardPattern |
+Pattern = (LiteralPattern | IdentifierPattern | TuplePattern | WildcardPattern |
            EnumPattern | OrPattern)
 Type = (PrimitiveType | ReferenceType | PointerType | ArrayType |
         SliceType | GenericType | FunctionType | TupleType | AssociatedTypeRef)

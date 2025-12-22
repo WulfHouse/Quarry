@@ -332,7 +332,7 @@ def test_substitute_var_decl():
     span = Span("test.pyrite", 1, 1, 1, 10)
     init = ast.IntLiteral(value=42, span=span)
     stmt = ast.VarDecl(
-        name="x",
+        pattern=ast.IdentifierPattern(name="x", span=span),
         type_annotation=None,
         initializer=init,
         mutable=False,
@@ -913,7 +913,7 @@ def test_substitute_var_decl_with_substitution():
     span = Span("test.pyrite", 1, 1, 1, 10)
     init = ast.Identifier(name="x", span=span)
     stmt = ast.VarDecl(
-        name="y",
+        pattern=ast.IdentifierPattern(name="y", span=span),
         type_annotation=None,
         initializer=init,
         mutable=False,

@@ -98,8 +98,8 @@ def run_script_mode(repo_root: Path):
             abs_path = Path.cwd() / file_arg
             sys.argv[1] = str(abs_path.resolve())
     
-    # Import and run the actual pyrite_run.py (sibling in tools/)
-    tools_dir = repo_root / "tools"
+    # Import and run the actual pyrite_run.py (sibling in tools/runtime/)
+    tools_dir = repo_root / "tools" / "runtime"
     pyrite_run_path = tools_dir / "pyrite_run.py"
     if not pyrite_run_path.exists():
         print(f"Error: Could not find tools/pyrite_run.py in repository root")

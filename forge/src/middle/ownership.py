@@ -304,17 +304,22 @@ class OwnershipAnalyzer:
             if source_type and not is_copy_type(source_type):
                 # This is a move
                 self.check_identifier_use(decl.initializer)
-                self.state.move_value(source_name, decl.name, decl.span)
+                # Use decl.name (legacy) or a placeholder if it's a tuple
+                target_name = decl.name if hasattr(decl, 'name') else "<pattern>"
+                self.state.move_value(source_name, target_name, decl.span)
                 # Track timeline event
-                self.add_timeline_event(source_name, "move", f"'{source_name}' moved to '{decl.name}'", decl.span)
+                self.add_timeline_event(source_name, "move", f"'{source_name}' moved to '{target_name}'", decl.span)
         else:
             # Analyze the initializer
             self.analyze_expression(decl.initializer)
         
-        # Allocate the new variable
-        var_type = self.variable_types.get(decl.name)
-        if var_type:
-            self.state.allocate(decl.name, var_type, decl.span)
+        # Get the type of the initializer
+        var_type = self.infer_type_from_expression(decl.initializer)
+        if decl.type_annotation and self.type_checker:
+            var_type = self.type_checker.resolve_type(decl.type_annotation)
+        
+        # Bind variables in the pattern
+        self.bind_pattern_variables(decl.pattern, var_type)
     
     def analyze_assignment(self, assign: ast.Assignment):
         """Analyze assignment"""
@@ -398,7 +403,15 @@ class OwnershipAnalyzer:
     
     def analyze_match(self, match_stmt: ast.MatchStmt):
         """Analyze match statement"""
-        self.analyze_expression(match_stmt.scrutinee)
+        scrutinee_moves = self.analyze_expression(match_stmt.scrutinee)
+        scrutinee_type = self.infer_type_from_expression(match_stmt.scrutinee)
+        
+        # If the scrutinee is an identifier and its type is not a copy type,
+        # matching against it (especially with field binding) may move it.
+        # For now, we'll assume matching moves the scrutinee if it's a move type.
+        scrutinee_name = None
+        if isinstance(match_stmt.scrutinee, ast.Identifier):
+            scrutinee_name = match_stmt.scrutinee.name
         
         # Save original state
         original_state = self.state.clone()
@@ -408,8 +421,13 @@ class OwnershipAnalyzer:
         for arm in match_stmt.arms:
             self.state = original_state.clone()
             
+            # If scrutinee is a move type, mark it as moved in this arm
+            if scrutinee_name and scrutinee_type and not is_copy_type(scrutinee_type):
+                self.state.move_value(scrutinee_name, "<match arm>", arm.pattern.span)
+                self.add_timeline_event(scrutinee_name, "move", f"'{scrutinee_name}' moved into match arm", arm.pattern.span)
+
             # Bind pattern variables
-            self.bind_pattern_variables(arm.pattern)
+            self.bind_pattern_variables(arm.pattern, scrutinee_type)
             
             if arm.guard:
                 self.analyze_expression(arm.guard)
@@ -467,19 +485,31 @@ class OwnershipAnalyzer:
                 # but we validate that the variable is valid at the capture site
                 pass
     
-    def bind_pattern_variables(self, pattern: ast.Pattern):
+    def bind_pattern_variables(self, pattern: ast.Pattern, expected_type: Optional[Type] = None):
         """Bind variables in a pattern"""
         if isinstance(pattern, ast.IdentifierPattern):
             # Bind the variable (type from type checker)
-            var_type = self.variable_types.get(pattern.name)
+            var_type = expected_type or self.variable_types.get(pattern.name)
             if var_type:
                 self.state.allocate(pattern.name, var_type, pattern.span)
+        elif isinstance(pattern, ast.TuplePattern):
+            if expected_type and isinstance(expected_type, TupleType):
+                for sub_pat, elem_type in zip(pattern.elements, expected_type.elements):
+                    self.bind_pattern_variables(sub_pat, elem_type)
+            else:
+                for sub_pat in pattern.elements:
+                    self.bind_pattern_variables(sub_pat)
         elif isinstance(pattern, ast.EnumPattern):
-            # TODO: Bind enum variant fields
-            pass
+            # Bind enum variant fields
+            if pattern.fields:
+                # We need to know the types of the fields for this variant.
+                # In a full implementation, we'd look up the variant in the EnumType.
+                # For now, we'll try to get them from self.variable_types if they were collected.
+                for i, sub_pat in enumerate(pattern.fields):
+                    self.bind_pattern_variables(sub_pat)
         elif isinstance(pattern, ast.OrPattern):
             for sub_pattern in pattern.patterns:
-                self.bind_pattern_variables(sub_pattern)
+                self.bind_pattern_variables(sub_pattern, expected_type)
     
     def analyze_expression(self, expr: ast.Expression) -> bool:
         """Analyze an expression for ownership. Returns True if expression moves the value."""

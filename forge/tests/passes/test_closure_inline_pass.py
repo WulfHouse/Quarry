@@ -116,7 +116,7 @@ def test_collect_in_statement_var_decl():
     
     init = ast.IntLiteral(value=42, span=Span("test.pyrite", 1, 1, 1, 2))
     stmt = ast.VarDecl(
-        name="x",
+        pattern=ast.IdentifierPattern(name="x", span=Span("test.pyrite", 1, 1, 1, 5)),
         type_annotation=None,
         initializer=init,
         mutable=False,
@@ -680,7 +680,7 @@ def test_inline_in_statement_var_decl():
     
     init = ast.IntLiteral(value=42, span=Span("test.pyrite", 1, 1, 1, 2))
     stmt = ast.VarDecl(
-        name="x",
+        pattern=ast.IdentifierPattern(name="x", span=Span("test.pyrite", 1, 1, 1, 5)),
         type_annotation=None,
         initializer=init,
         mutable=False,
@@ -1241,7 +1241,7 @@ def test_collect_in_statement_var_decl_with_initializer():
         span=Span("test.pyrite", 1, 5, 1, 7)
     )
     stmt = ast.VarDecl(
-        name="x",
+        pattern=ast.IdentifierPattern(name="x", span=Span("test.pyrite", 1, 1, 1, 7)),
         type_annotation=None,
         initializer=init,
         mutable=False,

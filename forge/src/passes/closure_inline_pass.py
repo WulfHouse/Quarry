@@ -229,7 +229,7 @@ class ClosureInlinePass:
         elif isinstance(stmt, ast.VarDecl):
             new_init = self._inline_in_expression(stmt.initializer, func)
             return ast.VarDecl(
-                name=stmt.name,
+                pattern=stmt.pattern,
                 type_annotation=stmt.type_annotation,
                 initializer=new_init,
                 mutable=stmt.mutable,

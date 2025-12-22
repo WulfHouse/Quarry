@@ -132,7 +132,7 @@ class WithDesugarPass:
         """
         # Create: let resource = try expression
         let_stmt = ast.VarDecl(
-            name=with_stmt.variable,
+            pattern=ast.IdentifierPattern(name=with_stmt.variable, span=with_stmt.span),
             mutable=False,  # let is immutable
             type_annotation=None,  # Type will be inferred
             initializer=with_stmt.value,  # Already contains try expression

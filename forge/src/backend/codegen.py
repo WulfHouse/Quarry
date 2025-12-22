@@ -249,6 +249,11 @@ class LLVMCodeGen:
             self.enum_types[typ.name] = enum_struct
             return enum_struct
         
+        elif isinstance(typ, TupleType):
+            # Tuple: { T1, T2, ... }
+            elem_types = [self.type_to_llvm(t) for t in typ.elements]
+            return ir.LiteralStructType(elem_types)
+        
         elif isinstance(typ, OpaqueType):
             # Opaque type: generate as void* (opaque pointer)
             return ir.IntType(8).as_pointer()  # void* in LLVM is i8*
@@ -703,25 +708,52 @@ class LLVMCodeGen:
         # Generate initializer
         value = self.gen_expression(decl.initializer)
         
-        # Store in variables map
-        self.variables[decl.name] = value
+        # Bind pattern
+        self.gen_pattern_binding(decl.pattern, value, decl.mutable)
         
-        # Track variable type for field access and method calls
+        # Track variable types for field access and method calls (legacy support)
+        # Note: This only tracks the first identifier in a tuple or the identifier itself
+        # In a full implementation, we'd track types for all bindings
         if hasattr(self, 'type_checker') and self.type_checker:
             if decl.type_annotation:
                 var_type = self.type_checker.resolve_type(decl.type_annotation)
             else:
-                # Infer type from initializer expression
                 var_type = self.type_checker.check_expression(decl.initializer)
             self.variable_types = getattr(self, 'variable_types', {})
-            self.variable_types[decl.name] = var_type
-        elif isinstance(decl.initializer, ast.StructLiteral):
-            # Track struct type from literal
-            if hasattr(self, 'type_checker') and self.type_checker:
-                struct_type = self.type_checker.resolver.lookup_type(decl.initializer.struct_name)
-                if struct_type:
-                    self.variable_types = getattr(self, 'variable_types', {})
-                    self.variable_types[decl.name] = struct_type
+            # Use property access to avoid issues with different AST versions
+            if isinstance(decl.pattern, ast.IdentifierPattern):
+                self.variable_types[decl.pattern.name] = var_type
+            elif isinstance(decl.pattern, ast.TuplePattern):
+                # For tuples, we'd ideally track types for each element
+                # For now, just track the first one for legacy compatibility if it exists
+                if decl.pattern.elements and isinstance(decl.pattern.elements[0], ast.IdentifierPattern):
+                    if isinstance(var_type, TupleType) and var_type.elements:
+                        self.variable_types[decl.pattern.elements[0].name] = var_type.elements[0]
+
+    def gen_pattern_binding(self, pattern: ast.Pattern, value: ir.Value, mutable: bool = False):
+        """Generate code for binding a value to a pattern"""
+        if isinstance(pattern, ast.IdentifierPattern):
+            if mutable:
+                # For mutable variables, use alloca
+                alloca = self.builder.alloca(value.type, name=pattern.name)
+                self.builder.store(value, alloca)
+                self.variables[pattern.name] = alloca
+            else:
+                # For immutable variables, use SSA register
+                self.variables[pattern.name] = value
+        elif isinstance(pattern, ast.TuplePattern):
+            for i, sub_pat in enumerate(pattern.elements):
+                elem_val = self.builder.extract_value(value, i)
+                self.gen_pattern_binding(sub_pat, elem_val, mutable)
+        elif isinstance(pattern, ast.WildcardPattern):
+            pass
+        elif isinstance(pattern, ast.OrPattern):
+            # Or patterns in let are not fully supported yet, but for now just bind to the first one
+            if pattern.patterns:
+                self.gen_pattern_binding(pattern.patterns[0], value, mutable)
+        elif isinstance(pattern, ast.EnumPattern):
+            # Enum patterns in let are not supported yet (they should be refutable)
+            pass
     
     def gen_assignment(self, assign: ast.Assignment):
         """Generate code for assignment"""
@@ -729,7 +761,15 @@ class LLVMCodeGen:
         
         if isinstance(assign.target, ast.Identifier):
             # Normal variable assignment
-            self.variables[assign.target.name] = value
+            target_name = assign.target.name
+            if target_name in self.variables:
+                target_val = self.variables[target_name]
+                if isinstance(target_val.type, ir.PointerType):
+                    # It's an alloca, use store
+                    self.builder.store(value, target_val)
+                    return
+            # Otherwise, update the binding (SSA style)
+            self.variables[target_name] = value
         elif isinstance(assign.target, ast.FieldAccess):
             # Field assignment: obj.field = value
             self.gen_field_assignment(assign.target, value)
@@ -748,69 +788,107 @@ class LLVMCodeGen:
         field_index = -1
         
         # Check if it's a known variable with type info
+        obj_type_pyrite = None
         if isinstance(access.object, ast.Identifier) and hasattr(self, 'variable_types') and access.object.name in self.variable_types:
-            obj_type = self.variable_types[access.object.name]
-            if isinstance(obj_type, StructType):
-                field_names = sorted(obj_type.fields.keys()) if getattr(self, 'deterministic', False) else list(obj_type.fields.keys())
+            obj_type_pyrite = self.variable_types[access.object.name]
+        
+        # If we couldn't find it directly, try to get it from the expression result if possible
+        # (For nested field access, we'd need to track types through expressions better)
+        
+        if obj_type_pyrite:
+            # If it's a reference, unwrap it to get the struct type
+            if isinstance(obj_type_pyrite, ReferenceType):
+                obj_type_pyrite = obj_type_pyrite.inner
+            
+            if isinstance(obj_type_pyrite, StructType):
+                field_names = sorted(obj_type_pyrite.fields.keys()) if getattr(self, 'deterministic', False) else list(obj_type_pyrite.fields.keys())
                 if access.field in field_names:
                     field_index = field_names.index(access.field)
         
         if field_index == -1:
-            # Try to infer from LLVM type if available
-            if isinstance(obj.type, ir.LiteralStructType):
-                # This is tricky because we don't have field names in LLVM types
-                # Fall back to error if we can't find names from type checker
-                raise CodeGenError(f"Could not determine field index for '{access.field}' on type {obj.type}", access.span)
-            else:
-                raise CodeGenError(f"Field assignment only supported for structs, found {obj.type}", access.span)
+            # Try to infer from LLVM type if it's a literal struct or pointer to one
+            llvm_type = obj.type
+            if isinstance(llvm_type, ir.PointerType):
+                llvm_type = llvm_type.pointee
             
-        # 3. Create new struct value with updated field
-        new_obj = self.builder.insert_value(obj, value, field_index)
-        
-        # 4. Assign the new struct value back to the target
-        if isinstance(access.object, ast.Identifier):
-            self.variables[access.object.name] = new_obj
-        else:
-            # Recursive assignment for nested fields/indices
-            if isinstance(access.object, (ast.FieldAccess, ast.IndexAccess)):
-                self.gen_assignment(ast.Assignment(target=access.object, value=new_obj, span=access.span))
+            if isinstance(llvm_type, ir.LiteralStructType):
+                # We still need the field names to find the index.
+                # If we don't have pyrite type info, we're stuck for now.
+                # In a full implementation, we'd have a mapping from struct name to field names.
+                pass
+
+        if field_index == -1:
+            raise CodeGenError(f"Could not determine field index for '{access.field}' on type {obj.type}", access.span)
+            
+        # 3. Handle assignment based on whether obj is a value or a pointer
+        if isinstance(obj.type, ir.PointerType):
+            # Object is a pointer (e.g. &mut struct)
+            # Use GEP to get field pointer and store
+            zero = ir.Constant(ir.IntType(32), 0)
+            idx = ir.Constant(ir.IntType(32), field_index)
+            field_ptr = self.builder.gep(obj, [zero, idx], inbounds=True)
+            self.builder.store(value, field_ptr)
+        elif isinstance(obj.type, ir.LiteralStructType):
+            # Object is a value (SSA register)
+            # Create new struct value with updated field
+            new_obj = self.builder.insert_value(obj, value, field_index)
+            
+            # Assign the new struct value back to the target
+            if isinstance(access.object, ast.Identifier):
+                self.variables[access.object.name] = new_obj
             else:
-                raise CodeGenError("Complex field assignment not yet supported", access.span)
+                # Recursive assignment for nested fields/indices
+                if isinstance(access.object, (ast.FieldAccess, ast.IndexAccess)):
+                    self.gen_assignment(ast.Assignment(target=access.object, value=new_obj, span=access.span))
+                else:
+                    raise CodeGenError("Complex field assignment not yet supported", access.span)
+        else:
+            raise CodeGenError(f"Field assignment only supported for structs or struct pointers, found {obj.type}", access.span)
 
     def gen_index_assignment(self, access: ast.IndexAccess, value: ir.Value):
         """Generate code for assigning to an array/list index"""
         obj = self.gen_expression(access.object)
         index = self.gen_expression(access.index)
         
-        # Handle List[T] which is { T*, i64, i64 }
+        # Normalize index to i64 for consistency
+        if index.type.width < 64:
+            index = self.builder.sext(index, ir.IntType(64))
+        elif index.type.width > 64:
+            index = self.builder.trunc(index, ir.IntType(64))
+
+        # 1. Handle pointer to array (e.g. &mut [int; 3])
+        if isinstance(obj.type, ir.PointerType) and isinstance(obj.type.pointee, ir.ArrayType):
+            zero = ir.Constant(ir.IntType(32), 0)
+            # GEP requires i32 indices for the array level
+            idx_i32 = self.builder.trunc(index, ir.IntType(32))
+            elem_ptr = self.builder.gep(obj, [zero, idx_i32], inbounds=True)
+            self.builder.store(value, elem_ptr)
+            return
+
+        # 2. Handle List[T] which is { T*, i64, i64 }
         if isinstance(obj.type, ir.LiteralStructType) and len(obj.type.elements) == 3:
             # Assume it's a List { T*, length, capacity }
-            # 1. Extract the pointer to data
             ptr = self.builder.extract_value(obj, 0)
-            
-            # 2. GEP requires i32 or i64 indices. List indices are usually i64.
-            # No changes needed if index is already i64.
-            
-            # 3. Index into the pointer and store
             elem_ptr = self.builder.gep(ptr, [index], inbounds=True)
             self.builder.store(value, elem_ptr)
             return
 
+        # 3. Handle Slice [T] which is { T*, i64 }
+        if isinstance(obj.type, ir.LiteralStructType) and len(obj.type.elements) == 2:
+            # Assume it's a Slice { T*, length }
+            ptr = self.builder.extract_value(obj, 0)
+            elem_ptr = self.builder.gep(ptr, [index], inbounds=True)
+            self.builder.store(value, elem_ptr)
+            return
+
+        # 4. Handle Array value (SSA register)
         if isinstance(obj.type, ir.ArrayType):
-            # For arrays, we use a temporary alloca + GEP + store to handle dynamic indices
-            # since insert_value requires constant indices.
+            # For array values, we use a temporary alloca + GEP + store
             alloca = self.builder.alloca(obj.type)
             self.builder.store(obj, alloca)
             
-            # GEP requires i32 indices
-            if index.type.width > 32:
-                idx_i32 = self.builder.trunc(index, ir.IntType(32))
-            elif index.type.width < 32:
-                idx_i32 = self.builder.sext(index, ir.IntType(32))
-            else:
-                idx_i32 = index
-                
             zero = ir.Constant(ir.IntType(32), 0)
+            idx_i32 = self.builder.trunc(index, ir.IntType(32))
             ptr = self.builder.gep(alloca, [zero, idx_i32], inbounds=True)
             self.builder.store(value, ptr)
             
@@ -1102,63 +1180,102 @@ class LLVMCodeGen:
         # Evaluate scrutinee
         scrutinee = self.gen_expression(match_stmt.scrutinee)
         
-        # Create blocks for each arm and their tests
+        # Create final merge block
         merge_block = self.function.append_basic_block(name="match.end")
         
-        # Generate pattern matching chain
+        # current_test_block will be updated in each iteration
+        current_test_block = self.function.append_basic_block(name="match.test0")
+        self.builder.branch(current_test_block)
+        
         for i, arm in enumerate(match_stmt.arms):
-            test_block = self.function.append_basic_block(name=f"match.test{i}")
+            self.builder.position_at_end(current_test_block)
+            
+            # Create arm block
             arm_block = self.function.append_basic_block(name=f"match.arm{i}")
             
-            # Jump to test
-            if i == 0:
-                self.builder.branch(test_block)
+            # Create next test block (or jump to merge block if this is the last arm)
+            if i + 1 < len(match_stmt.arms):
+                next_test_block = self.function.append_basic_block(name=f"match.test{i+1}")
+            else:
+                next_test_block = merge_block
             
-            # Generate test
-            self.builder.position_at_end(test_block)
-            
+            # Generate matching logic
             if isinstance(arm.pattern, ast.LiteralPattern):
-                # Compare scrutinee with literal
                 literal_val = self.gen_expression(arm.pattern.literal)
                 cond = self.builder.icmp_signed('==', scrutinee, literal_val)
-                
-                # If match, goto arm block; else try next
-                next_test = self.function.append_basic_block(name=f"match.test{i+1}") if i+1 < len(match_stmt.arms) else merge_block
-                self.builder.cbranch(cond, arm_block, next_test)
-                
-                # Generate arm body
-                self.builder.position_at_end(arm_block)
-                self.gen_block(arm.body)
-                if not self.builder.block.is_terminated:
-                    self.builder.branch(merge_block)
+                self.builder.cbranch(cond, arm_block, next_test_block)
             
-            elif isinstance(arm.pattern, ast.WildcardPattern):
-                # Wildcard matches everything
+            elif isinstance(arm.pattern, ast.EnumPattern):
+                # Check if enum is a struct or just an i32 tag
+                if isinstance(scrutinee.type, ir.IntType):
+                    # Simple enum without fields - scrutinee is the tag
+                    tag = scrutinee
+                else:
+                    # Enum with fields - extract tag from field 0
+                    tag = self.builder.extract_value(scrutinee, 0)
+                
+                # Get expected tag value
+                expected_tag_value = -1
+                if self.type_checker:
+                    scrutinee_type = self.type_checker.check_expression(match_stmt.scrutinee)
+                    if isinstance(scrutinee_type, GenericType):
+                        scrutinee_type = scrutinee_type.base_type
+                    
+                    if isinstance(scrutinee_type, EnumType):
+                        if arm.pattern.variant_name in scrutinee_type.variants:
+                            expected_tag_value = list(scrutinee_type.variants.keys()).index(arm.pattern.variant_name)
+                
+                if expected_tag_value == -1:
+                    raise CodeGenError(f"Could not determine tag for variant {arm.pattern.variant_name}", arm.pattern.span)
+                
+                expected_tag = ir.Constant(ir.IntType(32), expected_tag_value)
+                cond = self.builder.icmp_signed('==', tag, expected_tag)
+                self.builder.cbranch(cond, arm_block, next_test_block)
+                
+            elif isinstance(arm.pattern, ast.TuplePattern):
+                # Always matches
                 self.builder.branch(arm_block)
-                self.builder.position_at_end(arm_block)
-                self.gen_block(arm.body)
-                if not self.builder.block.is_terminated:
-                    self.builder.branch(merge_block)
-                break
+                # Any following arms are unreachable (type checker should have warned)
+                next_test_block = merge_block
+                
+            elif isinstance(arm.pattern, ast.WildcardPattern) or isinstance(arm.pattern, ast.IdentifierPattern):
+                # Always matches
+                self.builder.branch(arm_block)
+                # Any following arms are unreachable
+                next_test_block = merge_block
             
-            elif isinstance(arm.pattern, ast.IdentifierPattern):
-                # Bind the value
+            else:
+                # Fallback matching logic (should not happen if all handled)
+                self.builder.branch(arm_block)
+
+            # Generate arm body
+            self.builder.position_at_end(arm_block)
+            
+            # Bind pattern variables
+            if isinstance(arm.pattern, ast.IdentifierPattern):
                 self.variables[arm.pattern.name] = scrutinee
-                self.builder.branch(arm_block)
-                self.builder.position_at_end(arm_block)
-                self.gen_block(arm.body)
-                if not self.builder.block.is_terminated:
-                    self.builder.branch(merge_block)
-                break
+            elif isinstance(arm.pattern, ast.EnumPattern) and arm.pattern.fields:
+                for j, field_pat in enumerate(arm.pattern.fields):
+                    field_val_raw = self.builder.extract_value(scrutinee, j + 1)
+                    # Cast payload to correct type if possible
+                    self.gen_pattern_binding(field_pat, field_val_raw)
+            elif isinstance(arm.pattern, ast.TuplePattern):
+                for j, elem_pat in enumerate(arm.pattern.elements):
+                    elem_val = self.builder.extract_value(scrutinee, j)
+                    self.gen_pattern_binding(elem_pat, elem_val)
             
-            elif isinstance(arm.pattern, ast.OrPattern):
-                # OR pattern: test each sub-pattern
-                # For MVP, simplified
-                self.builder.branch(arm_block)
-                self.builder.position_at_end(arm_block)
-                self.gen_block(arm.body)
-                if not self.builder.block.is_terminated:
-                    self.builder.branch(merge_block)
+            # Match guards
+            if arm.guard:
+                # TODO: Implement guards (needs another level of branching)
+                pass
+                
+            self.gen_block(arm.body)
+            if not self.builder.block.is_terminated:
+                self.builder.branch(merge_block)
+            
+            # Move to next test block
+            current_test_block = next_test_block
+            if current_test_block == merge_block:
                 break
         
         # Continue at merge block
@@ -1188,7 +1305,14 @@ class LLVMCodeGen:
         
         elif isinstance(expr, ast.Identifier):
             if expr.name in self.variables:
-                return self.variables[expr.name]
+                val = self.variables[expr.name]
+                # If it's a pointer (alloca), load it (unless it's a reference type)
+                if isinstance(val.type, ir.PointerType):
+                    # Check Pyrite type to see if it's a reference
+                    py_type = self.variable_types.get(expr.name)
+                    if not isinstance(py_type, ReferenceType):
+                        return self.builder.load(val)
+                return val
             else:
                 raise CodeGenError(f"Undefined variable: {expr.name}", expr.span)
         
@@ -1218,6 +1342,9 @@ class LLVMCodeGen:
         
         elif isinstance(expr, ast.ListLiteral):
             return self.gen_list_literal(expr)
+        
+        elif isinstance(expr, ast.TupleLiteral):
+            return self.gen_tuple_literal(expr)
         
         elif isinstance(expr, ast.IndexAccess):
             return self.gen_index_access(expr)
@@ -1282,25 +1409,64 @@ class LLVMCodeGen:
         """Generate code for try expression (error propagation)
         
         try expr requires expr to be Result[T, E] and returns T.
-        
-        Full implementation would:
-        1. Check if expression returns Result[T, E] (type checker validates this)
-        2. Extract tag to check if it's Ok or Err
-        3. If Ok: extract and return the value (T)
-        4. If Err: execute all defers then return error from function (early return)
-        
-        Note: Full error propagation requires understanding exact Result enum layout.
-        For now, generate the expression - proper unwrapping will be implemented
-        once enum layout is finalized.
+        Desugars to early return on Err.
         """
-        # Type checker has already validated that expression is Result[T, E]
-        # For MVP, generate the expression
-        # TODO: Implement full Result unwrapping with error propagation
-        # This requires:
-        # - Understanding exact Result enum memory layout
-        # - Extracting tag and payload correctly
-        # - Handling early return with defer execution
-        return self.gen_expression(try_expr.expression)
+        # 1. Generate the Result[T, E] expression
+        result_val = self.gen_expression(try_expr.expression)
+        
+        # 2. Extract the tag (Result is an enum, layout is { i32 tag, ...fields })
+        tag = self.builder.extract_value(result_val, 0)
+        
+        # 3. Check if it's Err (tag != 0)
+        # Assuming tag 0 is Ok and tag 1 is Err
+        zero = ir.Constant(ir.IntType(32), 0)
+        is_err = self.builder.icmp_signed('!=', tag, zero)
+        
+        # 4. Create blocks for branching
+        ok_block = self.function.append_basic_block(name="try.ok")
+        err_block = self.function.append_basic_block(name="try.err")
+        
+        self.builder.cbranch(is_err, err_block, ok_block)
+        
+        # 5. Handle Err block: execute defers and return the error
+        self.builder.position_at_end(err_block)
+        self.execute_defers(scope_start=0)
+        # Return the original result value (which is already an Err)
+        # We might need to convert it to the function's return type if they differ,
+        # but Result propagation usually requires matching error types.
+        self.builder.ret(result_val)
+        
+        # 6. Handle Ok block: extract and return payload
+        self.builder.position_at_end(ok_block)
+        # Payload is in field 1 (first field after tag)
+        payload_raw = self.builder.extract_value(result_val, 1)
+        
+        # The payload is stored as i64 in the enum struct, we need to cast it back
+        # to the actual type T.
+        if self.type_checker:
+            res_type = self.type_checker.check_expression(try_expr.expression)
+            if isinstance(res_type, GenericType) and res_type.name == "Result":
+                t_type = res_type.type_args[0]
+                target_llvm_type = self.type_to_llvm(t_type)
+                
+                # Use bitcast or inttoptr/ptrtoint if needed
+                if isinstance(target_llvm_type, ir.PointerType):
+                    return self.builder.inttoptr(payload_raw, target_llvm_type)
+                elif isinstance(target_llvm_type, ir.IntType):
+                    if target_llvm_type.width < 64:
+                        return self.builder.trunc(payload_raw, target_llvm_type)
+                    elif target_llvm_type.width > 64:
+                        return self.builder.zext(payload_raw, target_llvm_type)
+                    return payload_raw
+                elif isinstance(target_llvm_type, (ir.FloatType, ir.DoubleType)):
+                    return self.builder.bitcast(payload_raw, target_llvm_type)
+                else:
+                    # For complex types (structs), they might not fit in i64.
+                    # Pyrite's current enum implementation pads with i64 fields.
+                    # This is a simplification.
+                    return self.builder.bitcast(payload_raw, target_llvm_type)
+        
+        return payload_raw
     
     def gen_list_literal(self, literal: ast.ListLiteral) -> ir.Value:
         """Generate code for list literal
@@ -1403,7 +1569,19 @@ class LLVMCodeGen:
             })
         
         return list_val
-    
+
+    def gen_tuple_literal(self, expr: ast.TupleLiteral) -> ir.Value:
+        """Generate code for tuple literal: (1, "a")"""
+        elements = [self.gen_expression(elem) for elem in expr.elements]
+        # Create a struct value for the tuple
+        pyrite_type = self.type_checker.check_expression(expr)
+        llvm_type = self.type_to_llvm(pyrite_type)
+        
+        tuple_val = self._create_zero_constant(llvm_type)
+        for i, val in enumerate(elements):
+            tuple_val = self.builder.insert_value(tuple_val, val, i)
+        return tuple_val
+
     def gen_index_access(self, access: ast.IndexAccess) -> ir.Value:
         """Generate code for array/list indexing"""
         obj = self.gen_expression(access.object)
@@ -1592,11 +1770,12 @@ class LLVMCodeGen:
                 var_name = unaryop.operand.name
                 if var_name in self.variables:
                     var_val = self.variables[var_name]
-                    # If it's already a pointer, return it
+                    # If it's already a pointer (either an alloca or a reference), return it
                     if isinstance(var_val.type, ir.PointerType):
                         return var_val
-                    # Otherwise, need to create a pointer
-                    # Allocate space on stack and store the value
+                    # Otherwise, need to create a temporary pointer (copying the value)
+                    # Note: This only happens for immutable let bindings.
+                    # In a full implementation, we'd maybe error if trying to take &mut of an immutable.
                     alloca = self.builder.alloca(var_val.type, name=f"{var_name}_ref")
                     self.builder.store(var_val, alloca)
                     return alloca
@@ -1615,8 +1794,63 @@ class LLVMCodeGen:
         else:
             raise CodeGenError(f"Unary operator not implemented: {unaryop.op}", unaryop.span)
     
+    def gen_enum_constructor(self, enum_type: EnumType, variant_name: str, arguments: List[ast.Expression]) -> ir.Value:
+        """Generate code for an enum variant constructor call"""
+        # 1. Get LLVM type for the enum
+        llvm_type = self.type_to_llvm(enum_type)
+        
+        # 2. Get the tag for this variant
+        tag_value = list(enum_type.variants.keys()).index(variant_name)
+        tag = ir.Constant(ir.IntType(32), tag_value)
+        
+        # 3. Create initial enum struct with tag
+        enum_val = self._create_zero_constant(llvm_type)
+        enum_val = self.builder.insert_value(enum_val, tag, 0)
+        
+        # 4. Add payloads (if any)
+        if arguments:
+            for i, arg_expr in enumerate(arguments):
+                arg_val = self.gen_expression(arg_expr)
+                # In Pyrite's current enum layout, payloads start at field index 1
+                # They are stored as i64, so we might need to cast
+                payload_field_idx = i + 1
+                if payload_field_idx < len(llvm_type.elements):
+                    # Cast payload to i64 if needed
+                    payload_val = arg_val
+                    target_type = llvm_type.elements[payload_field_idx]
+                    
+                    if payload_val.type != target_type:
+                        if isinstance(payload_val.type, ir.PointerType):
+                            payload_val = self.builder.ptrtoint(payload_val, target_type)
+                        elif isinstance(payload_val.type, ir.IntType):
+                            if payload_val.type.width < target_type.width:
+                                payload_val = self.builder.zext(payload_val, target_type)
+                            else:
+                                payload_val = self.builder.trunc(payload_val, target_type)
+                        elif isinstance(payload_val.type, (ir.FloatType, ir.DoubleType)):
+                            payload_val = self.builder.bitcast(payload_val, target_type)
+                    
+                    enum_val = self.builder.insert_value(enum_val, payload_val, payload_field_idx)
+        
+        return enum_val
+
     def gen_function_call(self, call: ast.FunctionCall) -> ir.Value:
         """Generate code for function call"""
+        # Special handling for enum constructors
+        if isinstance(call.function, ast.FieldAccess):
+            # Check if it's a type access like Enum::Variant
+            if isinstance(call.function.object, ast.Identifier):
+                type_name = call.function.object.name
+                if hasattr(self, 'type_checker') and self.type_checker:
+                    obj_type = self.type_checker.resolver.lookup_type(type_name)
+                    if isinstance(obj_type, EnumType):
+                        # It's an enum constructor call
+                        return self.gen_enum_constructor(obj_type, call.function.field, call.arguments)
+            
+            # Otherwise, it might be an instance method call or field containing a closure
+            # (handled by the general logic below)
+            pass
+
         # Special handling for builtin functions
         if isinstance(call.function, ast.Identifier):
             if call.function.name == "print":

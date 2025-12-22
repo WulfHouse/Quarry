@@ -737,8 +737,8 @@ class TypeChecker:
             # Infer type from initializer
             var_type = init_type
         
-        # Define variable in current scope
-        self.resolver.define_variable(decl.name, var_type, decl.mutable, decl.span)
+        # Bind variables in the pattern
+        self.check_pattern(decl.pattern, var_type)
     
     def check_assignment(self, assign: ast.Assignment):
         """Type check an assignment"""
@@ -949,11 +949,59 @@ class TypeChecker:
         elif isinstance(pattern, ast.IdentifierPattern):
             # Bind the variable
             self.resolver.define_variable(pattern.name, expected_type, False, pattern.span)
+        elif isinstance(pattern, ast.TuplePattern):
+            if not isinstance(expected_type, TupleType):
+                self.error(f"Cannot destructure non-tuple type {expected_type} as tuple", pattern.span)
+                return
+            
+            if len(pattern.elements) != len(expected_type.elements):
+                self.error(f"Tuple arity mismatch: pattern has {len(pattern.elements)}, type has {len(expected_type.elements)}", pattern.span)
+                return
+            
+            for sub_pat, elem_type in zip(pattern.elements, expected_type.elements):
+                self.check_pattern(sub_pat, elem_type)
         elif isinstance(pattern, ast.WildcardPattern):
             pass  # Matches anything
         elif isinstance(pattern, ast.EnumPattern):
-            # TODO: Check enum variant matches expected type
-            pass
+            # Check enum variant matches expected type
+            actual_enum_type = expected_type
+            if isinstance(actual_enum_type, GenericType):
+                actual_enum_type = actual_enum_type.base_type
+            
+            if not isinstance(actual_enum_type, EnumType):
+                self.error(f"Cannot match non-enum type {expected_type} against enum pattern", pattern.span)
+                return
+            
+            if pattern.variant_name not in actual_enum_type.variants:
+                self.error(f"Enum {actual_enum_type.name} has no variant '{pattern.variant_name}'", pattern.span)
+                return
+            
+            variant_field_types = actual_enum_type.variants[pattern.variant_name]
+            
+            # If variant has fields, check arity and bind them
+            if variant_field_types:
+                if not pattern.fields:
+                    self.error(f"Enum variant {actual_enum_type.name}::{pattern.variant_name} expects fields", pattern.span)
+                    return
+                
+                if len(pattern.fields) != len(variant_field_types):
+                    self.error(f"Enum variant {actual_enum_type.name}::{pattern.variant_name} expects {len(variant_field_types)} fields, got {len(pattern.fields)}", pattern.span)
+                    return
+                
+                # If expected_type is GenericType, instantiate field types
+                if isinstance(expected_type, GenericType):
+                    # Simplified instantiation for Option[T]
+                    if expected_type.name == "Option" and len(expected_type.type_args) == 1:
+                        field_types = [expected_type.type_args[0]]
+                    else:
+                        field_types = variant_field_types
+                else:
+                    field_types = variant_field_types
+
+                for sub_pat, field_type in zip(pattern.fields, field_types):
+                    self.check_pattern(sub_pat, field_type)
+            elif pattern.fields:
+                self.error(f"Enum variant {actual_enum_type.name}::{pattern.variant_name} expects no fields", pattern.span)
         elif isinstance(pattern, ast.OrPattern):
             for sub_pattern in pattern.patterns:
                 self.check_pattern(sub_pattern, expected_type)
@@ -1008,6 +1056,9 @@ class TypeChecker:
             return self.check_struct_literal(expr)
         elif isinstance(expr, ast.ListLiteral):
             return self.check_list_literal(expr)
+        elif isinstance(expr, ast.TupleLiteral):
+            element_types = [self.check_expression(elem) for elem in expr.elements]
+            return TupleType(element_types)
         elif isinstance(expr, ast.TryExpr):
             return self.check_try_expr(expr)
         elif isinstance(expr, ast.ParameterClosure):
@@ -1888,6 +1939,10 @@ class TypeChecker:
             return object_type.element
         elif isinstance(object_type, SliceType):
             return object_type.element
+        elif isinstance(object_type, GenericType) and object_type.name == "List":
+            if object_type.type_args:
+                return object_type.type_args[0]
+            return UNKNOWN
         else:
             # Type is not indexable
             self.error(f"Cannot index type {object_type}", access.span)

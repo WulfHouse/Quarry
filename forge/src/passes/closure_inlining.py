@@ -104,7 +104,7 @@ class ClosureInliner:
         elif isinstance(stmt, ast.VarDecl):
             new_init = self._substitute_in_expression(stmt.initializer, substitutions)
             return ast.VarDecl(
-                name=stmt.name,
+                pattern=stmt.pattern,
                 mutable=stmt.mutable,
                 type_annotation=stmt.type_annotation,
                 initializer=new_init,

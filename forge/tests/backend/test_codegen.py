@@ -994,7 +994,7 @@ def test_gen_var_decl():
     codegen.declare_function(func)
     codegen.gen_function(func)
     decl = ast.VarDecl(
-        name="x",
+        pattern=ast.IdentifierPattern(name="x", span=Span("test.pyrite", 1, 5, 1, 11)),
         type_annotation=None,
         initializer=ast.IntLiteral(value=42, span=Span("test.pyrite", 1, 9, 1, 11)),
         mutable=False,
@@ -1023,7 +1023,7 @@ def test_gen_assignment():
     codegen.gen_function(func)
     # Create variable first
     decl = ast.VarDecl(
-        name="x",
+        pattern=ast.IdentifierPattern(name="x", span=Span("test.pyrite", 1, 5, 1, 10)),
         type_annotation=None,
         initializer=ast.IntLiteral(value=5, span=Span("test.pyrite", 1, 9, 1, 10)),
         mutable=True,

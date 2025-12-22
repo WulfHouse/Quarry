@@ -427,7 +427,7 @@ def test_substitute_in_statement_var_decl():
     from src.frontend.tokens import Span
     context = MonomorphizationContext()
     stmt = ast.VarDecl(
-        name="x",
+        pattern=ast.IdentifierPattern(name="x", span=Span("test.pyrite", 1, 5, 1, 10)),
         type_annotation=None,
         initializer=ast.Identifier(name="N", span=Span("test.pyrite", 1, 9, 1, 10)),
         mutable=False,
@@ -446,7 +446,7 @@ def test_substitute_in_statement_var_decl_with_type():
     from src.types import IntType
     context = MonomorphizationContext()
     stmt = ast.VarDecl(
-        name="x",
+        pattern=ast.IdentifierPattern(name="x", span=Span("test.pyrite", 1, 5, 1, 10)),
         type_annotation=IntType(),
         initializer=ast.IntLiteral(value=5, span=Span("test.pyrite", 1, 9, 1, 10)),
         mutable=False,

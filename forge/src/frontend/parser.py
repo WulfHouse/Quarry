@@ -1156,22 +1156,8 @@ class Parser:
         mutable = self.match_token(TokenType.VAR)
         self.advance()  # consume let or var
         
-        # Check for tuple destructuring: let (a, b) = value
-        name = None
-        if self.match_token(TokenType.LPAREN):
-            # Tuple destructuring pattern
-            self.advance()  # consume '('
-            names = []
-            while not self.match_token(TokenType.RPAREN):
-                if names:
-                    self.expect(TokenType.COMMA)
-                names.append(self.expect(TokenType.IDENTIFIER).value)
-            self.expect(TokenType.RPAREN)
-            # For now, use the first name as the variable name
-            # TODO: Support proper tuple destructuring in VarDecl AST node
-            name = names[0] if names else "_"
-        else:
-            name = self.expect(TokenType.IDENTIFIER).value
+        # Parse pattern (identifier or tuple)
+        pattern = self.parse_pattern()
         
         # Optional type annotation
         type_annotation = None
@@ -1209,7 +1195,7 @@ class Parser:
                 self.expect(TokenType.NEWLINE)
         
         return ast.VarDecl(
-            name=name,
+            pattern=pattern,
             mutable=mutable,
             type_annotation=type_annotation,
             initializer=initializer,
@@ -1533,9 +1519,20 @@ class Parser:
             )
     
     def parse_pattern(self) -> ast.Pattern:
-        """Parse a pattern for match arms"""
+        """Parse a pattern for match arms or variable declarations"""
         start_span = self.current().span
         
+        # Tuple pattern: (a, b)
+        if self.match_token(TokenType.LPAREN):
+            self.advance()
+            elements = []
+            while not self.match_token(TokenType.RPAREN):
+                elements.append(self.parse_pattern())
+                if not self.match_token(TokenType.RPAREN):
+                    self.expect(TokenType.COMMA)
+            self.expect(TokenType.RPAREN)
+            return ast.TuplePattern(elements=elements, span=self.make_span(start_span))
+
         # Wildcard pattern
         if self.match_token(TokenType.IDENTIFIER) and self.current().value == "_":
             self.advance()
@@ -1566,7 +1563,13 @@ class Parser:
             # Check for enum pattern with double colon: Enum::Variant(...)
             if self.match_token(TokenType.DOUBLE_COLON):
                 self.advance()
-                variant = self.expect(TokenType.IDENTIFIER).value
+                if self.match_token(TokenType.IDENTIFIER):
+                    variant = self.advance().value
+                elif self.match_token(TokenType.NONE):
+                    self.advance()
+                    variant = "None"
+                else:
+                    raise ParseError(f"Expected variant name after '::', got {self.current().type.name}", self.current().span)
                 
                 # Optional fields
                 fields = None
@@ -2017,9 +2020,8 @@ class Parser:
                         self.expect(TokenType.COMMA)
                 
                 self.expect(TokenType.RPAREN)
-                # Return as a tuple - for now, use ListLiteral to represent tuples
-                # TODO: Add proper TupleLiteral AST node
-                return ast.ListLiteral(elements=elements, span=self.make_span(start_span))
+                # Return as a tuple literal
+                return ast.TupleLiteral(elements=elements, span=self.make_span(start_span))
             else:
                 # Single parenthesized expression
                 self.expect(TokenType.RPAREN)
