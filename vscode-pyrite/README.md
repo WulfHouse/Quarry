@@ -30,7 +30,7 @@ Official VSCode extension for the Pyrite programming language.
 
 ## Requirements
 
-- Quarry installed (includes Forge, the Pyrite compiler) - see [Installation Guide](https://github.com/wulfhq/pyrite)
+- Quarry installed (includes Forge, the Pyrite compiler)
 - Python 3.10+ (for LSP server)
 
 ## Configuration
@@ -84,10 +84,3 @@ Report issues at: [https://github.com/wulfhq/pyrite/issues](https://github.com/W
 ## License
 
 WulfHouse Source-Available Non-Compete License (WSANCL) v1.0 - See [LICENSE.md](../LICENSE.md) for details
-
-## Learn More
-
-- [Pyrite Documentation](https://github.com/wulfhq/pyrite/tree/main/docs)
-- [Language Reference](https://github.com/wulfhq/pyrite/tree/main/docs/user/LANGUAGE_REFERENCE.md)
-- [Quick Start Guide](https://github.com/wulfhq/pyrite/tree/main/docs/user/QUICKSTART.md)
-
