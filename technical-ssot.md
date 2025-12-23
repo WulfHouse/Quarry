@@ -2,13 +2,13 @@
 
 - Last updated: December 23, 2025
 - Mode: REQ_TO_LEAF
-- Baseline totals: REQ=423 SPEC=312 NODE=40 LEAF=272
-- Progress: mapped_to_leaf=351/423
+- Baseline totals: REQ=423 SPEC=343 NODE=41 LEAF=302
+- Progress: mapped_to_leaf=423/423
 - Cursor:
-  - next_unmapped_req: REQ-352
+  - next_unmapped_req: NONE
   - batch_size: 25
-  - last_completed_req: REQ-351
-- This run targets: REQ -> LEAF Mapping (Batch 14)
+  - last_completed_req: REQ-423
+- This run targets: COMPLETED (All REQs mapped to LEAFs)
 
 # Pyrite + Quarry Technical Specification (SSOT Implementation Guide)
 
