@@ -55,8 +55,8 @@ special values like NaN and infinity).
 
 As with ints, no implicit conversion occurs between floats and integers - a 
 conversion must be done with an explicit cast function or operator to avoid 
-unintended truncation or rounding. If necessary, a generic float keyword may be 
-an alias for the default float type (like Python's float meaning 64-bit).
+unintended truncation or rounding. If necessary, a generic `float` keyword may be 
+an alias for the default float type (like Python's `float` meaning 64-bit).
 
 Boolean
 ~~~~~~~

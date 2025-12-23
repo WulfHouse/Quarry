@@ -92,7 +92,7 @@ class ErrorFormatter:
         
         # Explanation hint
         if error_code:
-            explain = f"  = explain: Run 'pyritec --explain {error_code}' for more details"
+            explain = f"  = explain: Run 'forge --explain {error_code}' for more details"
             if self.use_colors:
                 explain = f"{Colors.GRAY}{explain}{Colors.RESET}"
             parts.append(explain)

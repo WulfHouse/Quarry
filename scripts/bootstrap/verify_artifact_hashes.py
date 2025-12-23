@@ -44,7 +44,7 @@ def collect_artifact_hashes() -> dict:
     }
     
     # Stage1 executable
-    stage1_exe = stage1_dir / "pyritec.exe" if sys.platform == "win32" else stage1_dir / "pyritec"
+    stage1_exe = stage1_dir / "forge.exe" if sys.platform == "win32" else stage1_dir / "forge"
     if stage1_exe.exists():
         hashes["stage1"]["executable"] = compute_file_hash(stage1_exe)
     
@@ -55,7 +55,7 @@ def collect_artifact_hashes() -> dict:
         hashes["stage1"]["object_files"][obj_file.name] = compute_file_hash(obj_file)
     
     # Stage2 executable
-    stage2_exe = stage2_dir / "pyritec.exe" if sys.platform == "win32" else stage2_dir / "pyritec"
+    stage2_exe = stage2_dir / "forge.exe" if sys.platform == "win32" else stage2_dir / "forge"
     if stage2_exe.exists():
         hashes["stage2"]["executable"] = compute_file_hash(stage2_exe)
     

@@ -145,9 +145,9 @@ def build_stage1():
     # Link executable
     print("\n[5/5] Linking Stage1 executable...")
     link_start = time.time()
-    stage1_exe = stage1_dir / "pyritec"
+    stage1_exe = stage1_dir / "forge"
     if sys.platform == "win32":
-        stage1_exe = stage1_dir / "pyritec.exe"
+        stage1_exe = stage1_dir / "forge.exe"
     
     if not object_files:
         print("  [WARN] No object files to link")

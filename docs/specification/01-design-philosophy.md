@@ -8,16 +8,13 @@ order: 1
 
 # Design Goals and Philosophy
 
-================================================================================
-
 Pyrite is a compiled systems programming language designed to combine the 
 low-level power and performance of C with the readability and ease-of-use of 
 Python, while integrating the safety of Rust and the simplicity of Zig. 
 
 The core design goals of Pyrite are outlined below:
 
-1.1 Simplicity and Minimalism by Default
---------------------------------------------------------------------------------
+## 1.1 Simplicity and Minimalism by Default
 
 Pyrite's syntax and feature set are kept minimal and straightforward. A beginner 
 should find Pyrite easy to learn and read, akin to Python. Advanced features are 
@@ -29,8 +26,7 @@ This follows the Python philosophy that "Explicit is better than implicit" and
 constructs over "magic" or implicit behavior. There are no hidden surprises - 
 what the code looks like is exactly what it will do when executed.
 
-1.2 C-Level Performance, Zero Runtime Overhead
---------------------------------------------------------------------------------
+## 1.2 C-Level Performance, Zero Runtime Overhead
 
 Pyrite programs compile to efficient native machine code with performance on par 
 with C. Every high-level construct in the language is designed as a zero-cost 
@@ -50,8 +46,7 @@ introducing a GC, and emerging languages like Mojo have demonstrated that it is
 possible to achieve performance comparable to C++/Rust even with a high-level, 
 Pythonic syntax by relying on static typing and compile-time optimization.
 
-1.3 Memory Safety by Default (Manual Control Optional)
---------------------------------------------------------------------------------
+## 1.3 Memory Safety by Default (Manual Control Optional)
 
 A primary objective of Pyrite is to eliminate common memory bugs (buffer 
 overflows, use-after-free, null pointer dereferences, data races, etc.) at 
@@ -70,8 +65,7 @@ This provides an "escape hatch" for power users (much like Rust's unsafe blocks)
 while keeping safe code free of memory errors. In short, safe by default, unsafe 
 by choice.
 
-1.4 Pythonic, Readable Syntax
---------------------------------------------------------------------------------
+## 1.4 Pythonic, Readable Syntax
 
 Pyrite's syntax is heavily influenced by Python to lower the barrier to entry for 
 beginners. Code uses indentation for blocks (significant whitespace) instead of 
@@ -85,8 +79,7 @@ the Zen of Python's maxim that "Readability counts." At the same time, the synta
 has been adapted to a statically-typed, compiled context in a way that feels 
 natural and intuitive for systems programming.
 
-1.5 Intuitive Memory Model for Learners
---------------------------------------------------------------------------------
+## 1.5 Intuitive Memory Model for Learners
 
 Pyrite is designed to make low-level concepts like memory allocation, lifetimes, 
 and data structure performance characteristics as transparent as possible, so 
@@ -108,8 +101,7 @@ can intuitively learn how memory management works (whether via an ownership
 system or via manual malloc/free), and can develop a performance intuition from 
 the start.
 
-1.6 Complete Systems Programming Capabilities
---------------------------------------------------------------------------------
+## 1.6 Complete Systems Programming Capabilities
 
 Pyrite is intended as a "do-anything" systems language. Anything you can do in 
 C, you can do in Pyrite. This includes low-level hardware manipulation in 
@@ -133,8 +125,7 @@ friction. (Interoperability is considered so important that Pyrite is designed t
 make conforming to the C ABI straightforward, similar to Zig's approach of 
 treating C interop as a first-class requirement.)
 
-1.7 Modern Features, Optional Complexity
---------------------------------------------------------------------------------
+## 1.7 Modern Features, Optional Complexity
 
 While keeping the core language simple, Pyrite doesn't shy away from powerful 
 features that improve safety or developer ergonomics - it simply makes them 
@@ -167,8 +158,7 @@ Rust's strong safety guarantees without needing a garbage collector, Python's
 elegant syntax and philosophy, and Zig's emphasis on explicit control - in one 
 unified toolset.
 
-1.8 Core Language Subset for Learning
---------------------------------------------------------------------------------
+## 1.8 Core Language Subset for Learning
 
 To support Pyrite's goal of being approachable to beginners while remaining 
 powerful for experts, the language defines a semantic "Core" subset. This is NOT 
@@ -181,69 +171,83 @@ a separate syntax or dialect, but rather a well-defined subset of features that:
   language fragmentation
 
 The Core subset philosophy:
-  - Forbids or warns about advanced features: unsafe blocks, manual allocators, 
-    complex lifetime annotations, advanced generic patterns
-  - Includes all fundamental features: basic types, structs, enums, pattern 
-    matching, ownership/borrowing basics, standard collections, defer, with
-  - Enables real systems programming: Core code is production-ready, not a toy
-  - Grows with the programmer: Code written in Core remains valid as developers 
-    adopt advanced features
+
+- Forbids or warns about advanced features: unsafe blocks, manual allocators, 
+  complex lifetime annotations, advanced generic patterns
+
+- Includes all fundamental features: basic types, structs, enums, pattern 
+  matching, ownership/borrowing basics, standard collections, defer, with
+
+- Enables real systems programming: Core code is production-ready, not a toy
+
+- Grows with the programmer: Code written in Core remains valid as developers 
+  adopt advanced features
 
 This is implemented through:
-  • Compiler mode: pyritec --core-only rejects advanced features
-  • Linter levels: quarry lint --beginner warns about complexity
-  • Standard library tiers: core:: namespace vs std:: full library
-  • Documentation paths: "Core Pyrite" learning track vs full language reference
+
+- Compiler mode: forge --core-only rejects advanced features
+
+- Linter levels: quarry lint --beginner warns about complexity
+
+- Standard library tiers: core:: namespace vs std:: full library
+
+- Documentation paths: "Core Pyrite" learning track vs full language reference
 
 By keeping Core as a semantic subset rather than syntactic variation, developers 
 learn "real Pyrite" from day one, and all code remains compatible as skills 
 advance. This avoids ecosystem fragmentation while maintaining approachability.
 
-1.9 Target Audiences
---------------------------------------------------------------------------------
+## 1.9 Target Audiences
 
 Pyrite is optimized primarily for **Python-first beginners with systems 
 programming aspirations**, with a strong secondary audience of **Rust-curious 
 developers seeking an easier path** to systems programming.
 
-Primary Audience: Python Beginners
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Primary Audience: Python Beginners
 
 These developers know Python's syntax and philosophy, but need:
-  • C-level performance without C-level complexity
-  • Understanding of memory management and performance
-  • Type safety and compile-time error catching
-  • Ability to write OS kernels, embedded systems, game engines
+
+- C-level performance without C-level complexity
+
+- Understanding of memory management and performance
+
+- Type safety and compile-time error catching
+
+- Ability to write OS kernels, embedded systems, game engines
 
 Pyrite's Pythonic syntax, explicit design, and teaching compiler make systems 
 concepts accessible to this audience.
 
-Secondary Audience: Rust-Curious Developers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Secondary Audience: Rust-Curious Developers
 
 Developers who bounced off Rust's learning curve but appreciate its goals:
-  • Already understand the value of ownership and memory safety
-  • Found Rust's syntax or borrow checker too complex initially
-  • Want the same safety guarantees with gentler onboarding
-  • Appreciate Rust's performance but need faster productivity
+
+- Already understand the value of ownership and memory safety
+
+- Found Rust's syntax or borrow checker too complex initially
+
+- Want the same safety guarantees with gentler onboarding
+
+- Appreciate Rust's performance but need faster productivity
 
 Pyrite offers the same safety model with more familiar syntax and better 
 pedagogical tooling (auto-fix, visual diagrams, explicit-by-default).
 
-Design Tradeoff Philosophy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Design Tradeoff Philosophy
 
 When design decisions conflict between audiences, favor beginners. However, 
 never alienate Rust-familiar developers:
-  • Keep &str working alongside Text alias
-  • Ownership model identical to Rust (familiar to experts)
-  • Advanced features available but optional (growth path)
+
+- Keep &str working alongside Text alias
+
+- Ownership model identical to Rust (familiar to experts)
+
+- Advanced features available but optional (growth path)
 
 This ensures beginners get gentle onboarding while experts don't feel 
 the language has been oversimplified at their expense.
 
-1.10 Ultimate Vision
---------------------------------------------------------------------------------
+## 1.10 Ultimate Vision
 
 Pyrite's ultimate goal is to become one of the most widely adopted and desired 
 programming languages of its era - the kind of language that consistently ranks 
@@ -267,15 +271,13 @@ The following sections provide a thorough specification of Pyrite's syntax,
 semantics, and features - detailed enough to serve as a foundation for 
 implementing a compiler and using the language effectively.
 
-1.11 Unique Differentiators: What Makes Pyrite Special
---------------------------------------------------------------------------------
+## 1.11 Unique Differentiators: What Makes Pyrite Special
 
 Pyrite combines proven ideas from multiple languages, but adds distinctive features 
 that few other systems languages provide in combination. This section highlights the 
 distinctive capabilities that position Pyrite to achieve widespread developer adoption.
 
-Features No Other Systems Language Has
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Features No Other Systems Language Has
 
 1. **Interactive REPL with Ownership Visualization (Section 8.7)**
    - Real-time ownership state displayed as you type
@@ -325,42 +327,59 @@ Features No Other Systems Language Has
    - First systems language with ownership + contracts + performance contracts
    - Enables highest safety certification levels
 
-Features That Match Best-in-Class (Competitive Parity)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Features That Match Best-in-Class (Competitive Parity)
 
-  • Memory safety (equal to Rust)
-  • Zero-cost abstractions (equal to Rust/C++)
-  • Compile-time evaluation (equal to Zig)
-  • Borrow checking (equal to Rust, better error messages)
-  • Cross-compilation (equal to Zig)
-  • Package manager (equal to Cargo)
-  • Fuzzing + sanitizers (equal to Rust/Go)
-  • Supply-chain security (equal to or better than Rust cargo-vet)
+- Memory safety (equal to Rust)
 
-Features That Exceed Competitors
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Zero-cost abstractions (equal to Rust/C++)
 
-  • **Learning curve:** Gentler than Rust (Pythonic syntax, interactive tools)
-  • **Error messages:** More visual than Rust (ownership flow diagrams)
-  • **Cost transparency:** More explicit than Zig (multi-level reporting)
-  • **Tooling integration:** More comprehensive than any competitor (50+ features)
-  • **Binary size tools:** Equal to Rust cargo bloat (critical for embedded)
-  • **Deterministic builds:** Equal to Rust (essential for security)
-  • **Formal semantics:** Better than Rust (mathematical specification)
+- Compile-time evaluation (equal to Zig)
 
-The "Most Admired" Formula
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Borrow checking (equal to Rust, better error messages)
+
+- Cross-compilation (equal to Zig)
+
+- Package manager (equal to Cargo)
+
+- Fuzzing + sanitizers (equal to Rust/Go)
+
+- Supply-chain security (equal to or better than Rust cargo-vet)
+
+### Features That Exceed Competitors
+
+- **Learning curve:** Gentler than Rust (Pythonic syntax, interactive tools)
+
+- **Error messages:** More visual than Rust (ownership flow diagrams)
+
+- **Cost transparency:** More explicit than Zig (multi-level reporting)
+
+- **Tooling integration:** More comprehensive than any competitor (50+ features)
+
+- **Binary size tools:** Equal to Rust cargo bloat (critical for embedded)
+
+- **Deterministic builds:** Equal to Rust (essential for security)
+
+- **Formal semantics:** Better than Rust (mathematical specification)
+
+### The "Most Admired" Formula
 
 Most languages excel in 2-3 dimensions. Pyrite excels in 8:
 
-  1. **Safety** → Ownership + contracts + formal verification
-  2. **Performance** → Zero-cost + profiling + optimization + energy
-  3. **Learning** → REPL + Playground + exercises + visual errors + native language
-  4. **Productivity** → Incremental builds + hot reload + auto-fix + great diagnostics
-  5. **Transparency** → Cost + size + energy + public metrics
-  6. **Security** → Audit + vet + sign + reproducible + formal methods
-  7. **Production** → Observability + testing + debugging + certification
-  8. **Global** → Internationalization + accessibility + evidence
+1. **Safety** → Ownership + contracts + formal verification
+
+2. **Performance** → Zero-cost + profiling + optimization + energy
+
+3. **Learning** → REPL + Playground + exercises + visual errors + native language
+
+4. **Productivity** → Incremental builds + hot reload + auto-fix + great diagnostics
+
+5. **Transparency** → Cost + size + energy + public metrics
+
+6. **Security** → Audit + vet + sign + reproducible + formal methods
+
+7. **Production** → Observability + testing + debugging + certification
+
+8. **Global** → Internationalization + accessibility + evidence
 
 This represents the difference between a good language and one that achieves 
 widespread developer adoption and satisfaction.
@@ -374,8 +393,7 @@ point, delivering every expected feature, and adding unique capabilities that
 competitors may not provide. Pyrite aims to match or exceed the best systems 
 languages while being more accessible.
 
-Quick Feature Comparison Matrix
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Quick Feature Comparison Matrix
 
 | Feature                        | Pyrite | Rust | Zig | C/C++ | Go  | Mojo |
 |--------------------------------|--------|------|-----|-------|-----|------|
@@ -417,11 +435,16 @@ Quick Feature Comparison Matrix
 | Dead code analysis             | Y      | 3rd  | N   | N     | N   | N    |
 
 **Legend:**
-  • Y = Built-in first-class feature (Yes)
-  • 3rd = Available through third-party tools
-  • P = Partial support or limited implementation
-  • N = Not available or not applicable (No)
-  • N/A = Concept doesn't apply (no ownership system)
+
+- Y = Built-in first-class feature (Yes)
+
+- 3rd = Available through third-party tools
+
+- P = Partial support or limited implementation
+
+- N = Not available or not applicable (No)
+
+- N/A = Concept doesn't apply (no ownership system)
 
 **Unique Features (8):** REPL with ownership viz, energy profiling, performance 
 lockfile, call-graph blame, contracts, formal semantics (comprehensive), 
@@ -433,14 +456,12 @@ compiler diagnostics, binary size tools
 **Result:** 8 distinctive features + 5 best-in-class capabilities + Pythonic syntax 
 = comprehensive differentiation strategy
 
-1.12 Getting Started: Developer Journey
---------------------------------------------------------------------------------
+## 1.12 Getting Started: Developer Journey
 
 To illustrate how all these features work together, here's the typical developer 
 journey from first install to production deployment.
 
-Day 1: Installation and First Program
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Day 1: Installation and First Program
 
     # Install Pyrite (single command)
     $ curl --sSf https://raw.githubusercontent.com/WulfHouse/Quarry/main/scripts/setup/install.sh | sh
@@ -460,8 +481,7 @@ Day 1: Installation and First Program
     >>> let data = List[int]([1, 2, 3])
     [Heap] [Move] Stack: 24B, Heap: 12B
 
-Week 1: Learning Ownership Interactively
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Week 1: Learning Ownership Interactively
 
     # Start interactive learning
     $ quarry learn ownership
@@ -475,8 +495,7 @@ Week 1: Learning Ownership Interactively
     >>> process(data)
     >>> data.length()  # See instant ownership error with visualization
 
-Week 2: First Real Project
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Week 2: First Real Project
 
     # Create project
     $ quarry new my-cli-tool
@@ -496,8 +515,7 @@ Week 2: First Real Project
     
     ✓ Fixed! Run 'quarry build' to verify.
 
-Week 3: Performance Optimization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Week 3: Performance Optimization
 
     # Profile the code
     $ quarry cost
@@ -514,8 +532,7 @@ Week 3: Performance Optimization
     $ quarry perf --check
     ✓ 15.3% faster than baseline
 
-Month 2: Production Deployment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Month 2: Production Deployment
 
     # Add dependencies
     $ quarry add http-server json
@@ -541,8 +558,7 @@ Month 2: Production Deployment
     
     # Deploy!
 
-Month 6: Embedded Project
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Month 6: Embedded Project
 
     # Target embedded device
     $ quarry new --embedded stm32-firmware
@@ -562,8 +578,7 @@ Month 6: Embedded Project
     # Flash to device
     $ quarry flash --target=stm32f4
 
-Year 1: Contributing to Ecosystem
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Year 1: Contributing to Ecosystem
 
     # Publish your library
     $ quarry publish my-awesome-lib
@@ -578,17 +593,22 @@ Year 1: Contributing to Ecosystem
     https://quarry.dev/metrics
     Ecosystem: 15,247 packages (+1 yours!)
 
-This Journey Demonstrates
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### This Journey Demonstrates
 
-  • **Day 1 productivity:** Write and run code immediately (script mode + REPL)
-  • **Week 1 learning:** Interactive tools teach ownership organically
-  • **Week 2 building:** Auto-fix removes friction, quarry just works
-  • **Week 3 optimizing:** Profiling + tuning make performance systematic
-  • **Month 2 production:** All production features built-in (observability, 
-    security, compliance)
-  • **Month 6 embedded:** Same language, different constraints, still safe
-  • **Year 1 ecosystem:** Contribute back, see impact, feel part of community
+- **Day 1 productivity:** Write and run code immediately (script mode + REPL)
+
+- **Week 1 learning:** Interactive tools teach ownership organically
+
+- **Week 2 building:** Auto-fix removes friction, quarry just works
+
+- **Week 3 optimizing:** Profiling + tuning make performance systematic
+
+- **Month 2 production:** All production features built-in (observability, 
+  security, compliance)
+
+- **Month 6 embedded:** Same language, different constraints, still safe
+
+- **Year 1 ecosystem:** Contribute back, see impact, feel part of community
 
 Every stage is supported by first-class tooling. No external dependencies, no 
 complex configuration requirements, no need to piece together solutions from 

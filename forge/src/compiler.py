@@ -350,7 +350,7 @@ def compile_source(source: str, filename: str = "<input>", output_path: Optional
 
 
 def main() -> int:
-    """Main entry point for pyritec compiler
+    """Main entry point for forge compiler
     
     Returns:
         Exit code (0 for success, non-zero for failure)

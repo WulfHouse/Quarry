@@ -40,6 +40,7 @@ for PATTERN in "${PROHIBITED_PATTERNS[@]}"; do
         --exclude=run_fast.sh \
         --exclude=install-hooks.sh \
         --exclude=README_COMMAND_POLICY.md \
+        --exclude=CHANGELOG.md \
         --exclude=*.log \
         --exclude=*.o \
         --exclude=*.exe \

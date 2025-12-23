@@ -5,7 +5,9 @@ This document lists language features, compiler capabilities, and toolchain feat
 ## Legend
 
 - ✅ **Supported**: Feature is fully implemented and proven to work
+
 - ⚠️ **Partial**: Feature is partially implemented (documented limitations apply)
+
 - ❌ **Not Supported**: Feature is explicitly absent or marked as TODO in repository
 
 ## Language Features
@@ -82,6 +84,20 @@ This document lists language features, compiler capabilities, and toolchain feat
 | Index access with range | ✅ | `test_parse_index_access_with_range()` |
 | Parameter closures (compile-time) | ✅ | `test_parse_parameter_closure()`, `forge/examples/basic/closures.pyrite` |
 | Runtime closures | ✅ | `test_parse_runtime_closure()`, `forge/examples/basic/closures.pyrite` |
+| Field assignment | ✅ | `forge/src/backend/codegen.py:885` |
+| Index assignment | ✅ | `forge/src/backend/codegen.py:951` |
+
+### Standard Library
+
+| Feature | Status | Evidence |
+|---------|--------|----------|
+| JSON parsing/serialization | ✅ | `pyrite/serialize/json.pyrite`, `tests/m10_json_test.pyrite` |
+| Tensor operations | ✅ | `pyrite/num/tensor.pyrite`, `tests/m10_tensor_test.pyrite` |
+| TCP Sockets | ✅ | `pyrite/net/tcp.pyrite`, `pyrite/net/socket.c` |
+| Generic List | ✅ | `pyrite/collections/list.pyrite`, `tests/m9_list_set_generic.pyrite` |
+| Generic Map | ✅ | `pyrite/collections/map.pyrite`, `tests/m9_map_generic.pyrite` |
+| Generic Set | ✅ | `pyrite/collections/set.pyrite`, `tests/m9_list_set_generic.pyrite` |
+| File I/O | ✅ | `pyrite/io/file.c`, `tests/test_write.pyrite` |
 
 ### Ownership and Borrowing
 
@@ -96,12 +112,10 @@ This document lists language features, compiler capabilities, and toolchain feat
 
 | Feature | Status | Evidence |
 |---------|--------|----------|
-| Enum variant field binding (ownership) | ⚠️ | `LIMITATIONS.md`: Partial, `src/middle/ownership.py:478` |
-| Iterator protocol | ⚠️ | `LIMITATIONS.md`: Partial, `src/middle/type_checker.py:783`, `src/backend/codegen.py:951` |
-| Result error propagation | ⚠️ | `LIMITATIONS.md`: Partial, `src/backend/codegen.py:1202` |
-| Compile-time parameters in type annotations | ❌ | `LIMITATIONS.md`: Not implemented, `src/backend/monomorphization.py:269` |
-| Field assignment | ❌ | `LIMITATIONS.md`: Not implemented, `src/backend/codegen.py:732` |
-| Index assignment | ❌ | `LIMITATIONS.md`: Not implemented, `src/backend/codegen.py:732` |
+| Enum variant field binding (ownership) | ⚠️ | `LIMITATIONS.md`: Partial, `forge/src/middle/ownership.py:478` |
+| Iterator protocol | ⚠️ | `LIMITATIONS.md`: Partial, `forge/src/middle/type_checker.py:783`, `forge/src/backend/codegen.py:951` |
+| Result error propagation | ⚠️ | `LIMITATIONS.md`: Partial, `forge/src/backend/codegen.py:1202` |
+| Compile-time parameters in type annotations | ❌ | `LIMITATIONS.md`: Not implemented, `forge/src/backend/monomorphization.py:269` |
 
 ## Compiler Features
 
@@ -142,37 +156,37 @@ This document lists language features, compiler capabilities, and toolchain feat
 
 | Feature | Status | Evidence |
 |---------|--------|----------|
-| Create new project (`new`) | ✅ | `forge/quarry/main.py:cmd_new()`, registered |
-| Build project (`build`) | ✅ | `forge/quarry/main.py:cmd_build()`, registered |
-| Run project (`run`) | ✅ | `forge/quarry/main.py:cmd_run()`, registered |
-| Clean artifacts (`clean`) | ✅ | `forge/quarry/main.py:cmd_clean()`, registered |
-| Run tests (`test`) | ✅ | `forge/quarry/main.py:cmd_test()`, registered |
+| Create new project (`new`) | ✅ | `quarry/main.py:cmd_new()`, registered |
+| Build project (`build`) | ✅ | `quarry/main.py:cmd_build()`, registered |
+| Run project (`run`) | ✅ | `quarry/main.py:cmd_run()`, registered |
+| Clean artifacts (`clean`) | ✅ | `quarry/main.py:cmd_clean()`, registered |
+| Run tests (`test`) | ✅ | `quarry/main.py:cmd_test()`, registered |
 
 ### Code Quality
 
 | Feature | Status | Evidence |
 |---------|--------|----------|
-| Format code (`fmt`) | ✅ | `forge/quarry/main.py:cmd_fmt()`, registered |
-| Auto-fix errors (`fix`) | ✅ | `forge/quarry/main.py:cmd_fix()`, registered |
+| Format code (`fmt`) | ✅ | `quarry/main.py:cmd_fmt()`, registered |
+| Auto-fix errors (`fix`) | ✅ | `quarry/main.py:cmd_fix()`, registered |
 
 ### Performance Analysis
 
 | Feature | Status | Evidence |
 |---------|--------|----------|
-| Cost analysis (`cost`) | ✅ | `forge/quarry/main.py:cmd_cost()`, registered |
-| Binary size analysis (`bloat`) | ✅ | `forge/quarry/main.py:cmd_bloat()`, registered |
-| Performance profiling (`perf`) | ✅ | `forge/quarry/main.py:cmd_perf()`, registered |
+| Cost analysis (`cost`) | ✅ | `quarry/main.py:cmd_cost()`, registered |
+| Binary size analysis (`bloat`) | ✅ | `quarry/main.py:cmd_bloat()`, registered |
+| Performance profiling (`perf`) | ✅ | `quarry/main.py:cmd_perf()`, registered |
 
 ### Dependency Management
 
 | Feature | Status | Evidence |
 |---------|--------|----------|
-| Resolve dependencies (`resolve`) | ✅ | `forge/quarry/main.py:cmd_resolve()`, registered |
-| Update dependencies (`update`) | ✅ | `forge/quarry/main.py:cmd_update()`, registered |
-| Install dependencies (`install`) | ✅ | `forge/quarry/main.py:cmd_install()`, registered |
-| Search packages (`search`) | ✅ | `forge/quarry/main.py:cmd_search()`, registered |
-| Package info (`info`) | ✅ | `forge/quarry/main.py:cmd_info()`, registered |
-| Publish package (`publish`) | ✅ | `forge/quarry/main.py:cmd_publish()`, registered |
+| Resolve dependencies (`resolve`) | ✅ | `quarry/main.py:cmd_resolve()`, registered |
+| Update dependencies (`update`) | ✅ | `quarry/main.py:cmd_update()`, registered |
+| Install dependencies (`install`) | ✅ | `quarry/main.py:cmd_install()`, registered |
+| Search packages (`search`) | ✅ | `quarry/main.py:cmd_search()`, registered |
+| Package info (`info`) | ✅ | `quarry/main.py:cmd_info()`, registered |
+| Publish package (`publish`) | ✅ | `quarry/main.py:cmd_publish()`, registered |
 
 ## Experimental Features
 
@@ -182,8 +196,12 @@ This document lists language features, compiler capabilities, and toolchain feat
 
 To validate feature claims:
 
-1. Check test files: `python tools/testing/pytest_fast.py`
+1. Check test files: `python tools/testing/pytest.py` (1794 tests collected)
+
 2. Check examples: `python tools/runtime/pyrite.py forge/examples/basic/<example>.pyrite`
+
 3. Check acceptance tests: `python tools/testing/pytest.py tests/acceptance/`
+
 4. Check limitations: `LIMITATIONS.md`
+
 5. Check code: Search for implementation in `forge/src/`

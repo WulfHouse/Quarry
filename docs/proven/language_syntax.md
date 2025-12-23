@@ -5,8 +5,11 @@ This document lists only syntax elements that are **proven** to be accepted by t
 ## Evidence Methodology
 
 Each syntax element listed here is backed by:
+
 - Passing parser tests in `forge/tests/frontend/test_parser.py`
+
 - Working examples in `forge/examples/basic/`
+
 - Acceptance tests in `tests/acceptance/`
 
 ## Functions
@@ -22,8 +25,11 @@ fn function_with_params(a: int, b: int) -> int:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_simple_function()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_function_with_params()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `forge/examples/basic/hello.pyrite`
 
 ### Function with Self Parameter
@@ -37,7 +43,9 @@ fn mutable_method(&mut self):
 ```
 
 **Evidence:**
+
 - Test: `test_parse_function_with_self_parameter()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_function_with_mutable_self()` in `forge/tests/frontend/test_parser.py`
 
 ### Generic Functions
@@ -50,7 +58,9 @@ fn max[T](a: T, b: T) -> T:
 ```
 
 **Evidence:**
+
 - Example: `forge/examples/basic/generics.pyrite`
+
 - Test: `test_parse_generic_type()` in `forge/tests/frontend/test_parser.py`
 
 ### Extern Functions
@@ -60,6 +70,7 @@ extern fn external_function(x: int) -> int
 ```
 
 **Evidence:**
+
 - Parser method: `parse_extern()` in `forge/src/frontend/parser.py:160`
 
 ## Variables
@@ -72,7 +83,9 @@ let name: String = "Pyrite"
 ```
 
 **Evidence:**
+
 - Test: `test_parse_let_statement()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `forge/examples/basic/simple.pyrite`
 
 ### Mutable Variable Declaration
@@ -83,6 +96,7 @@ var counter: int = 0
 ```
 
 **Evidence:**
+
 - Test: `test_parse_var_statement()` in `forge/tests/frontend/test_parser.py`
 
 ## Control Flow
@@ -97,6 +111,7 @@ else:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_if_statement()` in `forge/tests/frontend/test_parser.py`
 
 ### If Expression
@@ -106,6 +121,7 @@ let result = x if condition else y
 ```
 
 **Evidence:**
+
 - Test: `test_parse_if_expression()` in `forge/tests/frontend/test_parser.py`
 
 ### While Loop
@@ -116,6 +132,7 @@ while condition:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_while_loop()` in `forge/tests/frontend/test_parser.py`
 
 ### For Loop
@@ -126,6 +143,7 @@ for i in 0..10:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_for_loop()` in `forge/tests/frontend/test_parser.py`
 
 ### Match Statement
@@ -141,10 +159,15 @@ match value:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_match_statement()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_match_with_or_pattern()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_match_with_enum_pattern()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_match_with_wildcard_pattern()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `tests/acceptance/test5_match.pyrite`
 
 ### Break Statement
@@ -156,6 +179,7 @@ while True:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_break_statement()` in `forge/tests/frontend/test_parser.py`
 
 ### Continue Statement
@@ -167,6 +191,7 @@ while True:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_continue_statement()` in `forge/tests/frontend/test_parser.py`
 
 ### Return Statement
@@ -177,7 +202,9 @@ return value
 ```
 
 **Evidence:**
+
 - Test: `test_parse_return_with_value()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_return_without_value()` in `forge/tests/frontend/test_parser.py`
 
 ### Defer Statement
@@ -188,7 +215,9 @@ defer:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_defer_statement()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `tests/acceptance/test_defer.pyrite`
 
 ### With Statement
@@ -199,6 +228,7 @@ with resource:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_with_statement()` in `forge/tests/frontend/test_parser.py`
 
 ### Unsafe Block
@@ -209,6 +239,7 @@ unsafe:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_unsafe_block()` in `forge/tests/frontend/test_parser.py`
 
 ### Try Expression
@@ -218,6 +249,7 @@ let result = try operation()
 ```
 
 **Evidence:**
+
 - Test: `test_parse_try_expression()` in `forge/tests/frontend/test_parser.py`
 
 ## Types
@@ -231,6 +263,7 @@ let z: String = "hello"
 ```
 
 **Evidence:**
+
 - Used throughout parser tests and examples
 
 ### Reference Types
@@ -244,8 +277,11 @@ fn modify(x: &mut int):
 ```
 
 **Evidence:**
+
 - Test: `test_parse_reference_type()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_mutable_reference_type()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `forge/examples/basic/borrowing.pyrite`
 
 ### Pointer Types
@@ -258,7 +294,9 @@ let cp: *const int = ...
 
 **Evidence:**
 - Test: `test_parse_pointer_type()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_mutable_pointer_type()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_const_pointer_type()` in `forge/tests/frontend/test_parser.py`
 
 ### Array Types
@@ -268,6 +306,7 @@ let arr: [int; 10] = ...
 ```
 
 **Evidence:**
+
 - Test: `test_parse_array_type()` in `forge/tests/frontend/test_parser.py`
 
 ### Slice Types
@@ -277,6 +316,7 @@ let slice: [int] = ...
 ```
 
 **Evidence:**
+
 - Test: `test_parse_slice_type()` in `forge/tests/frontend/test_parser.py`
 
 ### Generic Types
@@ -287,8 +327,11 @@ let nested: Map[String, List[int]] = ...
 ```
 
 **Evidence:**
+
 - Test: `test_parse_generic_type()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_nested_generic_type()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `forge/examples/basic/generics.pyrite`
 
 ### Tuple Types
@@ -298,6 +341,7 @@ let pair: (int, String) = ...
 ```
 
 **Evidence:**
+
 - Test: `test_parse_tuple_type()` in `forge/tests/frontend/test_parser.py`
 
 ### Tuple Literals
@@ -308,7 +352,9 @@ let pair = ("hello", 42)
 ```
 
 **Evidence:**
+
 - Parser method: `parse_primary()` in `forge/src/frontend/parser.py:2006`
+
 - Codegen method: `gen_tuple_literal()` in `forge/src/backend/codegen.py:1573`
 
 ### Tuple Patterns in Variable Declarations
@@ -319,8 +365,11 @@ let (x, y, z) = get_tuple()
 ```
 
 **Evidence:**
+
 - Parser method: `parse_var_decl()` in `forge/src/frontend/parser.py:1152`
+
 - Type checker: `check_pattern()` in `forge/src/middle/type_checker.py:952`
+
 - Codegen: `gen_pattern_binding()` in `forge/src/backend/codegen.py:733`
 
 ### Function Types
@@ -330,6 +379,7 @@ let callback: fn(int) -> int = ...
 ```
 
 **Evidence:**
+
 - Test: `test_parse_function_type()` in `forge/tests/frontend/test_parser.py`
 
 ## Data Structures
@@ -343,7 +393,9 @@ struct Point:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_struct()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `forge/examples/basic/structs.pyrite`
 
 ### Struct Literal
@@ -353,7 +405,9 @@ let point = Point { x: 1, y: 2 }
 ```
 
 **Evidence:**
+
 - Test: `test_parse_struct_literal()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `forge/examples/basic/structs.pyrite`
 
 ### Enum Definition
@@ -365,8 +419,11 @@ enum Option[T]:
 ```
 
 **Evidence:**
+
 - Test: `test_parse_enum()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_enum_variant_with_none()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `forge/examples/basic/enums.pyrite`
 
 ### Trait Definition
@@ -377,6 +434,7 @@ trait Display:
 ```
 
 **Evidence:**
+
 - Parser method: `parse_trait()` in `forge/src/frontend/parser.py:597`
 
 ### Implementation Block
@@ -388,7 +446,9 @@ impl Display for Point:
 ```
 
 **Evidence:**
+
 - Parser method: `parse_impl()` in `forge/src/frontend/parser.py:690`
+
 - Test: `test_parse_function_after_impl()` in `forge/tests/frontend/test_parser.py`
 
 ### Opaque Type
@@ -398,7 +458,9 @@ opaque type Handle;
 ```
 
 **Evidence:**
+
 - Test: `test_parse_opaque_type()` in `forge/tests/frontend/test_parser.py`
+
 - Parser method: `parse_opaque_type()` in `forge/src/frontend/parser.py:846`
 
 ### Const Declaration
@@ -408,6 +470,7 @@ const MAX_SIZE: int = 100
 ```
 
 **Evidence:**
+
 - Parser method: `parse_const()` in `forge/src/frontend/parser.py:823`
 
 ## Expressions
@@ -422,7 +485,9 @@ let list_lit = [1, 2, 3]
 ```
 
 **Evidence:**
+
 - Test: `test_parse_list_literal()` in `forge/tests/frontend/test_parser.py`
+
 - Used throughout examples
 
 ### Binary Operations
@@ -434,7 +499,9 @@ let comparison = a > b
 ```
 
 **Evidence:**
+
 - Test: `test_parse_binary_op()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `tests/acceptance/test6_arithmetic.pyrite`
 
 ### Function Calls
@@ -444,7 +511,9 @@ print("hello", "world")
 ```
 
 **Evidence:**
+
 - Test: `test_parse_function_call()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `forge/examples/basic/hello.pyrite`
 
 ### Method Calls
@@ -454,6 +523,7 @@ list.push(42)
 ```
 
 **Evidence:**
+
 - Test: `test_parse_method_call()` in `forge/tests/frontend/test_parser.py`
 
 ### Field Access
@@ -463,7 +533,9 @@ let x = point.x
 ```
 
 **Evidence:**
+
 - Test: `test_parse_field_access()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `forge/examples/basic/structs.pyrite`
 
 ### Index Access
@@ -474,9 +546,27 @@ let slice = array[0..10]
 ```
 
 **Evidence:**
+
 - Test: `test_parse_index_access()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_index_access_with_range()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `tests/acceptance/test8_arrays.pyrite`
+
+### Field and Index Assignment
+
+```pyrite
+point.x = 42
+list[0] = 100
+```
+
+**Evidence:**
+
+- Codegen: `gen_field_assignment()` in `forge/src/backend/codegen.py:885`
+
+- Codegen: `gen_index_assignment()` in `forge/src/backend/codegen.py:951`
+
+- Test: `tests/m9_map_local.pyrite` (exercises field/index access)
 
 ## Closures
 
@@ -487,7 +577,9 @@ let closure = fn[x: int] -> int: x * 2
 ```
 
 **Evidence:**
+
 - Test: `test_parse_parameter_closure()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `forge/examples/basic/closures.pyrite`
 
 ### Runtime Closures
@@ -497,7 +589,9 @@ let closure = fn(x: int) -> int: x * 2
 ```
 
 **Evidence:**
+
 - Test: `test_parse_runtime_closure()` in `forge/tests/frontend/test_parser.py`
+
 - Example: `forge/examples/basic/closures.pyrite`
 
 ## Modules
@@ -510,8 +604,11 @@ import std::collections as coll
 ```
 
 **Evidence:**
+
 - Test: `test_parse_import()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_import_with_alias()` in `forge/tests/frontend/test_parser.py`
+
 - Test: `test_parse_program_with_only_imports()` in `forge/tests/frontend/test_parser.py`
 
 ## Known Limitations
@@ -525,5 +622,7 @@ The following syntax elements are **not** fully implemented (see `LIMITATIONS.md
 To validate syntax claims:
 
 1. Run parser tests: `python tools/testing/pytest_fast.py forge/tests/frontend/test_parser.py`
+
 2. Try examples: `python tools/runtime/pyrite.py forge/examples/basic/<example>.pyrite`
+
 3. Check acceptance tests: `python tools/testing/pytest.py tests/acceptance/`

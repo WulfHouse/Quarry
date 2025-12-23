@@ -6,8 +6,6 @@ order: 6
 
 # Control Flow
 
-================================================================================
-
 Pyrite's control flow structures combine Python's simplicity with C's low-level 
 capabilities. All the usual constructs are present (conditionals, loops, pattern 
 matching, etc.) with a syntax leaning towards Python's readability. There are 
@@ -48,8 +46,7 @@ syntax for familiarity.
 
 Pyrite provides both while loops and for loops.
 
-While Loop
-~~~~~~~~~~
+### While Loop
 
 The syntax is straightforward:
 
@@ -63,8 +60,7 @@ loop. Inside the loop, you can use break to immediately exit the loop, or
 continue to skip to the next iteration (re-checking the condition). This works 
 just like in C/Python.
 
-For Loop
-~~~~~~~~
+### For Loop
 
 Instead of C's traditional for (init; cond; step) loop, Pyrite adopts a 
 high-level iteration loop similar to Python's for ... in .... The Pyrite for loop 
@@ -225,8 +221,7 @@ You can use `_` (wildcard) to handle all remaining cases:
 6.4 Function Calls and Operators
 --------------------------------------------------------------------------------
 
-Function Calls
-~~~~~~~~~~~~~~
+### Function Calls
 
 Functions are called using parentheses and a comma-separated list of arguments, 
 just like in most languages. Example: result = foo(a, b). There's no quirk like 
@@ -236,8 +231,7 @@ straightforward. Pyrite supports positional arguments and may support keyword
 arguments for functions (to improve readability for some calls), though that's a 
 design choice beyond the core syntax.
 
-Expressions and Operators
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Expressions and Operators
 
 Pyrite supports the typical arithmetic and comparison operators: +, -, *, /, % 
 for arithmetic; ==, !=, <, <=, >, >= for comparisons. Operator precedence is 
@@ -263,8 +257,7 @@ ensures that, for example, a + b is always O(1) for fundamental types and won't
 secretly do something like allocate memory or call a complex routine without the 
 programmer realizing it.
 
-Order of Evaluation
-~~~~~~~~~~~~~~~~~~~
+### Order of Evaluation
 
 Pyrite guarantees left-to-right evaluation order for all expressions and function 
 arguments. This eliminates an entire class of undefined behavior present in C/C++ 
@@ -304,8 +297,7 @@ C++). Instead, Pyrite encourages the use of result types (like the `Result[T, E]
 enum described earlier) and provides syntactic sugar to make handling them 
 ergonomic. This approach is influenced by Rust and Zig.
 
-Result Type
-~~~~~~~~~~~
+### Result Type
 
 If a function can fail (for example, a function that reads a file might fail if 
 the file is not found), the function's return type is a `Result[T, E]`. For 
@@ -317,8 +309,7 @@ The caller of such a function is forced by the type system to handle the
 possibility of error - either by checking which variant it is (via pattern 
 matching or an if), or by propagating the error upward.
 
-The ? Operator
-~~~~~~~~~~~~~~
+### The ? Operator
 
 To avoid boilerplate when you have many fallible calls, Pyrite provides the `?` 
 operator (similar to Rust's `?`). The `?` operator performs early return on 
@@ -349,8 +340,7 @@ none of the hidden cost or control flow issues (you can statically see which
 functions may return errors by their type, and there's no unwinding at runtime - 
 it's just code that checks and returns).
 
-Explicit Error Handling with match
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Explicit Error Handling with match
 
 If a function wants to handle errors instead of propagating, it can use `match` 
 to inspect the `Result`:
@@ -364,8 +354,7 @@ to inspect the `Result`:
                 print("Could not open file:", e)
                 Err(e)  # or handle it somehow and return Ok(())
 
-Optional: try/catch Sugar
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Optional: try/catch Sugar
 
 For Python familiarity, Pyrite may provide `try`/`catch` syntax as sugar over 
 `Result` types. This would be compile-time desugaring, not exception-based:
@@ -393,8 +382,7 @@ For Python familiarity, Pyrite may provide `try`/`catch` syntax as sugar over
 `Result` types. There are no true exceptions in Pyrite - all error handling is 
 explicit and type-checked at compile time.
 
-No Exceptions
-~~~~~~~~~~~~~
+### No Exceptions
 
 By not having language-level exceptions, Pyrite avoids the pitfalls of hidden 
 control flow (where any function call might throw and skip the rest of your code 
@@ -410,8 +398,7 @@ explicitly propagate or handle the error. There is talk of possibly a catch
 expression that can wrap a whole block and turn any error into a result, but that 
 would just be a convenience that expands to checking each result.
 
-Defer Statement
-~~~~~~~~~~~~~~~
+### Defer Statement
 
 For cases where you need to guarantee code runs at scope exit (regardless of 
 error or return path), Pyrite provides a defer statement (inspired by Go and Zig). 
@@ -470,8 +457,7 @@ Note: defer is part of Core Pyrite - it's simple enough for beginners and powerf
 enough for systems programming. While RAII handles most cleanup, defer provides 
 an escape hatch for cases where ownership-based cleanup is awkward.
 
-With Statement
-~~~~~~~~~~~~~~
+### With Statement
 
 To provide familiar resource management patterns for Python developers, Pyrite 
 includes a with statement that desugars to try + defer at compile time. This is 

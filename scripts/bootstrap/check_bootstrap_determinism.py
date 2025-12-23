@@ -116,11 +116,11 @@ def check_determinism(strict: bool = False):
     
     # Check both stages exist
     if sys.platform == "win32":
-        stage1_exe = stage1_dir / "pyritec.exe"
-        stage2_exe = stage2_dir / "pyritec.exe"
+        stage1_exe = stage1_dir / "forge.exe"
+        stage2_exe = stage2_dir / "forge.exe"
     else:
-        stage1_exe = stage1_dir / "pyritec"
-        stage2_exe = stage2_dir / "pyritec"
+        stage1_exe = stage1_dir / "forge"
+        stage2_exe = stage2_dir / "forge"
     
     if not stage1_exe.exists():
         print("ERROR: Stage1 compiler not found")

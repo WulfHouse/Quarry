@@ -68,9 +68,9 @@ def build_stage2():
     
     # Check Stage1 exists
     print("\n[1/5] Verifying Stage1 compiler...")
-    stage1_exe = stage1_dir / "pyritec"
+    stage1_exe = stage1_dir / "forge"
     if sys.platform == "win32":
-        stage1_exe = stage1_dir / "pyritec.exe"
+        stage1_exe = stage1_dir / "forge.exe"
     if not stage1_exe.exists():
         print(f"ERROR: Stage1 compiler not found at {stage1_exe}")
         print("  Run bootstrap_stage1.py first")
@@ -159,9 +159,9 @@ def build_stage2():
     # Link executable
     print("\n[5/5] Linking Stage2 executable...")
     link_start = time.time()
-    stage2_exe = stage2_dir / "pyritec"
+    stage2_exe = stage2_dir / "forge"
     if sys.platform == "win32":
-        stage2_exe = stage2_dir / "pyritec.exe"
+        stage2_exe = stage2_dir / "forge.exe"
     
     if not object_files:
         print("  [WARN] No object files to link")

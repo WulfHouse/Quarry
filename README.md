@@ -1,27 +1,33 @@
 # Quarry - Pyrite SDK
 
-> **⚠️ ALPHA v1.0 STATUS**
+> **⚠️ ALPHA v1.1 STATUS**
 > 
-> This project is currently in **Alpha v1.0**. All repository content, including code, documentation, APIs, and specifications, is subject to change and may contain inconsistencies as development progresses toward Beta v1.0. Use at your own discretion.
+> This project is currently in **Alpha v1.1**. All repository content, including code, documentation, APIs, and specifications, is subject to change and may contain inconsistencies as development progresses toward Beta v1.0. Use at your own discretion.
 
-**Quarry** is the official SDK for the **Pyrite** programming language. This repository contains the Quarry SDK (currently in Alpha v1.0), including **Forge** (the Pyrite compiler), build system, package manager, language server, and development tools.
+**Quarry** is the official SDK for the **Pyrite** programming language. This repository contains the Quarry SDK (currently in Alpha v1.1), including **Forge** (the Pyrite compiler), build system, package manager, language server, and development tools.
 
 **Pyrite** is a compiled systems programming language designed to combine the low-level power and performance of C with the readability and ease-of-use of Python, while integrating the safety of Rust and the simplicity of Zig.
 
 **Created by Alexander Rose Wulf** (also known as **Aeowulf** and **WulfHouse**)
 
-*Conceptualized: December 12, 2025*
+*Latest Release: December 23, 2025 (Alpha v1.1)*
 
-*Published: December 22, 2025*
+*Initial Release: December 22, 2025 (Alpha v1.0)*
+
+*Conceptualized: December 12, 2025*
 
 ## Overview
 
 **Pyrite** is a memory-safe systems programming language that compiles to native machine code via LLVM. It features:
 
 - **Python-like syntax** - Easy to read and write
+
 - **C-level performance** - Zero runtime overhead
+
 - **Memory safety** - Ownership and borrowing system inspired by Rust
+
 - **Simple and explicit** - No hidden surprises, minimal magic
+
 - **Self-hosting compiler** - Forge is being rewritten in Pyrite itself (in progress)
 
 ## Quick Start
@@ -240,11 +246,17 @@ pyrite/
 **Quarry** is the official Pyrite SDK, including:
 
 - **Forge** - The Pyrite compiler (compiles Pyrite source code to LLVM IR and native machine code)
+
 - **Build System and Package Manager** - Incremental compilation, dependency management
+
 - **Auto-Fix System** - Automatically fix common errors
+
 - **Performance Analysis** - Cost transparency and profiling
+
 - **Binary Size Analysis** - Understand what's consuming space
+
 - **Language Server Protocol (LSP)** - IDE support
+
 - **Development Tools** - Tools as specified in the SSOT (see LIMITATIONS.md for implementation status)
 
 See `quarry/README.md` for details.
@@ -252,15 +264,21 @@ See `quarry/README.md` for details.
 ### Forge Compiler Stages
 
 - **Stage0 (Python)**: Forge implementation in Python (`forge/src/`)
+
 - **Stage1 (Pyrite)**: Forge compiled by Stage0 (`build/bootstrap/stage1/`)
+
 - **Stage2 (Pyrite)**: Forge compiled by Stage1 (`build/bootstrap/stage2/`)
 
 ### Language Server
 
 The Quarry LSP server provides IDE support for Pyrite:
+
 - Syntax highlighting
+
 - Error diagnostics
+
 - Code completion
+
 - Hover information
 
 ## Development Workflow
@@ -343,13 +361,17 @@ python tools/coverage/find_dead_code.py
 ## Configuration Files
 
 - **`pyproject.toml`**: Python project configuration (dependencies, pytest, coverage)
+
 - **`.coveragerc`**: Coverage.py configuration (backup to pyproject.toml)
+
 - **`.gitignore`**: Git ignore rules
 
 ## Documentation
 
 - **Language Specification**: `docs/SSOT.md` - Aspirational specification and vision (may not reflect current implementation)
+
 - **Bootstrap Guide**: `docs/bootstrap.md` - How to bootstrap Forge
+
 - **Quarry SDK**: `quarry/README.md` - Quarry build system and package manager documentation
 
 ## Contributing
@@ -357,19 +379,29 @@ python tools/coverage/find_dead_code.py
 ### Code Organization
 
 This repository contains the Quarry SDK (in alpha):
+
 - **Forge compiler source**: `forge/src/` (Python) and `forge/src-pyrite/` (Pyrite)
+
 - **Quarry build system**: `quarry/` (top-level) - Build system and package manager
+
 - **Standard library**: `pyrite/` (top-level) - Language-facing artifacts
+
 - **Language Server**: `forge/lsp/` - LSP implementation
+
 - **Tests**: `forge/tests/` (unit tests) and `tests/` (integration/acceptance)
+
 - **Tools**: `tools/` organized by purpose (coverage, testing, build, runtime, utils)
+
 - **Scripts**: `scripts/` organized by purpose (bootstrap, diagnostics, setup, utils)
 
 ### Build Artifacts
 
 All build artifacts are in `build/` and can be safely deleted:
+
 - `build/bootstrap/` - Bootstrap compiler artifacts
+
 - `build/.coverage` - Coverage data
+
 - `build/coverage.json` - Coverage reports
 
 ### Logs
@@ -378,7 +410,7 @@ Developer execution logs are in `.logs/` directory.
 
 ## Authors
 
-- **Alexander Rose Wulf** (also known as **Aeowulf** and **WulfHouse**) - Creator and original developer
+- **Alexander Rose Wulf** (also known as **Aeowulf** and **WulfHouse**) - Creator, director, and supervisor
 
 See [AUTHORS.md](AUTHORS.md) for complete authorship information, including contributors and alpha testers.
 
@@ -388,29 +420,41 @@ This project is licensed under the **WulfHouse Source-Available Non-Compete Lice
 
 **Note:** This is a source-available license, not an OSI-approved open-source license. It allows use, modification, and distribution for non-competing purposes, but restricts commercialization and competing uses of the toolchain itself. Code you build *with* Pyrite (Output) is unrestricted. See [LICENSE.md](LICENSE.md) for full terms.
 
-Copyright (c) 2025 Alexander Rose Wulf (Aeowulf/WulfHouse)
+Copyright © 2025 Alexander Rose Wulf (Aeowulf/WulfHouse)
 
 ## Legal Documents and Policies
 
 This project is governed by the following legal documents:
 
 - **[LICENSE.md](LICENSE.md)** - WulfHouse Source-Available Non-Compete License (WSANCL) v1.0
+
   - Governs use, modification, and distribution of the source code
+
   - Defines competing vs non-competing use restrictions
+
   - Code you build *with* Pyrite (Output) is unrestricted
 
 - **[CONTRIBUTOR_AGREEMENT.md](CONTRIBUTOR_AGREEMENT.md)** - Pull Request Contributor Agreement (PRCA)
+
   - Applies when you submit contributions (pull requests, commits, etc.)
+  
   - Grants copyright and patent licenses to WulfHouse
+
   - Automatically accepted when you submit a contribution
 
 - **[TRADEMARK_POLICY.md](TRADEMARK_POLICY.md)** - WulfHouse Trademark Policy
   - Governs use of trademarks: WulfHouse, Pyrite, Quarry, and Forge
+
   - Defines what is allowed vs prohibited for third-party projects
+  
   - **For third-party projects**: If you create tools, libraries, or services related to Pyrite/Quarry, you must follow the trademark policy and include appropriate disclaimers. See Section 6 of the trademark policy for required disclaimers.
 
 ## Links
 
 - **Language Specification**: See `docs/SSOT.md` (modular) or `docs/specification/` for individual modules
+
   - **⚠️ Important:** The SSOT is a **high-level master specification overview** and **hypothetical wishlist** for what the project is intended to eventually become. It may not accurately convey the current state of the project and monorepo. See [docs/SSOT_DISCLAIMER.md](docs/SSOT_DISCLAIMER.md) and [LIMITATIONS.md](LIMITATIONS.md) for what's actually implemented.
+  
+  - **Explicit Full Technical Specifications**: The complete technical, itemized specifications are in [`technical-ssot.md`](technical-ssot.md), which provides a zero-to-final map of every feature with detailed implementation guidance.
+
 - **Quarry SDK**: See `quarry/README.md` for build system and package manager

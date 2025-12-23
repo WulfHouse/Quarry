@@ -6,8 +6,6 @@ order: 5
 
 # Memory Management and Ownership
 
-================================================================================
-
 One of Pyrite's cornerstone features is its approach to memory management: 
 memory-safe by default with the ability to manually manage memory when necessary, 
 all achieved without a garbage collector or runtime penalty. This section details 
@@ -25,8 +23,7 @@ The key idea is that every value in Pyrite is owned by some variable (or
 temporary), or is borrowed from one. There is always a clear owner responsible 
 for freeing the value when it's no longer needed.
 
-Resource Ownership
-~~~~~~~~~~~~~~~~~~
+### Resource Ownership
 
 When we say a variable owns an object, it means that variable is responsible for 
 the object's lifetime. For stack-allocated values (those without an explicit heap 
@@ -42,8 +39,7 @@ RAII in C++ and is how Rust's ownership model works as well. In practical terms,
 the Pyrite compiler will automatically insert calls to destructors or free 
 functions at the end of scope for owned objects.
 
-Moves and Scope-Based Destruction
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Moves and Scope-Based Destruction
 
 As mentioned in the type system, when an owning variable goes out of scope, 
 Pyrite ensures the resource it owns is freed exactly once. For example, consider:
@@ -68,8 +64,7 @@ longer than the scope in which it's created, you must explicitly move it to an
 outer scope (e.g. by returning it from a function or assigning it to a variable 
 in an enclosing scope).
 
-Transfer of Ownership (Move semantics)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Transfer of Ownership (Move semantics)
 
 Ownership can be transferred by moving values between variables or across 
 function calls. In Pyrite, assigning an object to a new variable or passing it as 
@@ -101,8 +96,7 @@ double-free) and also prevent use-after-free: once a value is moved, any attempt
 to use the old handle is a compile-time error, so you can't accidentally use an 
 object after it's been freed.
 
-Borrowing (References)
-~~~~~~~~~~~~~~~~~~~~~~~
+### Borrowing (References)
 
 Often, you don't want to transfer ownership but merely lend access to some data 
 to a function or another part of code. This is where borrowing comes in. Instead 
@@ -164,8 +158,7 @@ This prevents concurrent mutation issues. Data races (unsynchronized concurrent
 writes) are eliminated in safe Pyrite because you simply can't alias mutable 
 references.
 
-Lifetimes (under the hood)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Lifetimes (under the hood)
 
 Pyrite's compiler uses a concept of lifetimes (much like Rust) to reason about 
 how long references are valid. However, the goal is to keep this implicit for 
@@ -210,8 +203,7 @@ Crucially, unsafe operations are explicitly marked and isolated so that the
 boundaries between safe and unsafe code are clear. Safe code cannot be 
 compromised by unsafe code unless you explicitly opt into it.
 
-Unsafe Blocks
-~~~~~~~~~~~~~
+### Unsafe Blocks
 
 To perform an operation that the compiler cannot verify as safe, you must enclose 
 it in an unsafe block (or be inside an unsafe fn). This signals to the compiler 
@@ -252,8 +244,7 @@ operations that are otherwise disallowed (like raw pointer dereference or callin
 an unsafe function). This means even inside unsafe, you get as much help from the 
 compiler as possible.
 
-Explicit Allocation/Free
-~~~~~~~~~~~~~~~~~~~~~~~~
+### Explicit Allocation/Free
 
 Pyrite's standard library will likely include functions analogous to C's malloc, 
 free, and realloc for raw memory management (or it will allow you to call C's 
@@ -271,8 +262,7 @@ write portions of a Rust library in unsafe internally but present a safe
 interface). This way the majority of the codebase remains safe Pyrite, and only a 
 tiny core is unsafe.
 
-Unsafe Data Structures and Type Punning
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Unsafe Data Structures and Type Punning
 
 In some low-level scenarios, you may need to reinterpret bits of memory in a 
 different type (type punning), or use a union to overlay different 
@@ -289,8 +279,7 @@ undefined behavior (and thus must be kept within unsafe and done correctly)
 include things like dereferencing invalid pointers, misaligning data, creating 
 data races, etc., similar to Rust's model of what's not allowed even in unsafe.
 
-Opting Out of the Borrow Checker
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Opting Out of the Borrow Checker
 
 There are cases where you might need to circumvent the borrowing rules. For 
 example, you might have an API that requires two mutable pointers to the same 

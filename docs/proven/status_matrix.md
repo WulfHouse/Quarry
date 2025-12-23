@@ -29,8 +29,10 @@ Compact reference table: area → supported? → evidence pointer.
 | Closures (parameter) | ✅ | `test_parse_parameter_closure()`, `forge/examples/basic/closures.pyrite` |
 | Closures (runtime) | ✅ | `test_parse_runtime_closure()`, `forge/examples/basic/closures.pyrite` |
 | Generics | ✅ | `forge/examples/basic/generics.pyrite`, `tests/acceptance/test_monomorphization.pyrite` |
-| Tuple literals | ❌ | `LIMITATIONS.md` |
-| Tuple destructuring | ❌ | `LIMITATIONS.md` |
+| Tuple literals | ✅ | `LIMITATIONS.md` |
+| Tuple destructuring | ✅ | `LIMITATIONS.md` |
+| Field assignment | ✅ | `forge/src/backend/codegen.py:885` |
+| Index assignment | ✅ | `forge/src/backend/codegen.py:951` |
 | Iterator protocol | ⚠️ | `LIMITATIONS.md`: Partial |
 
 ## Compiler Features
@@ -71,6 +73,17 @@ Compact reference table: area → supported? → evidence pointer.
 | `info` | ✅ | `forge/quarry/main.py:cmd_info()`, registered |
 | `publish` | ✅ | `forge/quarry/main.py:cmd_publish()`, registered |
 
+## Standard Library
+
+| Area | Supported? | Evidence |
+|------|------------|----------|
+| JSON | ✅ | `pyrite/serialize/json.pyrite` |
+| Tensors | ✅ | `pyrite/num/tensor.pyrite` |
+| Sockets/TCP | ✅ | `pyrite/net/tcp.pyrite` |
+| List (Generic) | ✅ | `pyrite/collections/list.pyrite` |
+| Map (Generic) | ✅ | `pyrite/collections/map.pyrite` |
+| Set (Generic) | ✅ | `pyrite/collections/set.pyrite` |
+
 ## Experimental
 
 | Feature | Status | Evidence |
@@ -79,12 +92,17 @@ Compact reference table: area → supported? → evidence pointer.
 ## Legend
 
 - ✅ = Fully supported and proven
+
 - ⚠️ = Partially supported (see `LIMITATIONS.md`)
+
 - ❌ = Not supported (see `LIMITATIONS.md`)
 
 ## Quick Reference
 
 - **Proven syntax**: See `docs/proven/language_syntax.md`
+
 - **Proven commands**: See `docs/proven/cli_commands.md`
+
 - **Detailed features**: See `docs/proven/features.md`
+
 - **Known limitations**: See `LIMITATIONS.md`

@@ -82,9 +82,9 @@ def test_stage2_build_process():
     """Test Stage1→Stage2 build process (if Stage1 exists)"""
     # Handle Windows .exe extension
     if sys.platform == "win32":
-        stage1_exe = stage1_dir / "pyritec.exe"
+        stage1_exe = stage1_dir / "forge.exe"
     else:
-        stage1_exe = stage1_dir / "pyritec"
+        stage1_exe = stage1_dir / "forge"
     script = repo_root / "scripts" / "bootstrap" / "bootstrap_stage2.py"
     
     # Check if script exists
@@ -145,9 +145,9 @@ def test_stage2_build_process():
     # If Stage2 executable was created, verify it exists
     # Handle Windows .exe extension
     if sys.platform == "win32":
-        stage2_exe = stage2_dir / "pyritec.exe"
+        stage2_exe = stage2_dir / "forge.exe"
     else:
-        stage2_exe = stage2_dir / "pyritec"
+        stage2_exe = stage2_dir / "forge"
     
     # If Stage2 executable was created, verify it exists
     # If not created, that's okay - script may have run but not produced executable
@@ -186,11 +186,11 @@ def test_determinism_check():
     """Test determinism check (if both stages exist)"""
     # Handle Windows .exe extension
     if sys.platform == "win32":
-        stage1_exe = stage1_dir / "pyritec.exe"
-        stage2_exe = stage2_dir / "pyritec.exe"
+        stage1_exe = stage1_dir / "forge.exe"
+        stage2_exe = stage2_dir / "forge.exe"
     else:
-        stage1_exe = stage1_dir / "pyritec"
-        stage2_exe = stage2_dir / "pyritec"
+        stage1_exe = stage1_dir / "forge"
+        stage2_exe = stage2_dir / "forge"
     script = repo_root / "scripts" / "bootstrap" / "check_bootstrap_determinism.py"
     
     # Check if script exists
