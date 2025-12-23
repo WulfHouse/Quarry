@@ -434,6 +434,13 @@ def types_compatible(t1: Type, t2: Type) -> bool:
         if t1.name == t2.name and t1.base_type == t2:
             return True
     
+    # Handle List to Array compatibility (for literals)
+    if isinstance(t1, ArrayType) and isinstance(t2, GenericType) and t2.name == "List":
+        return types_compatible(t1.element, t2.type_args[0])
+    
+    if isinstance(t1, GenericType) and t1.name == "List" and isinstance(t2, ArrayType):
+        return types_compatible(t1.type_args[0], t2.element)
+
     return False
 
 

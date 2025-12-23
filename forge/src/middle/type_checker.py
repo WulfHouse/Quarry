@@ -2053,6 +2053,34 @@ class TypeChecker:
             )
             return UNKNOWN
     
+    def evaluate_constant_int(self, expr: ast.Expression) -> Optional[int]:
+        """Evaluate a constant integer expression (SPEC-LANG-0216)"""
+        if isinstance(expr, ast.IntLiteral):
+            return expr.value
+        elif isinstance(expr, ast.BinOp):
+            left = self.evaluate_constant_int(expr.left)
+            right = self.evaluate_constant_int(expr.right)
+            
+            if left is not None and right is not None:
+                if expr.op == "+": return left + right
+                if expr.op == "-": return left - right
+                if expr.op == "*": return left * right
+                if expr.op == "/":
+                    if right == 0:
+                        self.error("Division by zero in constant expression", expr.span)
+                        return None
+                    return left // right
+                if expr.op == "%":
+                    if right == 0: return None
+                    return left % right
+        elif isinstance(expr, ast.UnaryOp):
+            operand = self.evaluate_constant_int(expr.right)
+            if operand is not None:
+                if expr.op == "-": return -operand
+                if expr.op == "+": return operand
+        
+        return None
+
     def resolve_type(self, type_annotation: ast.Type) -> Type:
         """Resolve a type annotation to a Type"""
         if isinstance(type_annotation, ast.PrimitiveType):
@@ -2101,9 +2129,13 @@ class TypeChecker:
         
         elif isinstance(type_annotation, ast.ArrayType):
             element = self.resolve_type(type_annotation.element_type)
-            # For MVP, assume size is an integer literal
-            if isinstance(type_annotation.size, ast.IntLiteral):
-                return ArrayType(element, type_annotation.size.value)
+            # Evaluate constant expression for size (SPEC-LANG-0216)
+            size = self.evaluate_constant_int(type_annotation.size)
+            if size is not None:
+                if size < 0:
+                    self.error("Array size cannot be negative", type_annotation.span)
+                    return ArrayType(element, 0)
+                return ArrayType(element, size)
             else:
                 self.error("Array size must be constant integer", type_annotation.span)
                 return ArrayType(element, 0)
