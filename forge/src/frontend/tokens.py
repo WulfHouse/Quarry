@@ -64,9 +64,19 @@ class TokenType(Enum):
     GT = auto()             # >
     GE = auto()             # >=
     ASSIGN = auto()         # =
+    PLUS_EQ = auto()        # +=
+    MINUS_EQ = auto()       # -=
+    STAR_EQ = auto()        # *=
+    SLASH_EQ = auto()       # /=
     AMPERSAND = auto()      # &
     PIPE = auto()           # |
     CARET = auto()          # ^
+    TILDE = auto()          # ~
+    SHL = auto()            # <<
+    SHR = auto()            # >>
+    AND_AND = auto()        # &&
+    PIPE_PIPE = auto()      # ||
+    BANG = auto()           # !
     AT_SIGN = auto()        # @
     DOT = auto()            # .
     COMMA = auto()          # ,

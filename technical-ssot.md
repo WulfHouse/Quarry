@@ -5117,7 +5117,7 @@ string"""
 
 **Source:** SPEC-LANG-0001, SSOT Section 3.1
 
-**Status:** PLANNED
+**Status:** EXISTS-TODAY
 
 **Priority:** P0
 
@@ -5181,7 +5181,7 @@ string"""
 
 **Source:** SPEC-LANG-0001, REQ-037, SSOT Section 3.1
 
-**Status:** PLANNED
+**Status:** EXISTS-TODAY
 
 **Priority:** P0
 
