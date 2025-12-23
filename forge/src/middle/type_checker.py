@@ -1030,6 +1030,8 @@ class TypeChecker:
             return self.check_field_access(expr)
         elif isinstance(expr, ast.IndexAccess):
             return self.check_index_access(expr)
+        elif isinstance(expr, ast.AsExpression):
+            return self.check_as_expression(expr)
         elif isinstance(expr, ast.StructLiteral):
             return self.check_struct_literal(expr)
         elif isinstance(expr, ast.ListLiteral):
@@ -1931,10 +1933,33 @@ class TypeChecker:
             if object_type.type_args:
                 return object_type.type_args[0]
             return UNKNOWN
+        elif isinstance(object_type, PointerType):
+            return object_type.inner
         else:
             # Type is not indexable
             self.error(f"Cannot index type {object_type}", access.span)
             return UNKNOWN
+    
+    def check_as_expression(self, cast: ast.AsExpression) -> Type:
+        """Check cast expression"""
+        expr_type = self.check_expression(cast.expression)
+        target_type = self.resolve_type(cast.target_type)
+        
+        # In unsafe mode, allow more casts
+        # For now, allow any pointer cast
+        if isinstance(expr_type, (PointerType, ReferenceType)) and isinstance(target_type, (PointerType, ReferenceType)):
+            return target_type
+        
+        # Allow casting String to *u8 in unsafe mode (extract data pointer)
+        if isinstance(expr_type, StringType) and isinstance(target_type, PointerType) and isinstance(target_type.inner, IntType) and target_type.inner.width == 8:
+            return target_type
+
+        # Default compatibility check
+        if types_compatible(expr_type, target_type):
+            return target_type
+            
+        self.error(f"Cannot cast {expr_type} to {target_type}", cast.span)
+        return target_type
     
     def check_struct_literal(self, literal: ast.StructLiteral) -> Type:
         """Check struct literal"""

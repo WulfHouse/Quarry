@@ -1,5 +1,5 @@
 # Helper script to enforce wrapper usage for developer commands
-# Usage: .\tools\run_safe.ps1 -Cmd "<command>" [-Head <N>] [-Tail <N>] [-Log <path>]
+# Usage: .\tools\utils\run_safe.ps1 -Cmd "<command>" [-NoPreview] [-PreviewLines <N>] [-TimeoutSec <S>] [-LogDir <path>]
 #
 # This script ensures all commands go through the run_logged wrapper
 # It's a convenience wrapper around the wrapper to make it easier for developers
@@ -12,11 +12,22 @@ param(
     [string]$Log = "",
     
     [Parameter(Mandatory=$false)]
-    [int]$Head = 80,
+    [int]$PreviewLines = 80,
     
     [Parameter(Mandatory=$false)]
-    [int]$Tail = 80
+    [switch]$NoPreview,
+
+    [Parameter(Mandatory=$false)]
+    [int]$TimeoutSec = 0,
+
+    [Parameter(Mandatory=$false)]
+    [string]$LogDir = ""
 )
+
+# Bound preview lines to reasonable value to prevent agent crashes
+if ($PreviewLines -gt 1000) {
+    $PreviewLines = 1000
+}
 
 # Get script directory to find repo root
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -24,8 +35,6 @@ $toolsDir = Split-Path -Parent $scriptDir
 $repoRoot = Split-Path -Parent $toolsDir
 
 # Find the wrapper script (prefer utils version)
-# Join-Path in older PowerShell doesn't accept multiple segments, so chain them
-$toolsDir = Join-Path $repoRoot 'tools'
 $utilsDir = Join-Path $toolsDir 'utils'
 $wrapperPath = Join-Path $utilsDir 'run_logged.ps1'
 if (-not (Test-Path $wrapperPath)) {
@@ -38,6 +47,11 @@ if (-not (Test-Path $wrapperPath)) {
     exit 1
 }
 
+# Default LogDir if not provided: use LOCALAPPDATA to avoid OneDrive issues
+if ([string]::IsNullOrEmpty($LogDir)) {
+    $LogDir = Join-Path $env:LOCALAPPDATA "pyrite\logs"
+}
+
 # Build wrapper command
 $wrapperArgs = @(
     '-NoProfile',
@@ -45,15 +59,26 @@ $wrapperArgs = @(
     '-File',
     $wrapperPath,
     '-Cmd',
-    $Cmd
+    $Cmd,
+    '-Head', $PreviewLines.ToString(),
+    '-Tail', $PreviewLines.ToString()
 )
 
 if ($Log) {
     $wrapperArgs += @('-Log', $Log)
 }
 
-$wrapperArgs += @('-Head', $Head.ToString())
-$wrapperArgs += @('-Tail', $Tail.ToString())
+if ($NoPreview) {
+    $wrapperArgs += @('-NoPreview')
+}
+
+if ($TimeoutSec -gt 0) {
+    $wrapperArgs += @('-TimeoutSec', $TimeoutSec.ToString())
+}
+
+if ($LogDir) {
+    $wrapperArgs += @('-LogDir', $LogDir)
+}
 
 # Execute wrapper
 & powershell $wrapperArgs

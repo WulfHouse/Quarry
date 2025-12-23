@@ -413,6 +413,13 @@ class TernaryExpr(ASTNode):
 
 
 @dataclass
+class AsExpression(ASTNode):
+    """Cast expression: x as Type"""
+    expression: 'Expression'
+    target_type: 'Type'
+
+
+@dataclass
 class FunctionCall(ASTNode):
     """Function call"""
     function: 'Expression'
@@ -619,7 +626,7 @@ Expression = (IntLiteral | FloatLiteral | StringLiteral | CharLiteral |
               BoolLiteral | NoneLiteral | Identifier | BinOp | UnaryOp |
               TernaryExpr | FunctionCall | MethodCall | FieldAccess |
               IndexAccess | SliceAccess | StructLiteral | ListLiteral | TupleLiteral | TryExpr |
-              GenericType)  # Allow GenericType as expression for Type[Args].method() syntax
+              GenericType | AsExpression)  # Allow GenericType as expression for Type[Args].method() syntax
 Pattern = (LiteralPattern | IdentifierPattern | TuplePattern | WildcardPattern |
            EnumPattern | OrPattern)
 Type = (PrimitiveType | ReferenceType | PointerType | ArrayType |

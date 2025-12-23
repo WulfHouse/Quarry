@@ -1796,7 +1796,22 @@ class Parser:
                 span=self.make_span(start_span)
             )
         
-        return self.parse_postfix()
+        return self.parse_cast()
+    
+    def parse_cast(self) -> ast.Expression:
+        """Parse cast expression (expr as Type)"""
+        expr = self.parse_postfix()
+        
+        while self.match_token(TokenType.AS):
+            self.advance()
+            target_type = self.parse_type()
+            expr = ast.AsExpression(
+                expression=expr,
+                target_type=target_type,
+                span=self.make_span(expr.span)
+            )
+            
+        return expr
     
     def parse_postfix(self) -> ast.Expression:
         """Parse postfix expression (calls, field access, indexing)"""

@@ -1452,6 +1452,9 @@ class LLVMCodeGen:
         elif isinstance(expr, ast.IndexAccess):
             return self.gen_index_access(expr)
         
+        elif isinstance(expr, ast.AsExpression):
+            return self.gen_as_expression(expr)
+        
         elif isinstance(expr, ast.TryExpr):
             return self.gen_try_expr(expr)
         
@@ -1728,8 +1731,33 @@ class LLVMCodeGen:
             elem_ptr = self.builder.gep(obj, [zero, index], inbounds=True)
             return self.builder.load(elem_ptr)
         
+        # 5. Handle Pointer indexing (unsafe)
+        if isinstance(obj.type, ir.PointerType):
+            # For raw pointers, we just offset and load
+            elem_ptr = self.builder.gep(obj, [index], inbounds=True)
+            return self.builder.load(elem_ptr)
+        
         # For other types, return placeholder
         return obj
+    
+    def gen_as_expression(self, cast: ast.AsExpression) -> ir.Value:
+        """Generate code for cast expression"""
+        expr = self.gen_expression(cast.expression)
+        target_py_type = self.type_checker.resolve_type(cast.target_type)
+        target_llvm_type = self.type_to_llvm(target_py_type)
+        
+        # Handle String to *u8 cast (extract pointer)
+        if isinstance(expr.type, ir.LiteralStructType) and len(expr.type.elements) == 2:
+            # Extract data pointer (first field)
+            ptr = self.builder.extract_value(expr, 0)
+            if ptr.type != target_llvm_type:
+                return self.builder.bitcast(ptr, target_llvm_type)
+            return ptr
+            
+        # Default bitcast
+        if expr.type != target_llvm_type:
+            return self.builder.bitcast(expr, target_llvm_type)
+        return expr
     
     def gen_binop(self, binop: ast.BinOp) -> ir.Value:
         """Generate code for binary operation"""

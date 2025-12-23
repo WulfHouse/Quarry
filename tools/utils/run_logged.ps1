@@ -9,6 +9,10 @@
 #   -Log (optional): Path to log file (default: auto-generated in .logs/)
 #   -Head (optional, default: 80): Number of first lines to print
 #   -Tail (optional, default: 80): Number of last lines to print
+#   -LogMode (optional, default: full): full, minimal, none
+#   -TimeoutSec (optional, default: 0): Timeout in seconds (0 = none)
+#   -NoPreview (optional): If present, do not print log head/tail
+#   -LogDir (optional): Custom log directory
 
 param(
     [Parameter(Mandatory=$true)]
@@ -21,25 +25,45 @@ param(
     [int]$Head = 80,
     
     [Parameter(Mandatory=$false)]
-    [int]$Tail = 80
+    [int]$Tail = 80,
+
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("full", "minimal", "none")]
+    [string]$LogMode = "full",
+
+    [Parameter(Mandatory=$false)]
+    [int]$TimeoutSec = 0,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$NoPreview,
+
+    [Parameter(Mandatory=$false)]
+    [string]$LogDir = ""
 )
 
 # Get script directory to find repo root
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Split-Path -Parent $scriptDir
-$logDir = Join-Path $repoRoot ".logs"
+
+# Determine log directory
+if ([string]::IsNullOrEmpty($LogDir)) {
+    $LogDir = Join-Path $repoRoot ".logs"
+} else {
+    # Ensure LogDir is rooted
+    if (-not [System.IO.Path]::IsPathRooted($LogDir)) {
+        $LogDir = Join-Path $repoRoot $LogDir
+    }
+}
 
 # Create log directory if it doesn't exist
-if (-not (Test-Path $logDir)) {
-    New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+if (-not (Test-Path $LogDir)) {
+    New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
 }
 
 # Determine log file path
-# If not specified, generate a unique filename in .logs/ directory
 if ([string]::IsNullOrEmpty($Log)) {
     # Generate unique log filename based on timestamp and command hash
     $timestamp = Get-Date -Format "yyyyMMdd-HHmmss-fff"
-    # Simple hash of command (first 8 chars of MD5)
     $cmdBytes = [System.Text.Encoding]::UTF8.GetBytes($Cmd)
     $md5 = [System.Security.Cryptography.MD5]::Create()
     $hashBytes = $md5.ComputeHash($cmdBytes)
@@ -47,72 +71,80 @@ if ([string]::IsNullOrEmpty($Log)) {
     $cmdHash = $hashString.Substring(0, 8).ToLower()
     
     $logName = "dev-$timestamp-$cmdHash.log"
-    $Log = Join-Path $logDir $logName
+    $Log = Join-Path $LogDir $logName
 } else {
-    # If Log is specified as relative path, put it in .logs/ unless it already includes that path
+    # If Log is specified as relative path, put it in LogDir
     if (-not [System.IO.Path]::IsPathRooted($Log)) {
+        # Check if it already looks like it's in a logs dir
         if ($Log -notlike ".logs*" -and $Log -notlike "*\.logs*") {
-            $Log = Join-Path $logDir (Split-Path -Leaf $Log)
+            $Log = Join-Path $LogDir (Split-Path -Leaf $Log)
         } else {
-            # Already has .logs in path, resolve relative to repo root
             $Log = Join-Path $repoRoot $Log
         }
     }
 }
 
 # Delete existing log if present
-# Use -ErrorAction SilentlyContinue to handle file locks gracefully
 if (Test-Path $Log) {
     Remove-Item $Log -Force -ErrorAction SilentlyContinue
 }
 
-# Run command to completion, capturing ALL output (stdout + stderr) to log
-# Use cmd /c for external commands to ensure proper exit code handling
+# Execution logic using Start-Process for timeout support
 $exitCode = 0
+$isTimeout = $false
+
 try {
-    # For simplicity and robustness, use cmd /c which works for most external commands
-    # Redirect both stdout (1) and stderr (2) to log file
-    # In cmd, use > for stdout and 2>&1 to redirect stderr to stdout, then redirect all to file
-    # cmd /c ensures the command runs to completion and exit code is preserved
-    $null = cmd /c "$Cmd > `"$Log`" 2>&1"
-    $exitCode = $LASTEXITCODE
+    # We use cmd /c with redirection inside it to capture all output.
+    # We use Start-Process to get a handle for timeout management.
+    $p = Start-Process "cmd" -ArgumentList "/c `"$Cmd > `"$Log`" 2>&1`"" -PassThru -NoNewWindow
     
-    # If LASTEXITCODE is null or 0 but we want to be sure, check if log exists
-    if ($exitCode -eq $null) {
-        $exitCode = 0
+    if ($TimeoutSec -gt 0) {
+        if (-not ($p | Wait-Process -Timeout $TimeoutSec -ErrorAction SilentlyContinue)) {
+            $p | Stop-Process -Force
+            $isTimeout = $true
+            $exitCode = -1
+            "`n[TIMEOUT] Process killed after $TimeoutSec seconds" | Out-File -FilePath $Log -Append -Encoding utf8
+        } else {
+            $exitCode = $p.ExitCode
+        }
+    } else {
+        $p | Wait-Process
+        $exitCode = $p.ExitCode
     }
 } catch {
-    # If command execution fails, capture error
     $errorMsg = $_.Exception.Message
-    $errorMsg | Out-File -FilePath $Log -Append -Encoding utf8
+    "`n[ERROR] $errorMsg" | Out-File -FilePath $Log -Append -Encoding utf8
     $exitCode = 1
 }
 
-# Read log file if it exists
-if (Test-Path $Log) {
-    $logContent = Get-Content $Log
-    
-    # Print first N lines
-    if ($logContent.Count -gt 0) {
-        $headLines = if ($logContent.Count -lt $Head) { $logContent } else { $logContent[0..($Head-1)] }
-        Write-Host "=== First $Head lines ===" -ForegroundColor Cyan
-        $headLines | Write-Host
-        
-        # Print last N lines if there's more content than Head
-        if ($logContent.Count -gt $Head) {
+# Print summary
+Write-Host "`n--- Command Summary ---" -ForegroundColor Gray
+Write-Host "Command: $Cmd"
+Write-Host "Log:     $Log"
+if ($isTimeout) {
+    Write-Host "Status:  TIMEOUT" -ForegroundColor Red
+} else {
+    $statusColor = if ($exitCode -eq 0) { "Green" } else { "Red" }
+    Write-Host "Status:  Exit Code $exitCode" -ForegroundColor $statusColor
+}
+
+# Preview log if requested
+if (-not $NoPreview -and ($LogMode -ne "none") -and (Test-Path $Log)) {
+    $fileInfo = Get-Item $Log
+    if ($fileInfo.Length -gt 0) {
+        if ($LogMode -eq "full") {
+            Write-Host "=== First $Head lines ===" -ForegroundColor Cyan
+            Get-Content $Log -TotalCount $Head | ForEach-Object { Write-Host $_ }
+            
             Write-Host "`n=== Last $Tail lines ===" -ForegroundColor Cyan
-            $startTail = [Math]::Max(0, $logContent.Count - $Tail)
-            $tailLines = $logContent[$startTail..($logContent.Count-1)]
-            $tailLines | Write-Host
+            Get-Content $Log -Tail $Tail | ForEach-Object { Write-Host $_ }
+        } elseif ($LogMode -eq "minimal" -and ($exitCode -ne 0 -or $isTimeout)) {
+            Write-Host "=== Last $Tail lines (failure) ===" -ForegroundColor Red
+            Get-Content $Log -Tail $Tail | ForEach-Object { Write-Host $_ }
         }
-        
-        Write-Host "`n=== Full log available at: $Log ===" -ForegroundColor Yellow
     } else {
         Write-Host "Log file is empty" -ForegroundColor Yellow
     }
-} else {
-    Write-Host "No log file created (command may have failed before producing output)" -ForegroundColor Yellow
 }
 
-# Exit with the original command's exit code
 exit $exitCode
