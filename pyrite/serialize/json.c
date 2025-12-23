@@ -33,6 +33,12 @@ String json_serialize_f64(double value) {
 String json_serialize_str(const char* value) {
     int64_t len = strlen(value);
     char* result = malloc(len + 3);
+    if (result == NULL) {
+        String s;
+        s.data = NULL;
+        s.len = 0;
+        return s;
+    }
     result[0] = '"';
     memcpy(result + 1, value, len);
     result[len + 1] = '"';

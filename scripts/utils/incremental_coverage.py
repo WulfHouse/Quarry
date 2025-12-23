@@ -111,7 +111,7 @@ def run_incremental_coverage(files: Set[str], base: str = None) -> int:
     # but filter the report to only show changed files
     cmd = [
         sys.executable,
-        "tools/pytest.py",
+        "tools/testing/pytest.py",
         "--cov=forge/src",
         "--cov-report=term",
         "-q"

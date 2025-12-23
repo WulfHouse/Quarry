@@ -54,7 +54,7 @@ def main():
     args = sys.argv[1:]
     
     # Build pytest command
-    cmd = [sys.executable, "tools/pytest.py"]
+    cmd = [sys.executable, "tools/testing/pytest.py"]
     
     # For full suite, ensure we have progress indicators
     is_full_suite = not any(

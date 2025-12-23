@@ -47,7 +47,7 @@ def run_command(cmd: list, description: str, timeout: int = 120) -> tuple[bool, 
 
 def test_pytest_collection_scope():
     """Test that pytest only collects from forge/tests"""
-    cmd = [sys.executable, "tools/pytest.py", "--collect-only", "-q"]
+    cmd = [sys.executable, "tools/testing/pytest.py", "--collect-only", "-q"]
     success, output = run_command(cmd, "Pytest collection scope check", timeout=60)
     
     if not success:
@@ -70,7 +70,7 @@ def test_coverage_scope():
     """Test that coverage only measures forge/src"""
     cmd = [
         sys.executable,
-        "tools/pytest.py",
+        "tools/testing/pytest.py",
         "forge/tests/frontend/test_lexer.py",
         "--cov=forge/src",
         "--cov-report=term",
@@ -107,7 +107,7 @@ def test_safe_wrapper():
         "--max-rss-mb=1024",
         "--",
         sys.executable,
-        "tools/pytest.py",
+        "tools/testing/pytest.py",
         "forge/tests/frontend/test_lexer.py",
         "-q"
     ]
