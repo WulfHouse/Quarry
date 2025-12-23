@@ -28,14 +28,14 @@
 
 ### Installation
 
-**Unix/macOS:**
+**Unix/macOS/Git Bash:**
 ```bash
 bash scripts/setup/install.sh
 ```
 
-**Windows:**
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/setup/install.ps1
+**Windows (Git Bash):**
+```bash
+bash scripts/setup/install.sh
 ```
 
 ### Compile a Program
@@ -175,8 +175,8 @@ pyrite/
 │   │   └── diagnose_coverage_timeout.py
 │   ├── setup/                      # Setup scripts
 │   │   ├── install.sh              # Unix/macOS installer
-│   │   ├── install.ps1             # Windows installer
-│   │   └── setup-dev.ps1           # Development environment setup
+│   │   ├── install.sh             # Windows installer
+│   │   └── setup-dev.sh           # Development environment setup
 │   ├── utils/                      # Utility scripts
 │   │   ├── incremental_coverage.py
 │   │   ├── split_large_test_file.py
@@ -209,9 +209,7 @@ pyrite/
 │   │   └── quarry.py               # Quarry build system
 │   ├── utils/                      # Utility tools
 │   │   ├── debug_try_operator.py
-│   │   ├── run_logged.ps1          # Command logging wrapper
-│   │   ├── run_safe.ps1            # Convenience wrapper
-│   │   └── validate_command_safety.ps1
+│   │   ├── run_gates.sh          # Command logging wrapper
 │   └── docs/                       # Tool documentation
 │       ├── DEVELOPER_COMMAND_POLICY.md
 │       └── README_COMMAND_POLICY.md
@@ -270,11 +268,8 @@ The Quarry LSP server provides IDE support for Pyrite:
 ### Setting Up Development Environment
 
 ```bash
-# Windows (PowerShell)
-powershell -ExecutionPolicy Bypass -File scripts/setup/setup-dev.ps1
-
-# Note: For Unix/macOS, manually add the tools/runtime directory to your PATH
-# or create shell aliases for pyrite, quarry, etc.
+# Git Bash / Bash
+source scripts/setup/setup-dev.sh
 ```
 
 ### Building Forge

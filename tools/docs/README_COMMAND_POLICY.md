@@ -6,38 +6,34 @@
 
 ## Quick Usage
 
-```powershell
+```bash
 # Standard pattern
-powershell -NoProfile -NonInteractive -File tools/utils/run_logged.ps1 -Cmd "<YOUR_COMMAND>" -Head 30 -Tail 30
-
-# Or use the convenience helper
-powershell -NoProfile -NonInteractive -File tools/utils/run_safe.ps1 -Cmd "<YOUR_COMMAND>" -Head 30 -Tail 30
+./scripts/run_gates.sh -- <YOUR_COMMAND>
 ```
 
 ## Why?
 
-Pipeline truncators (`| Select-Object -First N`) cause **cancellation**, which halts the execution. The wrapper ensures commands complete fully.
+Pipeline truncators (`| head -n 30`) can cause **cancellation**, which halts the execution. The wrapper ensures commands complete fully and logs output safely.
 
 ## Full Documentation
 
 - **Policy**: `tools/docs/DEVELOPER_COMMAND_POLICY.md`
-- **Details**: `plans/CANCELLATION_PREVENTION.md`
-- **Validation**: Run `tools/utils/validate_command_safety.ps1` to check your code
+- **Validation**: Run `./scripts/check_no_powershell.sh` to ensure no prohibited shell artifacts.
 
 ## Examples
 
 ### Compile Pyrite
-```powershell
-powershell -NoProfile -NonInteractive -File tools/utils/run_logged.ps1 -Cmd "python -m src.compiler file.pyrite --emit-llvm" -Head 30 -Tail 30
+```bash
+./scripts/run_gates.sh -- python -m src.compiler file.pyrite --emit-llvm
 ```
 
 ### Run Tests
-```powershell
-powershell -NoProfile -NonInteractive -File tools/utils/run_logged.ps1 -Cmd "python tools/pytest.py" -Head 50 -Tail 50
+```bash
+./scripts/run_gates.sh -- python tools/testing/pytest.py
 ```
 
 ### Debug Command
-```powershell
-powershell -NoProfile -NonInteractive -File tools/utils/run_logged.ps1 -Cmd "python script.py --debug" -Head 0 -Tail 0
+```bash
+./scripts/run_gates.sh -- python script.py --debug
 # Then filter log file if needed (AFTER completion)
 ```
