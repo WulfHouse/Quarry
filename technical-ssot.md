@@ -2,13 +2,13 @@
 
 - Last updated: December 23, 2025
 - Mode: REQ_TO_LEAF
-- Baseline totals: REQ=423 SPEC=201 NODE=35 LEAF=166
-- Progress: mapped_to_leaf=75/423
+- Baseline totals: REQ=423 SPEC=258 NODE=35 LEAF=223
+- Progress: mapped_to_leaf=200/423
 - Cursor:
-  - next_unmapped_req: REQ-076
+  - next_unmapped_req: REQ-201
   - batch_size: 25
-  - last_completed_req: REQ-075
-- This run targets: REQ -> LEAF Mapping (Batch 3)
+  - last_completed_req: REQ-200
+- This run targets: REQ -> LEAF Mapping (Batch 5)
 
 # Pyrite + Quarry Technical Specification (SSOT Implementation Guide)
 
@@ -4075,56 +4075,56 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-148 -> SPEC-FORGE-0029
 - REQ-149 -> SPEC-LANG-0119
 - REQ-150 -> SPEC-FORGE-0306
-- REQ-151 -> SPEC-FORGE-0007
-- REQ-152 -> SPEC-FORGE-0007
-- REQ-153 -> SPEC-LANG-0400
-- REQ-154 -> SPEC-FORGE-0007
-- REQ-155 -> SPEC-LANG-0200
+- REQ-151 -> SPEC-FORGE-0306
+- REQ-152 -> SPEC-FORGE-0307
+- REQ-153 -> SPEC-LANG-0242
+- REQ-154 -> SPEC-FORGE-0029
+- REQ-155 -> SPEC-LANG-0243
 - REQ-156 -> Meta
-- REQ-157 -> SPEC-LANG-0100
-- REQ-158 -> SPEC-LANG-0100
-- REQ-159 -> SPEC-QUARRY-0001
-- REQ-160 -> SPEC-LANG-0100
+- REQ-157 -> SPEC-LANG-0120
+- REQ-158 -> SPEC-LANG-0120
+- REQ-159 -> SPEC-QUARRY-0026
+- REQ-160 -> SPEC-LANG-0120
 - REQ-161 -> SPEC-QUARRY-0010, SPEC-QUARRY-0014
-- REQ-162 -> SPEC-QUARRY-0001
-- REQ-163 -> SPEC-QUARRY-0001
-- REQ-164 -> SPEC-QUARRY-0001
+- REQ-162 -> SPEC-QUARRY-0015
+- REQ-163 -> SPEC-QUARRY-0022
+- REQ-164 -> SPEC-QUARRY-0022
 - REQ-165 -> SPEC-QUARRY-0013
 - REQ-166 -> SPEC-QUARRY-0012
-- REQ-167 -> SPEC-QUARRY-0001
-- REQ-168 -> SPEC-QUARRY-0001
-- REQ-169 -> SPEC-QUARRY-0001
-- REQ-170 -> SPEC-QUARRY-0001
-- REQ-171 -> SPEC-QUARRY-0100
-- REQ-172 -> SPEC-QUARRY-0001
+- REQ-167 -> SPEC-QUARRY-0017
+- REQ-168 -> SPEC-QUARRY-0018
+- REQ-169 -> SPEC-QUARRY-0023
+- REQ-170 -> SPEC-QUARRY-0016
+- REQ-171 -> SPEC-QUARRY-0108
+- REQ-172 -> SPEC-QUARRY-0024
 - REQ-173 -> Meta
-- REQ-174 -> SPEC-QUARRY-0001
-- REQ-175 -> SPEC-QUARRY-0200
-- REQ-176 -> SPEC-QUARRY-0200
-- REQ-177 -> SPEC-QUARRY-0200
-- REQ-178 -> SPEC-QUARRY-0200
-- REQ-179 -> SPEC-QUARRY-0200
-- REQ-180 -> SPEC-QUARRY-0200
-- REQ-181 -> SPEC-QUARRY-0200
-- REQ-182 -> SPEC-QUARRY-0001
-- REQ-183 -> SPEC-QUARRY-0001
-- REQ-184 -> SPEC-QUARRY-0001
-- REQ-185 -> SPEC-QUARRY-0001
-- REQ-186 -> SPEC-QUARRY-0001
-- REQ-187 -> SPEC-QUARRY-0001
-- REQ-188 -> SPEC-QUARRY-0001
-- REQ-189 -> SPEC-QUARRY-0001
-- REQ-190 -> SPEC-QUARRY-0001
-- REQ-191 -> SPEC-QUARRY-0001
-- REQ-192 -> SPEC-QUARRY-0001
-- REQ-193 -> Meta
-- REQ-194 -> SPEC-QUARRY-0001
-- REQ-195 -> SPEC-QUARRY-0001
-- REQ-196 -> SPEC-QUARRY-0001
-- REQ-197 -> SPEC-QUARRY-0100
-- REQ-198 -> SPEC-QUARRY-0100
-- REQ-199 -> SPEC-QUARRY-0100
-- REQ-200 -> SPEC-QUARRY-0100
+- REQ-174 -> SPEC-QUARRY-0025
+- REQ-175 -> SPEC-QUARRY-0201
+- REQ-176 -> SPEC-QUARRY-0202
+- REQ-177 -> SPEC-QUARRY-0201
+- REQ-178 -> SPEC-QUARRY-0201
+- REQ-179 -> SPEC-QUARRY-0030
+- REQ-180 -> SPEC-QUARRY-0030
+- REQ-181 -> SPEC-QUARRY-0030
+- REQ-182 -> SPEC-QUARRY-0031
+- REQ-183 -> SPEC-QUARRY-0031
+- REQ-184 -> SPEC-QUARRY-0031
+- REQ-185 -> SPEC-QUARRY-0032
+- REQ-186 -> SPEC-QUARRY-0032
+- REQ-187 -> SPEC-QUARRY-0032
+- REQ-188 -> SPEC-QUARRY-0032
+- REQ-189 -> SPEC-QUARRY-0032
+- REQ-190 -> SPEC-QUARRY-0033
+- REQ-191 -> SPEC-QUARRY-0033
+- REQ-192 -> SPEC-QUARRY-0034
+- REQ-193 -> SPEC-QUARRY-0034
+- REQ-194 -> SPEC-QUARRY-0035
+- REQ-195 -> SPEC-QUARRY-0036
+- REQ-196 -> SPEC-FORGE-0208
+- REQ-197 -> SPEC-QUARRY-0101
+- REQ-198 -> SPEC-QUARRY-0101
+- REQ-199 -> SPEC-QUARRY-0102
+- REQ-200 -> SPEC-QUARRY-0102
 - REQ-201 -> SPEC-QUARRY-0100
 - REQ-202 -> SPEC-QUARRY-0100
 - REQ-203 -> SPEC-QUARRY-0100
@@ -5819,6 +5819,8 @@ string"""
 
 - SPEC-LANG-0115: Ternary expression parsing
 
+- SPEC-LANG-0120: Conditional compilation (@cfg) parsing
+
 #### SPEC-LANG-0101: Primary Expression Parsing
 
 **Kind:** LEAF  
@@ -6281,6 +6283,44 @@ let zeros = [0; 100]        # Repeat syntax
 - Positive: `x = 1 if y > 0 else 0`
 
 - Negative: `x = 1 if y > 0`
+
+#### SPEC-LANG-0120: Conditional Compilation (@cfg) Parsing
+
+**Kind:** LEAF
+
+**Source:** REQ-157, REQ-158, REQ-160, SSOT Section 7.6
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Parser supports `@cfg(...)` attribute on declarations (functions, structs, etc.).
+
+- Supports nested conditions: `any()`, `all()`, `not()`.
+
+- Supports key-value pairs: `target_os = "windows"`, `feature = "gpu"`.
+
+**User-facing behavior:**
+
+- Static inclusion/exclusion of code blocks based on compilation environment.
+
+**Examples:**
+
+- `@cfg(target_os = "linux") fn open_socket() { ... }`
+
+**Implementation notes:**
+
+- Evaluated early in the pipeline (after parsing, before name resolution).
+
+**Dependencies:**
+
+- SPEC-LANG-0101
+
+**Tests required:**
+
+- Unit: Verify parsing of various `@cfg` expressions.
 
 **Implementation notes:**
 
@@ -6815,6 +6855,10 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0240: Compile-time function evaluation (const fn)
 
 - SPEC-LANG-0241: Compile-time parameterization ([Size: int])
+
+- SPEC-LANG-0242: Compile-time assertions (compile.assert)
+
+- SPEC-LANG-0243: Compile-time string processing and hashing
 
 #### SPEC-LANG-0201: Type Inference Algorithm
 
@@ -8397,6 +8441,54 @@ let zeros = [0; 100]        # Repeat syntax
 **Examples:**
 
 - `struct Array[T, Size: int]: data: [T; Size]`
+
+#### SPEC-LANG-0242: Compile-time Assertions (compile.assert)
+
+**Kind:** LEAF
+
+**Source:** REQ-153, SSOT Section 7.6
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `compile.assert(condition, message)` built-in.
+
+- Condition must be evaluatable at compile-time (const expression).
+
+- If condition is false, compilation fails with provided message.
+
+**User-facing behavior:**
+
+- Static verification of invariants (e.g., buffer sizes, feature compatibility).
+
+**Examples:**
+
+- `compile.assert(Size > 0, "Buffer size must be positive")`
+
+#### SPEC-LANG-0243: Compile-time String Processing and Hashing
+
+**Kind:** LEAF
+
+**Source:** REQ-155, SSOT Section 7.6
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Ensure `const fn` can manipulate string literals.
+
+- Implement a standard `hash` function that can be evaluated at compile-time.
+
+- Verification that security-sensitive constants can be replaced by their hashes during compilation.
+
+**User-facing behavior:**
+
+- Storing sensitive strings as hashes in the final binary.
 
 ### 4.4 Ownership and Borrowing
 
@@ -11732,6 +11824,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-FORGE-0207: Runtime aliasing verification
 
+- SPEC-FORGE-0208: Verifiable zero-allocation build mode (--no-alloc)
+
 #### SPEC-FORGE-0201: Allocation Tracking Pass
 
 **Kind:** LEAF
@@ -11942,6 +12036,32 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Integration: Verify panic when passing overlapping pointers to a `@noalias` function in debug.
 
+#### SPEC-FORGE-0208: Verifiable Zero-allocation Build Mode (--no-alloc)
+
+**Kind:** LEAF
+
+**Source:** REQ-196, SSOT Section 8.12
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `--no-alloc` compiler flag.
+
+- When enabled, the compiler raises an error for any operation that would require a heap allocator (e.g., `new`, `clone` of heap-allocated types, capturing closures that require heap).
+
+- Provides clear diagnostics identifying the specific allocation site.
+
+**User-facing behavior:**
+
+- Compile-time guarantee that no heap allocations occur, suitable for embedded and safety-critical systems.
+
+**Tests required:**
+
+- Integration: Verify compilation fails with `--no-alloc` if a heap allocation is present.
+
 #### SPEC-FORGE-0300: Advanced Optimization Suite
 
 **Kind:** NODE
@@ -11965,6 +12085,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-FORGE-0305: Optimization via noalias
 
 - SPEC-FORGE-0306: Explicit loop unrolling (@unroll)
+
+- SPEC-FORGE-0307: Integrated unrolling and SIMD optimization
 
 #### SPEC-FORGE-0303: CPU Multi-versioning Dispatcher
 
@@ -12057,6 +12179,28 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Errors/diagnostics:**
 
 - `OptimizationWarning: Loop body too large for requested unroll factor; ignoring.`
+
+#### SPEC-FORGE-0307: Integrated Unrolling and SIMD Optimization
+
+**Kind:** LEAF
+
+**Source:** REQ-152, SSOT Section 7.6
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Compiler optimization pass combines unrolled loops with SIMD lane filling.
+
+- Generates code that processes multiple elements in parallel across multiple unrolled iterations.
+
+- Optimized for modern CPU pipelines (interleaving independent operations).
+
+**User-facing behavior:**
+
+- Maximum possible performance for arithmetic kernels by combining @unroll and @simd.
 
 #### SPEC-FORGE-0100: Error Message Formatting
 
@@ -12418,6 +12562,30 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-QUARRY-0021: Configurable contract checking levels
 
+- SPEC-QUARRY-0022: Intelligent script caching and shebang support
+
+- SPEC-QUARRY-0023: Official package registry (quarry.dev) integration
+
+- SPEC-QUARRY-0024: Opinionated official formatter (quarry fmt)
+
+- SPEC-QUARRY-0025: Learning profile mode (--learning)
+
+- SPEC-QUARRY-0026: Feature flag system (Quarry.toml)
+
+- SPEC-QUARRY-0030: Automated code fixes (quarry fix)
+
+- SPEC-QUARRY-0031: Coverage-guided fuzzing (quarry fuzz)
+
+- SPEC-QUARRY-0032: Integrated sanitizers (ASan, TSan, UBSan)
+
+- SPEC-QUARRY-0033: Multi-level linter (quarry lint)
+
+- SPEC-QUARRY-0034: Code expansion tooling (quarry expand)
+
+- SPEC-QUARRY-0035: Automated documentation generation (quarry doc)
+
+- SPEC-QUARRY-0036: Cross-platform toolchain management
+
 #### SPEC-QUARRY-0010: CLI Argument Parsing
 
 **Kind:** LEAF
@@ -12720,9 +12888,263 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Support setting the default contract level in `Quarry.toml` build profiles.
 
+#### SPEC-QUARRY-0022: Intelligent Script Caching and Shebang Support
+
+**Kind:** LEAF
+
+**Source:** REQ-163, REQ-164, SSOT Section 8.1
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Script mode (`pyrite run`) implements a content-based hashing cache for single-file scripts.
+
+- Reuses the compiled binary if the source hasn't changed.
+
+- Handles shebang (`#!`) parsing at the top of `.pyrite` files.
+
 **User-facing behavior:**
 
-- Easy control over contract overhead.
+- Near-instant startup for subsequent runs of the same script.
+
+#### SPEC-QUARRY-0023: Official Package Registry (quarry.dev) Integration
+
+**Kind:** LEAF
+
+**Source:** REQ-169, SSOT Section 8.3
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- `quarry publish` command implemented.
+
+- Integrates with the official hub for sharing and discovering packages.
+
+- Supports automated metadata extraction from `Quarry.toml`.
+
+**User-facing behavior:**
+
+- Easy discovery and distribution of Pyrite libraries.
+
+#### SPEC-QUARRY-0024: Opinionated Official Formatter (quarry fmt)
+
+**Kind:** LEAF
+
+**Source:** REQ-172, REQ-173, SSOT Section 8.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- `quarry fmt` command implemented.
+
+- Enforces canonical style: 4 spaces, 100 char limit, standard spacing.
+
+- Zero-configuration (configuration options are explicitly forbidden or extremely limited).
+
+**User-facing behavior:**
+
+- Unified code style across the entire ecosystem.
+
+#### SPEC-QUARRY-0025: Learning Profile Mode (--learning)
+
+**Kind:** LEAF
+
+**Source:** REQ-174, SSOT Section 8.6
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- `quarry new --learning` command implemented.
+
+- Pre-configures manifest with `core-only` mode and forbidden `unsafe`.
+
+- Enables enhanced beginner-friendly diagnostics.
+
+**User-facing behavior:**
+
+- Lower barrier to entry for new developers.
+
+#### SPEC-QUARRY-0026: Feature Flag System (Quarry.toml)
+
+**Kind:** LEAF
+
+**Source:** REQ-159, SSOT Section 7.6
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Support defining `[features]` in `Quarry.toml`.
+
+- Map these features to `@cfg(feature = "...")` in the source code.
+
+- Handle transitive feature enabling in dependencies.
+
+**User-facing behavior:**
+
+- Conditional inclusion of functionality based on project configuration.
+
+#### SPEC-QUARRY-0030: Automated Code Fixes (quarry fix)
+
+**Kind:** LEAF
+
+**Source:** REQ-179, REQ-180, REQ-181, SSOT Section 8.8
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `quarry fix` command that applies compiler-suggested transformations.
+
+- Supports interactive mode for resolving ownership/borrowing errors with ranked solutions.
+
+- Covers auto-fixes for correctness, style, performance, and basic lifetime issues.
+
+**User-facing behavior:**
+
+- Automated resolution of common errors and style violations.
+
+#### SPEC-QUARRY-0031: Coverage-guided Fuzzing (quarry fuzz)
+
+**Kind:** LEAF
+
+**Source:** REQ-182, REQ-183, REQ-184, SSOT Section 8.9
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement `quarry fuzz` command for coverage-guided fuzz testing.
+
+- Support `@fuzz` attribute for participating functions.
+
+- Automatically save crash-inducing inputs and convert them to regression tests.
+
+**User-facing behavior:**
+
+- Built-in automated discovery of edge-case crashes and logic errors.
+
+#### SPEC-QUARRY-0032: Integrated Sanitizers (ASan, TSan, UBSan)
+
+**Kind:** LEAF
+
+**Source:** REQ-185, REQ-186, REQ-187, REQ-188, REQ-189, SSOT Section 8.9
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Integrate ASan, TSan, and UBSan into the build system (via LLVM).
+
+- Support enabling sanitizers via build profile or CLI flag (e.g., `--sanitize=address`).
+
+- Ensure compatibility with CI pipelines for automated bug detection.
+
+**User-facing behavior:**
+
+- Runtime detection of memory errors, data races, and undefined behavior.
+
+#### SPEC-QUARRY-0033: Multi-level Linter (quarry lint)
+
+**Kind:** LEAF
+
+**Source:** REQ-190, REQ-191, SSOT Section 8.10
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `quarry lint` command with progressive strictness levels (Beginner to Pedantic).
+
+- Cover correctness, style, performance (heap allocations), and safety categories.
+
+**User-facing behavior:**
+
+- Guided skill evolution and project-specific strictness enforcement.
+
+#### SPEC-QUARRY-0034: Code Expansion Tooling (quarry expand)
+
+**Kind:** LEAF
+
+**Source:** REQ-192, REQ-193, SSOT Section 8.10.1
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement `quarry expand` command to display post-transformation source code.
+
+- Show desugared versions of high-level constructs (e.g., `with`, `try`, closures).
+
+**User-facing behavior:**
+
+- Improved transparency and educational insight into compiler translations.
+
+#### SPEC-QUARRY-0035: Automated Documentation Generation (quarry doc)
+
+**Kind:** LEAF
+
+**Source:** REQ-194, SSOT Section 8.11
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `quarry doc` command to generate HTML documentation.
+
+- Extract content from triple-quoted doc comments and public API signatures.
+
+- Support tested examples within doc comments.
+
+**User-facing behavior:**
+
+- Professional, zero-config documentation for every Pyrite package.
+
+#### SPEC-QUARRY-0036: Cross-platform Toolchain Management
+
+**Kind:** LEAF
+
+**Source:** REQ-195, SSOT Section 8.12
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement automated management of cross-compilation target components.
+
+- Support `--target` flag for building binaries for different platforms.
+
+**User-facing behavior:**
+
+- Trivial cross-compilation without manual toolchain setup.
 
 ### 6.2 Advanced Tooling
 
@@ -13068,9 +13490,11 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Implement a Read-Eval-Print-Loop for Pyrite.
 
-- Support immediate execution of expressions and function definitions.
+- Support immediate execution of expressions and function definitions using incremental JIT compilation (REQ-178).
 
 - Provide auto-completion and history.
+
+- Implement session management commands (:save, :load), type/ownership inspection (:type, :ownership), and performance profiling (:perf) (REQ-177).
 
 **User-facing behavior:**
 
@@ -13103,6 +13527,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - Generate visual diagrams (SVG or ASCII) showing ownership and borrowing timelines.
 
 - Integrate with compiler diagnostics to show "why" an error occurred.
+
+- Implement an enhanced REPL mode (`--explain`) that displays real-time ownership flow as the developer types (REQ-176).
 
 **User-facing behavior:**
 
@@ -13994,12 +14420,12 @@ For each Phase exit gate and each Milestone acceptance check referenced in Secti
 
 | Gate/Milestone | Evidence (tests/checks) | Covered SPEC-IDs |
 |---|---|---|
-| **Phase 0 Exit** | Lexer/Parser AST production on expressions | SPEC-LANG-0002..0007, 0101..0114, SPEC-FORGE-0009..0013 |
+| **Phase 0 Exit** | Lexer/Parser AST production on expressions | SPEC-LANG-0002..0007, 0101..0114, 0115..0120, SPEC-FORGE-0009..0013 |
 | **M0: Lexical Core** | Lexer unit tests + Golden tokenization | SPEC-LANG-0002..0007, SPEC-FORGE-0002 |
 | **M1: Pipeline & Diagnostics** | Diagnostic tests + i18n/JSON output validation | SPEC-FORGE-0101..0109 |
-| **M2: Parsing & Name Resolution** | AST construction tests + import resolution integration | SPEC-LANG-0101..0114, 0009..0015, SPEC-FORGE-0009..0018 |
-| **M3: Type System Core** | Inference/Compatibility/Literal unit tests | SPEC-LANG-0201..0203, 0206, 0211..0216, SPEC-FORGE-0019..0023 |
-| **M4: Build System Foundations** | `quarry init/build` integration + manifest loading | SPEC-QUARRY-0001, 0010..0013, 0015..0018 |
+| **M2: Parsing & Name Resolution** | AST construction tests + import resolution integration | SPEC-LANG-0101..0114, 0115..0120, 0009..0015, SPEC-FORGE-0009..0018 |
+| **M3: Type System Core** | Inference/Compatibility/Literal unit tests | SPEC-LANG-0201..0203, 0206, 0211..0216, 0242, 0243, SPEC-FORGE-0019..0023 |
+| **M4: Build System Foundations** | `quarry init/build` integration + manifest loading | SPEC-QUARRY-0001, 0010..0013, 0015..0018, 0021..0024, 0026 |
 | **M5: Advanced Type System** | Trait/Lifetime inference verification | SPEC-LANG-0204..0205 |
 | **M6: Ownership & Borrowing** | Borrow checker diagnostic tests | SPEC-LANG-0301, 0303..0310 |
 | **M7: Code Generation & Linking** | Execution of compiled binaries + closure tests | SPEC-FORGE-0024..0028, 0008, SPEC-LANG-0501..0508 |
@@ -14011,9 +14437,9 @@ For each Phase exit gate and each Milestone acceptance check referenced in Secti
 |-----------|-------------------------|------------------|
 | M9        | stdlib unit tests, I/O smoke tests | SPEC-LANG-0801, SPEC-LANG-0802, SPEC-LANG-0803 |
 | M10       | serialization conformance tests, networking stress tests | SPEC-LANG-0804, SPEC-LANG-0805, SPEC-LANG-0806 |
-| M11       | contract violation tests, allocation reports | SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203 |
-| M12       | REPL integration tests, visualization golden tests | SPEC-QUARRY-0201, SPEC-QUARRY-0202, SPEC-QUARRY-0203, SPEC-QUARRY-0204, SPEC-QUARRY-0401, SPEC-QUARRY-0402, SPEC-QUARRY-0403, SPEC-QUARRY-0404 |
-| M13       | profiling accuracy checks, lockfile regression tests | SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903 |
+| M11       | contract violation tests, allocation reports, sanitizer logs | SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207, SPEC-FORGE-0208, SPEC-QUARRY-0031, SPEC-QUARRY-0032 |
+| M12       | REPL integration tests, visualization golden tests, auto-fix verification, doc extraction | SPEC-QUARRY-0201, SPEC-QUARRY-0202, SPEC-QUARRY-0203, SPEC-QUARRY-0204, SPEC-QUARRY-0025, SPEC-QUARRY-0030, SPEC-QUARRY-0033, SPEC-QUARRY-0034, SPEC-QUARRY-0035, SPEC-QUARRY-0401, SPEC-QUARRY-0402, SPEC-QUARRY-0403, SPEC-QUARRY-0404 |
+| M13       | profiling accuracy checks, lockfile regression tests, cross-compilation smoke tests | SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-QUARRY-0113, SPEC-QUARRY-0036, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0604, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903, SPEC-FORGE-0305, SPEC-FORGE-0306, SPEC-FORGE-0307 |
 | M14       | TSan results, async cancellation tests | SPEC-LANG-1001, SPEC-LANG-1002, SPEC-LANG-1003, SPEC-LANG-1004, SPEC-LANG-1005 |
 | M15       | audit reports, SBOM verification | SPEC-QUARRY-0301, SPEC-QUARRY-0302, SPEC-QUARRY-0303, SPEC-QUARRY-0304 |
 | M16       | exhaustive runtime verification tests | SPEC-QUARRY-0109 |
@@ -14034,21 +14460,21 @@ For each Phase exit gate and each Milestone acceptance check referenced in Secti
 
 Definition: a "P1 shallow candidate" is any spec area that is required for Beta completeness but currently exists only as a NODE or broad spec.
 
-- **SPEC-LANG-0400** (Design by Contract): Expanded into LEAFs for postconditions, invariants, and state capture (+4 LEAFs).
+- **SPEC-LANG-0400** (Design by Contract): Expanded into LEAFs for postconditions, invariants, state capture, and static verification (+7 LEAFs).
 
-- **SPEC-LANG-0600** (Explicit SIMD): Expanded into LEAFs for types, attributes, and introspection (+3 LEAFs).
+- **SPEC-LANG-0600** (Explicit SIMD): Expanded into LEAFs for types, attributes, introspection, and @noalias (+4 LEAFs).
 
 - **SPEC-LANG-0900** (Memory Management): Expanded into LEAFs for allocators and freestanding support (+3 LEAFs).
 
 - **SPEC-LANG-1000** (Concurrency System): Expanded into LEAFs for threads, sync, and structured concurrency (+5 LEAFs).
 
-- **SPEC-FORGE-0200** (Performance Governance): Expanded into LEAFs for blame analysis and budget verification (+2 LEAFs).
+- **SPEC-FORGE-0200** (Performance Governance): Expanded into LEAFs for blame analysis, budget verification, and aliasing checks (+3 LEAFs).
 
 - **SPEC-QUARRY-0300** (Supply-Chain Security): Expanded into LEAFs for auditing, vetting, and SBOM (+4 LEAFs).
 
 - **SPEC-QUARRY-0400** (Ecosystem Tooling): Promoted to P1 and expanded into LEAFs for analytics, aggregate API, and bindgen (+4 LEAFs).
 
-Total new P1 LEAFs: 25.
+Total new P1 LEAFs: 34.
 
 ### Alpha/Beta Critical Leaves (This Run)
 *(Superseded by Section 8.1 for P0 ordering)*
@@ -14108,7 +14534,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: AST construction and symbol table management.
 
-    - Included: SPEC-LANG-0101, SPEC-LANG-0102, SPEC-LANG-0103, SPEC-LANG-0104, SPEC-LANG-0105, SPEC-LANG-0106, SPEC-LANG-0107, SPEC-LANG-0111, SPEC-LANG-0112, SPEC-LANG-0113, SPEC-LANG-0114, SPEC-LANG-0115, SPEC-LANG-0108, SPEC-LANG-0116, SPEC-LANG-0117, SPEC-LANG-0118, SPEC-LANG-0119, SPEC-FORGE-0009, SPEC-FORGE-0010, SPEC-FORGE-0011, SPEC-FORGE-0012, SPEC-FORGE-0013, SPEC-FORGE-0014, SPEC-FORGE-0015, SPEC-FORGE-0016, SPEC-FORGE-0017, SPEC-FORGE-0018, SPEC-LANG-0009, SPEC-LANG-0010, SPEC-LANG-0011, SPEC-LANG-0012, SPEC-LANG-0013, SPEC-LANG-0014, SPEC-LANG-0015.
+    - Included: SPEC-LANG-0101, SPEC-LANG-0102, SPEC-LANG-0103, SPEC-LANG-0104, SPEC-LANG-0105, SPEC-LANG-0106, SPEC-LANG-0107, SPEC-LANG-0111, SPEC-LANG-0112, SPEC-LANG-0113, SPEC-LANG-0114, SPEC-LANG-0115, SPEC-LANG-0108, SPEC-LANG-0116, SPEC-LANG-0117, SPEC-LANG-0118, SPEC-LANG-0119, SPEC-LANG-0120, SPEC-FORGE-0009, SPEC-FORGE-0010, SPEC-FORGE-0011, SPEC-FORGE-0012, SPEC-FORGE-0013, SPEC-FORGE-0014, SPEC-FORGE-0015, SPEC-FORGE-0016, SPEC-FORGE-0017, SPEC-FORGE-0018, SPEC-LANG-0009, SPEC-LANG-0010, SPEC-LANG-0011, SPEC-LANG-0012, SPEC-LANG-0013, SPEC-LANG-0014, SPEC-LANG-0015.
 
     - Dependencies: M1.
 
@@ -14118,7 +14544,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Infer and check types for basic expressions.
 
-    - Included: SPEC-LANG-0201, SPEC-LANG-0202, SPEC-LANG-0203, SPEC-LANG-0206, SPEC-LANG-0211, SPEC-LANG-0212, SPEC-LANG-0213, SPEC-LANG-0214, SPEC-LANG-0215, SPEC-LANG-0216, SPEC-LANG-0217, SPEC-LANG-0218, SPEC-LANG-0219, SPEC-LANG-0220, SPEC-LANG-0221, SPEC-LANG-0222, SPEC-LANG-0223, SPEC-LANG-0224, SPEC-LANG-0225, SPEC-LANG-0226, SPEC-LANG-0227, SPEC-LANG-0228, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0232, SPEC-LANG-0233, SPEC-LANG-0234, SPEC-LANG-0235, SPEC-LANG-0236, SPEC-LANG-0237, SPEC-LANG-0238, SPEC-LANG-0240, SPEC-LANG-0241, SPEC-LANG-0208, SPEC-LANG-0209, SPEC-LANG-0210, SPEC-FORGE-0019, SPEC-FORGE-0020, SPEC-FORGE-0021, SPEC-FORGE-0022, SPEC-FORGE-0023.
+    - Included: SPEC-LANG-0201, SPEC-LANG-0202, SPEC-LANG-0203, SPEC-LANG-0206, SPEC-LANG-0211, SPEC-LANG-0212, SPEC-LANG-0213, SPEC-LANG-0214, SPEC-LANG-0215, SPEC-LANG-0216, SPEC-LANG-0217, SPEC-LANG-0218, SPEC-LANG-0219, SPEC-LANG-0220, SPEC-LANG-0221, SPEC-LANG-0222, SPEC-LANG-0223, SPEC-LANG-0224, SPEC-LANG-0225, SPEC-LANG-0226, SPEC-LANG-0227, SPEC-LANG-0228, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0232, SPEC-LANG-0233, SPEC-LANG-0234, SPEC-LANG-0235, SPEC-LANG-0236, SPEC-LANG-0237, SPEC-LANG-0238, SPEC-LANG-0240, SPEC-LANG-0241, SPEC-LANG-0242, SPEC-LANG-0243, SPEC-LANG-0208, SPEC-LANG-0209, SPEC-LANG-0210, SPEC-FORGE-0019, SPEC-FORGE-0020, SPEC-FORGE-0021, SPEC-FORGE-0022, SPEC-FORGE-0023.
 
     - Dependencies: M2.
 
@@ -14128,7 +14554,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Basic project structure and dependency resolution.
 
-    - Included: SPEC-QUARRY-0001 (NODE), SPEC-QUARRY-0002, SPEC-QUARRY-0003, SPEC-QUARRY-0010, SPEC-QUARRY-0011, SPEC-QUARRY-0012, SPEC-QUARRY-0013, SPEC-QUARRY-0015, SPEC-QUARRY-0016, SPEC-QUARRY-0017, SPEC-QUARRY-0018, SPEC-QUARRY-0021.
+    - Included: SPEC-QUARRY-0001 (NODE), SPEC-QUARRY-0002, SPEC-QUARRY-0003, SPEC-QUARRY-0010, SPEC-QUARRY-0011, SPEC-QUARRY-0012, SPEC-QUARRY-0013, SPEC-QUARRY-0015, SPEC-QUARRY-0016, SPEC-QUARRY-0017, SPEC-QUARRY-0018, SPEC-QUARRY-0021, SPEC-QUARRY-0022, SPEC-QUARRY-0023, SPEC-QUARRY-0024, SPEC-QUARRY-0026.
 
     - Dependencies: None (parallelizable with M2/M3).
 
@@ -14217,7 +14643,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Design by Contract and advanced compiler passes.
 
-    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207.
+    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207, SPEC-FORGE-0208, SPEC-QUARRY-0031, SPEC-QUARRY-0032.
 
     - Dependency satisfaction note: Depends on M6 (Ownership).
 
@@ -14227,7 +14653,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Interactive tools for developer onboarding and visualization.
 
-    - Included: SPEC-QUARRY-0201, SPEC-QUARRY-0202, SPEC-QUARRY-0203, SPEC-QUARRY-0204, SPEC-QUARRY-0401, SPEC-QUARRY-0402, SPEC-QUARRY-0403, SPEC-QUARRY-0404, SPEC-QUARRY-0501, SPEC-QUARRY-0502, SPEC-QUARRY-0503, SPEC-QUARRY-0504, SPEC-QUARRY-0505.
+    - Included: SPEC-QUARRY-0201, SPEC-QUARRY-0202, SPEC-QUARRY-0203, SPEC-QUARRY-0204, SPEC-QUARRY-0025, SPEC-QUARRY-0030, SPEC-QUARRY-0033, SPEC-QUARRY-0034, SPEC-QUARRY-0035, SPEC-QUARRY-0401, SPEC-QUARRY-0402, SPEC-QUARRY-0403, SPEC-QUARRY-0404, SPEC-QUARRY-0501, SPEC-QUARRY-0502, SPEC-QUARRY-0503, SPEC-QUARRY-0504, SPEC-QUARRY-0505.
 
     - Dependency satisfaction note: Depends on M7 (Codegen for JIT/WASM) and M8 (Build Orchestration).
 
@@ -14247,7 +14673,7 @@ Total new P1 LEAFs: 25.
   
     - Goal: Tooling for static and runtime performance analysis.
     
-    - Included: SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-QUARRY-0113, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0604, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903, SPEC-FORGE-0305, SPEC-FORGE-0306.
+    - Included: SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-QUARRY-0113, SPEC-QUARRY-0036, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0604, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903, SPEC-FORGE-0305, SPEC-FORGE-0306, SPEC-FORGE-0307.
     
     - Dependency satisfaction note: Depends on M10 (for benchmarking) and M11 (for allocation tracking).
     
@@ -14707,6 +15133,22 @@ Total new P1 LEAFs: 25.
 - **Mapping coverage delta:** +25 REQs mapped to LEAFs
 - **Roadmap placement:** Consistent (M2, M3, M4, M7, M11, M13)
 - **New dependencies:** None (expanding existing systems)
+
+### Verification (Scoped): REQ-151..REQ-175 Mapping (This Run)
+
+- **REQ Range:** REQ-151..REQ-175
+- **New LEAFs:** 11 (SPEC-FORGE-0307, SPEC-LANG-0242, SPEC-LANG-0243, SPEC-LANG-0120, SPEC-QUARRY-0026, SPEC-QUARRY-0015, SPEC-QUARRY-0022, SPEC-QUARRY-0023, SPEC-QUARRY-0016, SPEC-QUARRY-0024, SPEC-QUARRY-0025)
+- **Mapping coverage delta:** +25 REQs mapped to LEAFs
+- **Roadmap placement:** Consistent (M2, M3, M4, M8, M12, M13)
+- **New dependencies:** None
+
+### Verification (Scoped): REQ-176..REQ-200 Mapping (This Run)
+
+- **REQ Range:** REQ-176..REQ-200
+- **New LEAFs:** 8 (SPEC-QUARRY-0030, SPEC-QUARRY-0031, SPEC-QUARRY-0032, SPEC-QUARRY-0033, SPEC-QUARRY-0034, SPEC-QUARRY-0035, SPEC-QUARRY-0036, SPEC-FORGE-0208)
+- **Mapping coverage delta:** +25 REQs mapped to LEAFs
+- **Roadmap placement:** Consistent (M11, M12, M13)
+- **New dependencies:** None
 
 ---
 
