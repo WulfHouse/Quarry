@@ -4050,31 +4050,31 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-123 -> SPEC-LANG-0401
 - REQ-124 -> SPEC-LANG-0403
 - REQ-125 -> SPEC-LANG-0403
-- REQ-126 -> SPEC-LANG-0400
-- REQ-127 -> SPEC-LANG-0400
-- REQ-128 -> SPEC-LANG-0400
-- REQ-129 -> SPEC-LANG-0400
-- REQ-130 -> SPEC-QUARRY-0001
-- REQ-131 -> SPEC-LANG-0400
-- REQ-132 -> SPEC-LANG-0600
-- REQ-133 -> SPEC-LANG-0600
-- REQ-134 -> SPEC-LANG-0600
+- REQ-126 -> SPEC-LANG-0404
+- REQ-127 -> SPEC-LANG-0405
+- REQ-128 -> SPEC-LANG-0406
+- REQ-129 -> SPEC-LANG-0407
+- REQ-130 -> SPEC-QUARRY-0021
+- REQ-131 -> SPEC-LANG-0408
+- REQ-132 -> SPEC-LANG-0604
+- REQ-133 -> SPEC-FORGE-0305
+- REQ-134 -> SPEC-FORGE-0207
 - REQ-135 -> SPEC-LANG-0500
-- REQ-136 -> SPEC-LANG-0500
-- REQ-137 -> SPEC-LANG-0500
-- REQ-138 -> SPEC-LANG-0500
-- REQ-139 -> SPEC-LANG-0500
+- REQ-136 -> SPEC-LANG-0501
+- REQ-137 -> SPEC-LANG-0510
+- REQ-138 -> SPEC-LANG-0502
+- REQ-139 -> SPEC-LANG-0503
 - REQ-140 -> SPEC-LANG-0500
-- REQ-141 -> SPEC-LANG-0500
-- REQ-142 -> SPEC-LANG-0500
-- REQ-143 -> SPEC-QUARRY-0100
-- REQ-144 -> SPEC-LANG-0500
-- REQ-145 -> SPEC-LANG-0500
-- REQ-146 -> SPEC-LANG-0200
-- REQ-147 -> SPEC-LANG-0200
-- REQ-148 -> SPEC-FORGE-0007
-- REQ-149 -> SPEC-LANG-0100
-- REQ-150 -> SPEC-FORGE-0007
+- REQ-141 -> SPEC-LANG-0505
+- REQ-142 -> SPEC-LANG-0504
+- REQ-143 -> SPEC-QUARRY-0113
+- REQ-144 -> SPEC-LANG-0511
+- REQ-145 -> SPEC-LANG-0511
+- REQ-146 -> SPEC-LANG-0240
+- REQ-147 -> SPEC-LANG-0241
+- REQ-148 -> SPEC-FORGE-0029
+- REQ-149 -> SPEC-LANG-0119
+- REQ-150 -> SPEC-FORGE-0306
 - REQ-151 -> SPEC-FORGE-0007
 - REQ-152 -> SPEC-FORGE-0007
 - REQ-153 -> SPEC-LANG-0400
@@ -6354,6 +6354,36 @@ let zeros = [0; 100]        # Repeat syntax
 
 - Integration: Verify order of side effects in complex expressions.
 
+#### SPEC-LANG-0119: Compile-time Conditionals (if-comptime)
+
+**Kind:** LEAF
+
+**Source:** REQ-149, SSOT Section 7.6
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Parser supports `if` statements where the condition depends on compile-time parameters.
+
+- Compiler evaluates the condition during monomorphization/specialization.
+
+- Completely eliminates dead branches from the generated code.
+
+**User-facing behavior:**
+
+- Static selection of code paths based on compile-time configuration (e.g., Debug/Release, Target OS).
+
+**Semantics:**
+
+- Condition must be a constant expression or compile-time parameter.
+
+**Examples:**
+
+- `if [DebugMode]: print("Debugging...")`
+
 #### SPEC-LANG-0110: Statement Parsing
 
 **Kind:** NODE
@@ -6381,6 +6411,8 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0117: Context managers (with) parsing
 
 - SPEC-LANG-0118: Deterministic evaluation order parsing
+
+- SPEC-LANG-0119: Compile-time conditionals (if-comptime)
 
 #### SPEC-LANG-0111: Conditional Statement Parsing
 
@@ -6779,6 +6811,10 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0237: Module-level privacy and visibility
 
 - SPEC-LANG-0238: Composition-based type architecture (No inheritance)
+
+- SPEC-LANG-0240: Compile-time function evaluation (const fn)
+
+- SPEC-LANG-0241: Compile-time parameterization ([Size: int])
 
 #### SPEC-LANG-0201: Type Inference Algorithm
 
@@ -8310,6 +8346,58 @@ let zeros = [0; 100]        # Repeat syntax
 
 - Favor composition and interface-based design.
 
+#### SPEC-LANG-0240: Compile-time Function Evaluation (const fn)
+
+**Kind:** LEAF
+
+**Source:** REQ-146, SSOT Section 7.6
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `const fn` modifier for functions.
+
+- Restrict `const fn` to operations that are safe to execute at compile-time (no I/O, no mutable global state).
+
+- Compiler evaluates calls to `const fn` with constant arguments during type checking/early analysis.
+
+**User-facing behavior:**
+
+- Precomputation of complex values and lookup tables.
+
+**Examples:**
+
+- `const fn square(x: int) -> int: return x * x; let val = square(5);`
+
+#### SPEC-LANG-0241: Compile-time Parameterization ([Size: int])
+
+**Kind:** LEAF
+
+**Source:** REQ-147, SSOT Section 7.6
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Support compile-time parameters in square brackets for functions and types (e.g., `fn alloc[Size: int]()`).
+
+- These parameters act as constants within the function body.
+
+- Triggers monomorphization (specialization) for each unique constant value.
+
+**User-facing behavior:**
+
+- Zero-overhead parameterization for performance-critical code.
+
+**Examples:**
+
+- `struct Array[T, Size: int]: data: [T; Size]`
+
 ### 4.4 Ownership and Borrowing
 
 [... existing content ...]
@@ -8337,6 +8425,12 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0404: State capture function (old())
 
 - SPEC-LANG-0405: Quantified predicates (forall, exists)
+
+- SPEC-LANG-0406: Compile-time contract verification
+
+- SPEC-LANG-0407: Contract propagation and blame tracking
+
+- SPEC-LANG-0408: @safety_critical attribute
 
 #### SPEC-LANG-0401: Precondition Attribute (@requires)
 
@@ -8512,6 +8606,82 @@ let zeros = [0; 100]        # Repeat syntax
 
 - SPEC-LANG-0402
 
+#### SPEC-LANG-0406: Compile-time Contract Verification
+
+**Kind:** LEAF
+
+**Source:** REQ-128, SSOT Section 7.3
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Compiler attempts to prove contract conditions at compile-time using symbolic execution or range analysis.
+
+- If proven true, runtime check is omitted even in debug builds.
+
+- If proven false, a compilation error is raised.
+
+**User-facing behavior:**
+
+- Improved performance and earlier error detection.
+
+**Tests required:**
+
+- Unit: Verify omission of checks for simple true-by-construction contracts.
+
+- Golden: Error message for statically-provable contract violations.
+
+#### SPEC-LANG-0407: Contract Propagation and Blame Tracking
+
+**Kind:** LEAF
+
+**Source:** REQ-129, SSOT Section 7.3
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Contracts are tracked across function boundaries.
+
+- On violation, the error message identifies whether the caller or callee breached the contract (blame).
+
+**User-facing behavior:**
+
+- Clearer diagnostics for complex cross-module contract failures.
+
+**Errors/diagnostics:**
+
+- `ContractViolation: Precondition failed at [call-site]; blame: [caller]`
+
+#### SPEC-LANG-0408: @safety_critical Attribute
+
+**Kind:** LEAF
+
+**Source:** REQ-131, SSOT Section 7.3
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Support `@safety_critical` attribute for contract-bearing functions.
+
+- Contracts in such functions are checked even in `release` build profiles.
+
+**User-facing behavior:**
+
+- Guaranteed safety for critical operations with opt-in runtime overhead in production.
+
+**Examples:**
+
+- `@safety_critical @requires(ptr != null) fn sensitive_op(ptr: *u8)`
+
 #### SPEC-LANG-0405: Quantified Predicates (forall, exists)
 
 **Kind:** LEAF
@@ -8585,6 +8755,10 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0507: Closure environment memory layout
 
 - SPEC-LANG-0508: Recursive closure restrictions
+
+- SPEC-LANG-0510: Algorithmic helpers via parameter closures
+
+- SPEC-LANG-0511: Stdlib closure guidelines (Algorithmic/Flexible)
 
 #### SPEC-LANG-0501: Parameter Closure Syntax (fn[...])
 
@@ -8804,6 +8978,50 @@ let zeros = [0; 100]        # Repeat syntax
 
 - Unit: Error on direct recursive closure without boxing.
 
+#### SPEC-LANG-0510: Algorithmic Helpers via Parameter Closures
+
+**Kind:** LEAF
+
+**Source:** REQ-137, SSOT Section 7.5
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Implement standard library primitives `vectorize`, `parallelize`, and `tile`.
+
+- These must take `fn[...]` (parameter closures) to ensure zero runtime overhead and mandatory inlining.
+
+**User-facing behavior:**
+
+- High-performance algorithmic building blocks with no abstraction cost.
+
+**Examples:**
+
+- `vectorize(0..1024, fn[i]: a[i] = b[i] + c[i])`
+
+#### SPEC-LANG-0511: Stdlib Closure Guidelines (Algorithmic/Flexible)
+
+**Kind:** LEAF
+
+**Source:** REQ-144, REQ-145, SSOT Section 7.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Establish and document guidelines for stdlib API design:
+    - High-performance/inlineable APIs use `fn[...]`.
+    - Flexible/dynamic/escaping APIs (e.g., threads, events) use `fn(...)`.
+
+**User-facing behavior:**
+
+- Consistent and predictable API behavior across the standard library.
+
 #### SPEC-LANG-0600: Explicit SIMD and Vectorization
 
 **Kind:** NODE
@@ -8821,6 +9039,8 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0602: @simd attribute enforcement
 
 - SPEC-LANG-0603: CPU feature introspection (preferred_width)
+
+- SPEC-LANG-0604: @noalias attribute syntax and semantics
 
 #### SPEC-LANG-0601: Portable SIMD types (simd::Vec[T, N])
 
@@ -8867,6 +9087,36 @@ let zeros = [0; 100]        # Repeat syntax
 **Dependencies:**
 
 - SPEC-LANG-0600
+
+#### SPEC-LANG-0604: @noalias Attribute Syntax and Semantics
+
+**Kind:** LEAF
+
+**Source:** REQ-132, SSOT Section 7.4
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Parser supports `@noalias` attribute on function parameters (pointers/references).
+
+- Marks the corresponding LLVM parameters with the `noalias` attribute.
+
+- Documents that this is an unsafe assertion (implies `unsafe`).
+
+**User-facing behavior:**
+
+- Expert control over aliasing to enable aggressive optimizations.
+
+**Semantics:**
+
+- Asserting `@noalias` means the memory accessed via this parameter is not accessed via any other parameter in the same function scope.
+
+**Examples:**
+
+- `fn transform(@noalias src: *f32, @noalias dst: *f32, len: usize)`
 
 #### SPEC-LANG-0602: @simd Attribute Enforcement
 
@@ -11252,6 +11502,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-FORGE-0028: Memory and pointer codegen (alloc, deref)
 
+- SPEC-FORGE-0029: Specialized code generation for comptime parameters
+
 #### SPEC-FORGE-0024: Codegen Driver and LLVM Context Management
 
 **Kind:** LEAF
@@ -11372,6 +11624,28 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Unit: Verify IR for pointer access and local variable storage.
 
+#### SPEC-FORGE-0029: Specialized Code Generation for Comptime Parameters
+
+**Kind:** LEAF
+
+**Source:** REQ-148, SSOT Section 7.6
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement the monomorphization engine for compile-time parameters.
+
+- Generate unique LLVM function symbols for each unique set of constant arguments.
+
+- Ensure that specialization happens before full IR optimization.
+
+**User-facing behavior:**
+
+- High performance via specialized code (e.g., constant-folded branches, unrolled loops).
+
 #### SPEC-FORGE-0008: Linking Phase
 
 **Kind:** LEAF  
@@ -11455,6 +11729,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-FORGE-0205: Monomorphization and Static Dispatch
 
 - SPEC-FORGE-0206: Zero-cost Error Handling (No Unwinding)
+
+- SPEC-FORGE-0207: Runtime aliasing verification
 
 #### SPEC-FORGE-0201: Allocation Tracking Pass
 
@@ -11642,6 +11918,30 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Zero-cost errors when they do not occur; predictable performance.
 
+#### SPEC-FORGE-0207: Runtime Aliasing Verification
+
+**Kind:** LEAF
+
+**Source:** REQ-134, SSOT Section 7.4
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- In debug builds, the compiler generates checks to verify that memory areas marked with `@noalias` do not overlap.
+
+- Panics with a clear diagnostic if aliasing is detected at runtime.
+
+**User-facing behavior:**
+
+- Catching unsafe optimization assumptions early in development.
+
+**Tests required:**
+
+- Integration: Verify panic when passing overlapping pointers to a `@noalias` function in debug.
+
 #### SPEC-FORGE-0300: Advanced Optimization Suite
 
 **Kind:** NODE
@@ -11661,6 +11961,10 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-FORGE-0303: CPU Multi-versioning dispatcher
 
 - SPEC-FORGE-0304: Bounds check elision
+
+- SPEC-FORGE-0305: Optimization via noalias
+
+- SPEC-FORGE-0306: Explicit loop unrolling (@unroll)
 
 #### SPEC-FORGE-0303: CPU Multi-versioning Dispatcher
 
@@ -11707,6 +12011,52 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Tests required:**
 
 - Integration: Verify absence of `panic_bounds_check` in optimized IR for safe loops
+
+#### SPEC-FORGE-0305: Optimization via noalias
+
+**Kind:** LEAF
+
+**Source:** REQ-133, SSOT Section 7.4
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Compiler leverages `@noalias` assertions to reorder memory accesses.
+
+- Enables aggressive vectorization and elimination of redundant loads.
+
+**User-facing behavior:**
+
+- Significant performance gains in memory-intensive kernels.
+
+#### SPEC-FORGE-0306: Explicit Loop Unrolling (@unroll)
+
+**Kind:** LEAF
+
+**Source:** REQ-150, REQ-151, SSOT Section 7.6
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement `@unroll` attribute for loops.
+
+- Support `factor`, `full`, and `auto` parameters.
+
+- Enforce safety limits (max factor 64, body size limits) to prevent binary bloat.
+
+**User-facing behavior:**
+
+- Precise control over loop optimization.
+
+**Errors/diagnostics:**
+
+- `OptimizationWarning: Loop body too large for requested unroll factor; ignoring.`
 
 #### SPEC-FORGE-0100: Error Message Formatting
 
@@ -12066,6 +12416,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-QUARRY-0020: Output artifact management (binary vs library)
 
+- SPEC-QUARRY-0021: Configurable contract checking levels
+
 #### SPEC-QUARRY-0010: CLI Argument Parsing
 
 **Kind:** LEAF
@@ -12352,6 +12704,26 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Integration: Build one binary and one library and verify artifacts.
 
+#### SPEC-QUARRY-0021: Configurable Contract Checking Levels
+
+**Kind:** LEAF
+
+**Source:** REQ-130, SSOT Section 7.3
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Add `--contracts [all|none|safety_critical]` flag to `quarry build` and `quarry run`.
+
+- Support setting the default contract level in `Quarry.toml` build profiles.
+
+**User-facing behavior:**
+
+- Easy control over contract overhead.
+
 ### 6.2 Advanced Tooling
 
 #### SPEC-QUARRY-0100: Performance Profiling and Analysis
@@ -12387,6 +12759,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-QUARRY-0111: Memory Layout Analysis (quarry layout)
 
 - SPEC-QUARRY-0112: Aliasing and Optimization Insights
+
+- SPEC-QUARRY-0113: Closure cost analysis integration
 
 #### SPEC-QUARRY-0107: Machine Autotuning (quarry autotune)
 
@@ -12637,6 +13011,28 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **User-facing behavior:**
 
 - Visibility into low-level compiler optimizations.
+
+#### SPEC-QUARRY-0113: Closure Cost Analysis Integration
+
+**Kind:** LEAF
+
+**Source:** REQ-143, SSOT Section 7.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- `quarry cost` tool reports on closure allocation costs.
+
+- Distinguishes between zero-cost `fn[...]` and potentially heap-allocated `fn(...)`.
+
+- Provides breakdown of captured variable sizes and types.
+
+**User-facing behavior:**
+
+- Visibility into the performance impact of closure usage.
 
 #### SPEC-QUARRY-0200: Interactive Learning and Exploration
 
@@ -13712,7 +14108,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: AST construction and symbol table management.
 
-    - Included: SPEC-LANG-0101, SPEC-LANG-0102, SPEC-LANG-0103, SPEC-LANG-0104, SPEC-LANG-0105, SPEC-LANG-0106, SPEC-LANG-0107, SPEC-LANG-0111, SPEC-LANG-0112, SPEC-LANG-0113, SPEC-LANG-0114, SPEC-LANG-0115, SPEC-LANG-0108, SPEC-LANG-0116, SPEC-LANG-0117, SPEC-LANG-0118, SPEC-FORGE-0009, SPEC-FORGE-0010, SPEC-FORGE-0011, SPEC-FORGE-0012, SPEC-FORGE-0013, SPEC-FORGE-0014, SPEC-FORGE-0015, SPEC-FORGE-0016, SPEC-FORGE-0017, SPEC-FORGE-0018, SPEC-LANG-0009, SPEC-LANG-0010, SPEC-LANG-0011, SPEC-LANG-0012, SPEC-LANG-0013, SPEC-LANG-0014, SPEC-LANG-0015.
+    - Included: SPEC-LANG-0101, SPEC-LANG-0102, SPEC-LANG-0103, SPEC-LANG-0104, SPEC-LANG-0105, SPEC-LANG-0106, SPEC-LANG-0107, SPEC-LANG-0111, SPEC-LANG-0112, SPEC-LANG-0113, SPEC-LANG-0114, SPEC-LANG-0115, SPEC-LANG-0108, SPEC-LANG-0116, SPEC-LANG-0117, SPEC-LANG-0118, SPEC-LANG-0119, SPEC-FORGE-0009, SPEC-FORGE-0010, SPEC-FORGE-0011, SPEC-FORGE-0012, SPEC-FORGE-0013, SPEC-FORGE-0014, SPEC-FORGE-0015, SPEC-FORGE-0016, SPEC-FORGE-0017, SPEC-FORGE-0018, SPEC-LANG-0009, SPEC-LANG-0010, SPEC-LANG-0011, SPEC-LANG-0012, SPEC-LANG-0013, SPEC-LANG-0014, SPEC-LANG-0015.
 
     - Dependencies: M1.
 
@@ -13722,7 +14118,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Infer and check types for basic expressions.
 
-    - Included: SPEC-LANG-0201, SPEC-LANG-0202, SPEC-LANG-0203, SPEC-LANG-0206, SPEC-LANG-0211, SPEC-LANG-0212, SPEC-LANG-0213, SPEC-LANG-0214, SPEC-LANG-0215, SPEC-LANG-0216, SPEC-LANG-0217, SPEC-LANG-0218, SPEC-LANG-0219, SPEC-LANG-0220, SPEC-LANG-0221, SPEC-LANG-0222, SPEC-LANG-0223, SPEC-LANG-0224, SPEC-LANG-0225, SPEC-LANG-0226, SPEC-LANG-0227, SPEC-LANG-0228, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0232, SPEC-LANG-0233, SPEC-LANG-0234, SPEC-LANG-0235, SPEC-LANG-0236, SPEC-LANG-0237, SPEC-LANG-0238, SPEC-LANG-0208, SPEC-LANG-0209, SPEC-LANG-0210, SPEC-FORGE-0019, SPEC-FORGE-0020, SPEC-FORGE-0021, SPEC-FORGE-0022, SPEC-FORGE-0023.
+    - Included: SPEC-LANG-0201, SPEC-LANG-0202, SPEC-LANG-0203, SPEC-LANG-0206, SPEC-LANG-0211, SPEC-LANG-0212, SPEC-LANG-0213, SPEC-LANG-0214, SPEC-LANG-0215, SPEC-LANG-0216, SPEC-LANG-0217, SPEC-LANG-0218, SPEC-LANG-0219, SPEC-LANG-0220, SPEC-LANG-0221, SPEC-LANG-0222, SPEC-LANG-0223, SPEC-LANG-0224, SPEC-LANG-0225, SPEC-LANG-0226, SPEC-LANG-0227, SPEC-LANG-0228, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0232, SPEC-LANG-0233, SPEC-LANG-0234, SPEC-LANG-0235, SPEC-LANG-0236, SPEC-LANG-0237, SPEC-LANG-0238, SPEC-LANG-0240, SPEC-LANG-0241, SPEC-LANG-0208, SPEC-LANG-0209, SPEC-LANG-0210, SPEC-FORGE-0019, SPEC-FORGE-0020, SPEC-FORGE-0021, SPEC-FORGE-0022, SPEC-FORGE-0023.
 
     - Dependencies: M2.
 
@@ -13732,7 +14128,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Basic project structure and dependency resolution.
 
-    - Included: SPEC-QUARRY-0001 (NODE), SPEC-QUARRY-0002, SPEC-QUARRY-0003, SPEC-QUARRY-0010, SPEC-QUARRY-0011, SPEC-QUARRY-0012, SPEC-QUARRY-0013, SPEC-QUARRY-0015, SPEC-QUARRY-0016, SPEC-QUARRY-0017, SPEC-QUARRY-0018.
+    - Included: SPEC-QUARRY-0001 (NODE), SPEC-QUARRY-0002, SPEC-QUARRY-0003, SPEC-QUARRY-0010, SPEC-QUARRY-0011, SPEC-QUARRY-0012, SPEC-QUARRY-0013, SPEC-QUARRY-0015, SPEC-QUARRY-0016, SPEC-QUARRY-0017, SPEC-QUARRY-0018, SPEC-QUARRY-0021.
 
     - Dependencies: None (parallelizable with M2/M3).
 
@@ -13771,7 +14167,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Native binary production.
 
-    - Included: SPEC-FORGE-0024, SPEC-FORGE-0025, SPEC-FORGE-0026, SPEC-FORGE-0027, SPEC-FORGE-0028, SPEC-FORGE-0205, SPEC-FORGE-0206, SPEC-FORGE-0008, SPEC-LANG-0501, SPEC-LANG-0502, SPEC-LANG-0503, SPEC-LANG-0504, SPEC-LANG-0505, SPEC-LANG-0506, SPEC-LANG-0507, SPEC-LANG-0508.
+    - Included: SPEC-FORGE-0024, SPEC-FORGE-0025, SPEC-FORGE-0026, SPEC-FORGE-0027, SPEC-FORGE-0028, SPEC-FORGE-0029, SPEC-FORGE-0205, SPEC-FORGE-0206, SPEC-FORGE-0008, SPEC-LANG-0501, SPEC-LANG-0502, SPEC-LANG-0503, SPEC-LANG-0504, SPEC-LANG-0505, SPEC-LANG-0506, SPEC-LANG-0507, SPEC-LANG-0508.
 
     - Dependencies: M6.
 
@@ -13821,7 +14217,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Design by Contract and advanced compiler passes.
 
-    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204.
+    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207.
 
     - Dependency satisfaction note: Depends on M6 (Ownership).
 
@@ -13851,7 +14247,7 @@ Total new P1 LEAFs: 25.
   
     - Goal: Tooling for static and runtime performance analysis.
     
-    - Included: SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903.
+    - Included: SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-QUARRY-0113, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0604, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903, SPEC-FORGE-0305, SPEC-FORGE-0306.
     
     - Dependency satisfaction note: Depends on M10 (for benchmarking) and M11 (for allocation tracking).
     
@@ -14303,6 +14699,14 @@ Total new P1 LEAFs: 25.
 - **Mapping coverage delta:** +25 REQs mapped to LEAFs
 - **Roadmap placement:** Consistent (M2, M3, M7, M13)
 - **New dependencies:** None (self-contained parser/type/tooling additions)
+
+### Verification (Scoped): REQ-126..REQ-150 Mapping (This Run)
+
+- **REQ Range:** REQ-126..REQ-150
+- **New LEAFs:** 15 (SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0604, SPEC-FORGE-0207, SPEC-FORGE-0305, SPEC-FORGE-0306, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-QUARRY-0113, SPEC-LANG-0240, SPEC-LANG-0241, SPEC-LANG-0119, SPEC-FORGE-0029, SPEC-QUARRY-0021)
+- **Mapping coverage delta:** +25 REQs mapped to LEAFs
+- **Roadmap placement:** Consistent (M2, M3, M4, M7, M11, M13)
+- **New dependencies:** None (expanding existing systems)
 
 ---
 
