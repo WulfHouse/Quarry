@@ -4639,26 +4639,26 @@ This section contains normative requirements identified during the Post-freeze S
 - REQ-399 -> SPEC-QUARRY-0406
 - REQ-400 -> SPEC-LANG-0121
 - REQ-401 -> SPEC-LANG-0246
-- REQ-402 -> SPEC-LANG-0100
-- REQ-403 -> SPEC-LANG-0500
-- REQ-404 -> SPEC-LANG-0100
-- REQ-405 -> SPEC-LANG-1004
-- REQ-406 -> SPEC-LANG-0100
-- REQ-407 -> SPEC-LANG-0100
-- REQ-408 -> SPEC-LANG-0700
-- REQ-409 -> SPEC-LANG-1500
-- REQ-410 -> SPEC-LANG-1500
-- REQ-411 -> SPEC-LANG-1500
-- REQ-412 -> SPEC-QUARRY-0001
-- REQ-413 -> SPEC-QUARRY-0001
-- REQ-414 -> SPEC-QUARRY-0001
-- REQ-415 -> SPEC-FORGE-0100
+- REQ-402 -> SPEC-LANG-0247
+- REQ-403 -> SPEC-LANG-0512
+- REQ-404 -> SPEC-LANG-0122
+- REQ-405 -> SPEC-LANG-0123
+- REQ-406 -> SPEC-LANG-0022
+- REQ-407 -> SPEC-LANG-0023
+- REQ-408 -> SPEC-LANG-0705
+- REQ-409 -> SPEC-LANG-1502
+- REQ-410 -> SPEC-LANG-1503
+- REQ-411 -> SPEC-LANG-1504
+- REQ-412 -> SPEC-QUARRY-0015
+- REQ-413 -> SPEC-QUARRY-0015
+- REQ-414 -> SPEC-QUARRY-0015
+- REQ-415 -> SPEC-FORGE-0209
 - REQ-416 -> SPEC-QUARRY-0201
-- REQ-417 -> SPEC-QUARRY-0003
-- REQ-418 -> SPEC-QUARRY-0003
-- REQ-419 -> SPEC-QUARRY-0400
-- REQ-420 -> SPEC-QUARRY-0400
-- REQ-421 -> SPEC-QUARRY-0301
+- REQ-417 -> SPEC-QUARRY-0024
+- REQ-418 -> SPEC-QUARRY-0024
+- REQ-419 -> SPEC-QUARRY-0023
+- REQ-420 -> SPEC-QUARRY-0023
+- REQ-421 -> SPEC-QUARRY-0031
 - REQ-422 -> SPEC-QUARRY-0007
 - REQ-423 -> SPEC-QUARRY-0109
 
@@ -6459,6 +6459,52 @@ let zeros = [0; 100]        # Repeat syntax
 **User-facing behavior:**
 
 - Clear and unambiguous entry point for every application.
+
+- Clear and unambiguous entry point for every application.
+
+#### SPEC-LANG-0122: No Operator Overloading
+
+**Kind:** LEAF
+
+**Source:** REQ-404, SSOT Section 6.4
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Pyrite forbids operator overloading by default (REQ-404).
+
+- Ensure that operator symbols in code always have predictable, non-misleading performance and semantics.
+
+- Compiler must error if any attempt is made to redefine operator behavior for custom types.
+
+**User-facing behavior:**
+
+- Enhanced code auditability and predictability; `a + b` always means what it looks like.
+
+#### SPEC-LANG-0123: `with` Statement Trait Requirement
+
+**Kind:** LEAF
+
+**Source:** REQ-405, SSOT Section 6.7
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Resources used in a `with` statement must implement the `Closeable` trait (REQ-405).
+
+- The expression used in `with` must return a `Result[T, E]` where `T: Closeable`.
+
+- Compiler verifies trait implementation and result type during type checking.
+
+**User-facing behavior:**
+
+- Deterministic resource management with consistent error handling.
 
 #### SPEC-LANG-0110: Statement Parsing
 
@@ -8596,6 +8642,26 @@ let zeros = [0; 100]        # Repeat syntax
 
 - Clearer control flow; no accidental truthiness bugs.
 
+#### SPEC-LANG-0247: None Literal Assignment Constraint
+
+**Kind:** LEAF
+
+**Source:** REQ-402, SSOT Section 3.1
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- The `None` literal can only be assigned to variables whose type explicitly permits it (e.g., `Option[T]`) (REQ-402).
+
+- Compiler must error if `None` is assigned to a non-optional type.
+
+**User-facing behavior:**
+
+- Prevents accidental null assignment to non-optional types, enhancing memory safety.
+
 ### 4.4 Ownership and Borrowing
 
 [... existing content ...]
@@ -8990,6 +9056,8 @@ let zeros = [0; 100]        # Repeat syntax
 
 - SPEC-LANG-0511: Stdlib closure guidelines (Algorithmic/Flexible)
 
+- SPEC-LANG-0512: Untagged Union Safety (REQ-403)
+
 #### SPEC-LANG-0501: Parameter Closure Syntax (fn[...])
 
 **Kind:** LEAF
@@ -9251,6 +9319,28 @@ let zeros = [0; 100]        # Repeat syntax
 **User-facing behavior:**
 
 - Consistent and predictable API behavior across the standard library.
+
+- Consistent and predictable API behavior across the standard library.
+
+#### SPEC-LANG-0512: Untagged Union Safety
+
+**Kind:** LEAF
+
+**Source:** REQ-403, SSOT Section 5.3
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Reading from a union field is only considered safe if the programmer manually tracks the current active variant (e.g., using a tag field in a surrounding struct).
+
+- Otherwise, union field access must be performed within an `unsafe` block (REQ-403).
+
+**User-facing behavior:**
+
+- Memory safety enforcement for low-level union types.
 
 #### SPEC-LANG-0600: Explicit SIMD and Vectorization
 
@@ -9600,6 +9690,32 @@ let zeros = [0; 100]        # Repeat syntax
 **Dependencies:**
 
 - SPEC-LANG-0700
+
+- `DeviceVec` handles allocation on creation and deallocation on drop.
+
+#### SPEC-LANG-0705: Device Memory Access Restriction
+
+**Kind:** LEAF
+
+**Source:** REQ-408, SSOT Section 9.13
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- Device memory (`DevicePtr[T]`) can only be accessed within functions marked with the `@kernel` attribute (REQ-408).
+
+- Compiler must enforce this restriction to ensure memory safety in heterogeneous environments.
+
+**User-facing behavior:**
+
+- Prevents illegal access to GPU memory from host code, avoiding segmentation faults or hardware hangs.
+
+**Tests required:**
+
+- Unit: Verify compiler error when accessing `DevicePtr` from a non-`@kernel` function.
 
 #### SPEC-LANG-0703: GPU Thread and Block Primitives
 
@@ -12068,13 +12184,53 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Lexer and Parser use the edition flag to select appropriate rules.
 
+#### SPEC-LANG-0022: Edition Binary Compatibility
+
+**Kind:** LEAF
+
+**Source:** REQ-406, SSOT Section 8.14
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Language editions must maintain binary compatibility (ABI stability) (REQ-406).
+
+- Compiled artifacts from different editions must be linkable and compatible at runtime.
+
+**User-facing behavior:**
+
+- Projects can mix dependencies from different language editions without ABI conflicts.
+
+#### SPEC-LANG-0023: Edition Security Support Window
+
+**Kind:** LEAF
+
+**Source:** REQ-407, SSOT Section 8.14
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- The Pyrite ecosystem must provide security fixes for the current edition and at least two previous editions (REQ-407).
+
+- Document the security support lifecycle for each edition.
+
+**User-facing behavior:**
+
+- Long-term stability and security for production deployments using older editions.
+
 ---
 
 #### SPEC-LANG-1500: Formal Semantics and Security Certification
 
 **Kind:** NODE
 
-**Source:** REQ-383, REQ-409, REQ-410, REQ-411, SSOT Section 16.2
+**Source:** REQ-383, REQ-409, REQ-410, REQ-411, SSOT Section 16.1, 16.2
 
 **Status:** PLANNED
 
@@ -12083,6 +12239,12 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Children:**
 
 - SPEC-LANG-1501: Certification Standards Compliance (DO-178C, CC EAL 7)
+
+- SPEC-LANG-1502: Undefined Behavior Catalog (REQ-409)
+
+- SPEC-LANG-1503: Data-Race-Free Theorem (REQ-410)
+
+- SPEC-LANG-1504: Memory-Safety Theorem (REQ-411)
 
 #### SPEC-LANG-1501: Certification Standards Compliance (DO-178C, CC EAL 7)
 
@@ -12103,6 +12265,68 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **User-facing behavior:**
 
 - Use of Pyrite in high-assurance and mission-critical systems.
+
+- Use of Pyrite in high-assurance and mission-critical systems.
+
+#### SPEC-LANG-1502: Undefined Behavior Catalog
+
+**Kind:** LEAF
+
+**Source:** REQ-409, SSOT Section 16.1
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- The Pyrite formal specification must maintain an explicit catalog of undefined behaviors (REQ-409).
+
+- Catalog must include null dereferences, data races, and uninitialized memory reads.
+
+**User-facing behavior:**
+
+- Clear documentation on what constitutes UB, helping developers avoid dangerous patterns.
+
+#### SPEC-LANG-1503: Data-Race-Free Theorem
+
+**Kind:** LEAF
+
+**Source:** REQ-410, SSOT Section 16.1
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- Pyrite must formally prove the theorem: "Safe Pyrite is Data-Race-Free" (REQ-410).
+
+- Proof ensures that well-typed programs without `unsafe` blocks are free of concurrent data races.
+
+**User-facing behavior:**
+
+- Mathematical guarantee of thread safety for the safe subset of the language.
+
+#### SPEC-LANG-1504: Memory-Safety Theorem
+
+**Kind:** LEAF
+
+**Source:** REQ-411, SSOT Section 16.1
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- Pyrite must formally prove the theorem: "Well-Typed Programs Are Memory-Safe" (REQ-411).
+
+- Proof ensures the absence of use-after-free, double-free, and other memory errors in safe code.
+
+**User-facing behavior:**
+
+- Verified absence of common memory corruption bugs in safe Pyrite code.
 
 ## 5. Forge Compiler Specification (Recursive Itemization)
 
@@ -13112,6 +13336,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-FORGE-0208: Verifiable zero-allocation build mode (--no-alloc)
 
+- SPEC-FORGE-0209: Ownership Consumption Warning (REQ-415)
+
 #### SPEC-FORGE-0201: Allocation Tracking Pass
 
 **Kind:** LEAF
@@ -13347,6 +13573,28 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Tests required:**
 
 - Integration: Verify compilation fails with `--no-alloc` if a heap allocation is present.
+
+- Integration: Verify compilation fails with `--no-alloc` if a heap allocation is present.
+
+#### SPEC-FORGE-0209: Ownership Consumption Warning
+
+**Kind:** LEAF
+
+**Source:** REQ-415, SSOT Section 9.1
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- The compiler or linter must issue a warning if a function takes ownership of a parameter without the explicit `@consumes` annotation (REQ-415).
+
+- Enforces the "views-by-default" convention across the codebase.
+
+**User-facing behavior:**
+
+- Improved code readability; developers can immediately see when a function consumes its arguments.
 
 #### SPEC-FORGE-0300: Advanced Optimization Suite
 
@@ -14076,7 +14324,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-018, SSOT Section 1.12 Day 1
+**Source:** REQ-018, REQ-412, REQ-413, REQ-414, SSOT Section 1.12, 8.1
 
 **Status:** PLANNED
 
@@ -14086,17 +14334,29 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - `pyrite run <file>.pyrite` works without a `Quarry.toml` manifest.
 
-- Uses a temporary directory for build artifacts.
+- Script mode must use the same compiler and enforce the same safety guarantees as the standard build system (REQ-412).
+
+- Automatically detect source code changes and recompile the binary before execution (REQ-413).
+
+- Provide commands for managing the script mode cache: list, clean, and clear (REQ-414).
+
+- Uses a temporary directory (or specific cache directory) for build artifacts.
 
 - Automatically handles basic standard library linking.
 
 **User-facing behavior:**
 
-- Execute standalone scripts immediately.
+- Execute standalone scripts immediately with full performance and safety of the language.
+
+- Managed build artifacts; no manual cleanup required.
 
 **Tests required:**
 
 - Integration: Run a single-file script and verify output.
+
+- Integration: Modify script, rerun, and verify it was recompiled.
+
+- Integration: Verify cache management commands.
 
 #### SPEC-QUARRY-0016: Test Runner Orchestrator (quarry test)
 
@@ -14270,7 +14530,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-169, SSOT Section 8.3
+**Source:** REQ-169, REQ-419, REQ-420, SSOT Section 8.3
 
 **Status:** PLANNED
 
@@ -14280,19 +14540,25 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - `quarry publish` command implemented.
 
+- Quarry must require that all tests pass (`quarry test`) before allowing publication (REQ-419).
+
+- Quarry must require a valid license declaration in the package manifest before allowing publication (REQ-420).
+
 - Integrates with the official hub for sharing and discovering packages.
 
 - Supports automated metadata extraction from `Quarry.toml`.
 
 **User-facing behavior:**
 
-- Easy discovery and distribution of Pyrite libraries.
+- High-quality, verified packages in the official registry.
+
+- Automatic legal compliance checks during the publication workflow.
 
 #### SPEC-QUARRY-0024: Opinionated Official Formatter (quarry fmt)
 
 **Kind:** LEAF
 
-**Source:** REQ-172, REQ-173, SSOT Section 8.5
+**Source:** REQ-172, REQ-173, REQ-417, REQ-418, SSOT Section 8.4, 8.5
 
 **Status:** PLANNED
 
@@ -14302,13 +14568,15 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - `quarry fmt` command implemented.
 
-- Enforces canonical style: 4 spaces, 100 char limit, standard spacing.
+- Enforces canonical style: 4 spaces indentation (REQ-417), 100 char line limit (REQ-418), standard spacing.
 
 - Zero-configuration (configuration options are explicitly forbidden or extremely limited).
 
 **User-facing behavior:**
 
-- Unified code style across the entire ecosystem.
+- Consistent code appearance across the entire ecosystem.
+
+- No "bikeshedding" over formatting rules.
 
 #### SPEC-QUARRY-0025: Learning Profile Mode (--learning)
 
@@ -14922,7 +15190,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-175, SSOT Section 8.7
+**Source:** REQ-175, REQ-416, SSOT Section 8.7
 
 **Status:** PLANNED
 
@@ -14932,6 +15200,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Implement a Read-Eval-Print-Loop for Pyrite.
 
+- The REPL must require the use of explicit `unsafe` blocks for any operation that violates compile-time safety guarantees (REQ-416).
+
 - Support immediate execution of expressions and function definitions using incremental JIT compilation (REQ-178).
 
 - Provide auto-completion and history.
@@ -14940,7 +15210,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **User-facing behavior:**
 
-- Fast experimentation with language features.
+- Fast experimentation with language features while maintaining strict safety consistency.
 
 **Tests required:**
 
@@ -15122,7 +15392,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-225, SSOT Section 8.17
+**Source:** REQ-225, REQ-421, SSOT Section 8.10, 8.17
 
 **Status:** PLANNED
 
@@ -15134,6 +15404,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Scans `Quarry.lock` against a local/remote vulnerability database.
 
+- The built-in fuzzing engine must track code coverage and prioritize the generation of inputs that explore previously unvisited execution paths (REQ-421).
+
 - Reports known CVEs and suggests updates.
 
 - Supports `--fix` flag to automatically update dependencies to patched versions (REQ-226).
@@ -15144,21 +15416,25 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Automated security health check and remediation for dependencies.
 
+- Enhanced software quality through coverage-guided automated testing.
+
 **Errors/diagnostics:**
 
 - `VulnerabilityFound: Package T version V has known vulnerability ...`
 
 **Tests required:**
 
-- Integration: Verify detection of a package with a mocked vulnerability
+- Integration: Verify detection of a package with a mocked vulnerability.
+
+- Integration: Verify fuzzing engine prioritizes coverage-increasing inputs.
 
 **Implementation notes:**
 
-- Downloads vulnerability database (JSON) to local cache
+- Downloads vulnerability database (JSON) to local cache.
 
 **Dependencies:**
 
-- SPEC-QUARRY-0300
+- SPEC-QUARRY-0300, SPEC-QUARRY-0031
 
 #### SPEC-QUARRY-0302: Dependency Vetting (quarry vet)
 
@@ -15436,7 +15712,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-256 through REQ-260, REQ-386, SSOT Section 8.23
+**Source:** REQ-256 through REQ-260, REQ-386, REQ-422, SSOT Section 8.23
 
 **Status:** PLANNED
 
@@ -15447,6 +15723,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - Tool monitors files and reloads function bodies without process restart
 
 - Hot reloading functionality is restricted to debug builds only and must not be available for production binaries (REQ-386).
+
+- Support garbage collection of old code versions once they are no longer referenced by any active function pointers or stack frames (REQ-422).
 
 - Enforces safety: rejects changes to struct layout or signatures
 
