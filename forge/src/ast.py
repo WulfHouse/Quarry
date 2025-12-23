@@ -1,6 +1,6 @@
 """Abstract Syntax Tree node definitions for Pyrite"""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional, Any
 from .frontend.tokens import Span
 
@@ -9,22 +9,22 @@ from .frontend.tokens import Span
 @dataclass
 class ASTNode:
     """Base class for all AST nodes"""
-    span: Span
-    is_proven: bool = False  # For SPEC-LANG-0406 (compile-time contract verification)
+    span: Span  # Source location
+    is_proven: bool = field(default=False, init=False)  # For SPEC-LANG-0406 (compile-time contract verification)
 
 
 # Program structure
 @dataclass
 class Program(ASTNode):
     """Root of the AST"""
-    imports: List['ImportStmt']
-    items: List['Item']
+    imports: List['ImportStmt'] = field(default_factory=list)
+    items: List['Item'] = field(default_factory=list)
 
 
 @dataclass
 class ImportStmt(ASTNode):
     """Import statement: import std::collections"""
-    path: List[str]  # ["std", "collections"]
+    path: List[str] = field(default_factory=list)  # ["std", "collections"]
     alias: Optional[str] = None  # "as collections"
 
 
