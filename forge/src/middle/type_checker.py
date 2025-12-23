@@ -2094,10 +2094,12 @@ class TypeChecker:
                         return None
                     return left // right
                 if expr.op == "%":
-                    if right == 0: return None
+                    if right == 0:
+                        self.error("Modulo by zero in constant expression", expr.span)
+                        return None
                     return left % right
         elif isinstance(expr, ast.UnaryOp):
-            operand = self.evaluate_constant_int(expr.right)
+            operand = self.evaluate_constant_int(expr.operand)
             if operand is not None:
                 if expr.op == "-": return -operand
                 if expr.op == "+": return operand
