@@ -47,6 +47,12 @@ class CodeGenError(Exception):
         super().__init__(f"{span}: {message}" if span else message)
 
 
+# Error message constants for code generation
+MAP_SET_INSERT_INVALID_ARGS_TEMPLATE = "Map.{method_name}() requires two arguments (key, value)"
+LIST_WITH_CAPACITY_INVALID_ARGS = "List.with_capacity() requires one argument"
+LIST_GET_INVALID_ARGS = "List.get() requires one argument"
+
+
 class LLVMCodeGen:
     """LLVM IR code generator"""
     
@@ -2734,7 +2740,7 @@ class LLVMCodeGen:
                         # map.set(key, value) or map.insert(key, value)
                         if len(call.arguments) < 2:
                             raise CodeGenError(
-                                f"Map.{method_name}() requires two arguments (key, value)",
+                                MAP_SET_INSERT_INVALID_ARGS_TEMPLATE.format(method_name=method_name),
                                 call.span
                             )
                         value_expr = call.arguments[1]
@@ -2786,7 +2792,7 @@ class LLVMCodeGen:
                 else: # with_capacity
                     if len(call.arguments) < 1:
                         raise CodeGenError(
-                            "List.with_capacity() requires one argument",
+                            LIST_WITH_CAPACITY_INVALID_ARGS,
                             call.span
                         )
                     cap_val = self.gen_expression(call.arguments[0])
@@ -2831,7 +2837,7 @@ class LLVMCodeGen:
                 elif method_name == "get":
                     if len(call.arguments) < 1:
                         raise CodeGenError(
-                            "List.get() requires one argument",
+                            LIST_GET_INVALID_ARGS,
                             call.span
                         )
                     index_val = self.gen_expression(call.arguments[0])
