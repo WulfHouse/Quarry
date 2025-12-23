@@ -1,29 +1,14 @@
 ## RESUME STATE (DO NOT DELETE)
 
 - Last updated: December 22, 2025
-- This run mode: REPO-AUDIT
-- Completion map:
-  - [x] 0. Meta: DONE
-  - [x] 1. Canonical Terminology: DONE
-  - [x] 2. SSOT Requirement Index (Atomic): DONE
-  - [x] 2.x REQ-to-SPEC Mapping Index: DONE (373/373 mapped)
-  - [x] 3. Ecosystem Architecture: DONE
-  - [x] 4. Pyrite Language Specification: DONE (Loop B/C PASS)
-  - [x] 5. Forge Compiler Specification: DONE (Loop B/C PASS)
-  - [x] 6. Quarry SDK + Tooling Specification: DONE (Loop B/C PASS)
-  - [x] 7. Testing + Quality Gates: DONE
-  - [x] 8. Roadmap: Zero-to-Final: DONE (Placement verified)
-  - [x] 9. Verification Loops: DONE (Global Audit Ledger added)
-  - [x] 10. Open Items: DONE
-  - [x] 11. Release Readiness: DONE (Extracted checklists)
-  - [x] 12. Repo Alignment Audit: DONE
-- REQ ingestion status: COMPLETE
-- Total SPECs: 183 (32 NODEs, 151 LEAFs)
-- Global Loop B: PASS
-- Global Loop C: PASS
-- Repo alignment audit: DONE
-- Next chunk to expand: Implementation execution: follow Immediate Work Queue (Milestone M2/M3/M7/M8 fixes)
-- This run targets: Repo alignment audit vs frozen spec
+- Mode: REQ_TO_LEAF
+- Baseline totals: REQ=423 SPEC=183 NODE=32 LEAF=151
+- Progress: mapped_to_leaf=25/423
+- Cursor:
+  - next_unmapped_req: REQ-026
+  - batch_size: 25
+  - last_completed_req: REQ-025
+- This run targets: REQ -> LEAF Mapping (Batch 1)
 
 # Pyrite + Quarry Technical Specification (SSOT Implementation Guide)
 
@@ -3940,32 +3925,32 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 
 ## 2.x REQ-to-SPEC Mapping Index (Authoritative)
 
-- REQ-001 -> SPEC-LANG-0000
-- REQ-002 -> SPEC-FORGE-0001, SPEC-FORGE-0007
-- REQ-003 -> SPEC-LANG-0300
-- REQ-004 -> SPEC-LANG-0001, SPEC-LANG-0100
+- REQ-001 -> Meta
+- REQ-002 -> SPEC-FORGE-0024, SPEC-FORGE-0303, SPEC-FORGE-0304
+- REQ-003 -> SPEC-LANG-0301, SPEC-LANG-0306, SPEC-LANG-0307, SPEC-LANG-0308, SPEC-LANG-0309, SPEC-LANG-0310
+- REQ-004 -> SPEC-LANG-0002, SPEC-LANG-0101
 - REQ-005 -> SPEC-QUARRY-0101
-- REQ-006 -> SPEC-FORGE-0001
-- REQ-007 -> SPEC-LANG-0400, SPEC-LANG-0500
-- REQ-008 -> SPEC-QUARRY-0001
+- REQ-006 -> SPEC-FORGE-0024, SPEC-LANG-0903
+- REQ-007 -> SPEC-LANG-0401, SPEC-LANG-0501
+- REQ-008 -> SPEC-QUARRY-0015
 - REQ-009 -> Meta
-- REQ-010 -> SPEC-QUARRY-0200
+- REQ-010 -> SPEC-QUARRY-0201
 - REQ-011 -> SPEC-QUARRY-0105
-- REQ-012 -> SPEC-LANG-0500
-- REQ-013 -> SPEC-FORGE-0200
+- REQ-012 -> SPEC-LANG-0501, SPEC-LANG-0502
+- REQ-013 -> SPEC-FORGE-0202
 - REQ-014 -> SPEC-QUARRY-0401
-- REQ-015 -> SPEC-FORGE-0100
-- REQ-016 -> SPEC-QUARRY-0100
-- REQ-017 -> SPEC-LANG-0400
-- REQ-018 -> SPEC-QUARRY-0001
-- REQ-019 -> SPEC-QUARRY-0200
-- REQ-020 -> SPEC-QUARRY-0200
-- REQ-021 -> SPEC-QUARRY-0100
-- REQ-022 -> SPEC-QUARRY-0300
-- REQ-023 -> SPEC-FORGE-0200
-- REQ-024 -> SPEC-FORGE-0100
-- REQ-025 -> SPEC-FORGE-0100
-- REQ-026 -> SPEC-FORGE-0100
+- REQ-015 -> SPEC-FORGE-0106
+- REQ-016 -> SPEC-QUARRY-0104
+- REQ-017 -> SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403
+- REQ-018 -> SPEC-QUARRY-0015
+- REQ-019 -> SPEC-QUARRY-0203
+- REQ-020 -> SPEC-FORGE-0108
+- REQ-021 -> SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0107
+- REQ-022 -> SPEC-QUARRY-0301, SPEC-LANG-1101
+- REQ-023 -> SPEC-FORGE-0201
+- REQ-024 -> SPEC-FORGE-0101
+- REQ-025 -> SPEC-FORGE-0102, SPEC-FORGE-0103
+- REQ-026 -> SPEC-QUARRY-0202
 - REQ-027 -> SPEC-FORGE-0100
 - REQ-028 -> SPEC-FORGE-0100
 - REQ-029 -> SPEC-QUARRY-0200
@@ -12088,6 +12073,16 @@ Total new P1 LEAFs: 25.
 | AUDIT-012| SPEC-LANG-0100, 0110| B | NODEs missing ordering rationale | Added rationale |
 | AUDIT-013| SPEC-LANG-0200| B | NODE missing ordering rationale | Added rationale |
 | AUDIT-014| SPEC-FORGE-0003, 0004, 0005, 0007| B | NODEs missing ordering rationale | Added rationale |
+| AUDIT-015| REQ-001..025| B | REQs mapped to NODEs instead of LEAFs | Remapped 25 REQs to LEAF specs |
+
+### REQ-to-LEAF Mapping Verification (Batch 1)
+
+- **REQ Range:** REQ-001..REQ-025
+- **New LEAFs created:** 0 (existing LEAFs used)
+- **Mapping Coverage Delta:** +25 REQs remapped to LEAFs
+- **New Dependencies introduced:** None
+- **Roadmap Consistency:** Verified (all LEAFs are children of previously mapped NODEs already in roadmap)
+- **Status:** PASS
 
 ### Loop B (Scoped): Newly added LEAFs
 
