@@ -471,6 +471,9 @@ class LLVMCodeGen:
         set_insert_ty = ir.FunctionType(ir.VoidType(), [set_struct_ty.as_pointer(), ir.IntType(8).as_pointer()])
         self.set_insert = ir.Function(self.module, set_insert_ty, name="set_insert")
         
+        # set_remove(set: *mut Set, elem: *const void) -> void
+        self.set_remove = ir.Function(self.module, set_insert_ty, name="set_remove")
+        
         # set_contains(set: *const Set, elem: *const void) -> i32
         set_contains_ty = ir.FunctionType(ir.IntType(32), [set_struct_ty.as_pointer(), ir.IntType(8).as_pointer()])
         self.set_contains = ir.Function(self.module, set_contains_ty, name="set_contains")
@@ -2735,7 +2738,7 @@ class LLVMCodeGen:
                 else:
                     set_ptr = obj
                 
-                if method_name == "insert" or method_name == "contains":
+                if method_name == "insert" or method_name == "contains" or method_name == "remove":
                     if len(call.arguments) < 1:
                         raise CodeGenError(f"Set.{method_name}() requires one argument", call.span)
                     elem_val = self.gen_expression(call.arguments[0])
@@ -2777,6 +2780,9 @@ class LLVMCodeGen:
                     
                     if method_name == "insert":
                         self.builder.call(self.set_insert, [set_ptr, elem_ptr])
+                        return ir.Constant(ir.IntType(32), 0)
+                    elif method_name == "remove":
+                        self.builder.call(self.set_remove, [set_ptr, elem_ptr])
                         return ir.Constant(ir.IntType(32), 0)
                     else: # contains
                         result = self.builder.call(self.set_contains, [set_ptr, elem_ptr])

@@ -12,6 +12,7 @@ struct Set[T]:
 # FFI declarations for C functions
 extern "C" fn set_new(elem_size: i64) -> Set[T]
 extern "C" fn set_insert(set: *mut Set[T], elem: *const u8)
+extern "C" fn set_remove(set: *mut Set[T], elem: *const u8)
 extern "C" fn set_contains(set: *const Set[T], elem: *const u8) -> i32
 extern "C" fn set_length(set: *const Set[T]) -> i64
 extern "C" fn set_drop(set: *mut Set[T])
@@ -23,6 +24,9 @@ impl Set[T]:
         return
     
     fn insert(&mut self, elem: T):
+        return
+    
+    fn remove(&mut self, elem: T):
         return
     
     fn contains(&self, elem: T) -> bool:
