@@ -2,13 +2,13 @@
 
 - Last updated: December 23, 2025
 - Mode: REQ_TO_LEAF
-- Baseline totals: REQ=423 SPEC=258 NODE=35 LEAF=223
-- Progress: mapped_to_leaf=200/423
+- Baseline totals: REQ=423 SPEC=268 NODE=35 LEAF=233
+- Progress: mapped_to_leaf=250/423
 - Cursor:
-  - next_unmapped_req: REQ-201
+  - next_unmapped_req: REQ-251
   - batch_size: 25
-  - last_completed_req: REQ-200
-- This run targets: REQ -> LEAF Mapping (Batch 5)
+  - last_completed_req: REQ-250
+- This run targets: REQ -> LEAF Mapping (Batch 7)
 
 # Pyrite + Quarry Technical Specification (SSOT Implementation Guide)
 
@@ -4150,25 +4150,25 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-223 -> Meta
 - REQ-224 -> SPEC-FORGE-0030
 - REQ-225 -> SPEC-QUARRY-0301
-- REQ-226 -> SPEC-QUARRY-0300
-- REQ-227 -> SPEC-QUARRY-0300
-- REQ-228 -> SPEC-QUARRY-0300
-- REQ-229 -> SPEC-QUARRY-0300
-- REQ-230 -> SPEC-QUARRY-0300
-- REQ-231 -> SPEC-QUARRY-0300
-- REQ-232 -> SPEC-QUARRY-0300
-- REQ-233 -> SPEC-QUARRY-0300
-- REQ-234 -> SPEC-QUARRY-0300
-- REQ-235 -> SPEC-QUARRY-0100
-- REQ-236 -> SPEC-QUARRY-0100
-- REQ-237 -> SPEC-QUARRY-0100
-- REQ-238 -> SPEC-QUARRY-0100
-- REQ-239 -> SPEC-QUARRY-0100
-- REQ-240 -> SPEC-QUARRY-0100
-- REQ-241 -> SPEC-QUARRY-0100
-- REQ-242 -> SPEC-QUARRY-0300
-- REQ-243 -> SPEC-QUARRY-0300
-- REQ-244 -> SPEC-QUARRY-0300
+- REQ-226 -> SPEC-QUARRY-0301
+- REQ-227 -> SPEC-QUARRY-0301
+- REQ-228 -> SPEC-QUARRY-0302
+- REQ-229 -> SPEC-QUARRY-0302
+- REQ-230 -> SPEC-QUARRY-0307
+- REQ-231 -> SPEC-QUARRY-0306
+- REQ-232 -> SPEC-QUARRY-0304
+- REQ-233 -> SPEC-QUARRY-0303
+- REQ-234 -> SPEC-QUARRY-0308
+- REQ-235 -> SPEC-QUARRY-0114
+- REQ-236 -> SPEC-QUARRY-0114
+- REQ-237 -> SPEC-QUARRY-0114
+- REQ-238 -> SPEC-QUARRY-0114
+- REQ-239 -> SPEC-QUARRY-0114
+- REQ-240 -> SPEC-QUARRY-0115
+- REQ-241 -> SPEC-QUARRY-0115
+- REQ-242 -> SPEC-QUARRY-0303
+- REQ-243 -> SPEC-QUARRY-0303
+- REQ-244 -> SPEC-QUARRY-0303
 - REQ-245 -> SPEC-QUARRY-0105
 - REQ-246 -> SPEC-QUARRY-0105
 - REQ-247 -> SPEC-QUARRY-0105
@@ -13304,6 +13304,10 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-QUARRY-0113: Closure cost analysis integration
 
+- SPEC-QUARRY-0114: Binary bloat analysis (quarry bloat)
+
+- SPEC-QUARRY-0115: Continuous binary size tracking and budgets
+
 #### SPEC-QUARRY-0107: Machine Autotuning (quarry autotune / quarry tune)
 
 **Kind:** LEAF
@@ -13586,6 +13590,52 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Visibility into the performance impact of closure usage.
 
+#### SPEC-QUARRY-0114: Binary Bloat Analysis (quarry bloat)
+
+**Kind:** LEAF
+
+**Source:** REQ-235 through REQ-239, SSOT Section 8.18
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `quarry bloat` command.
+
+- Breakdown of binary size by section (.text, .rodata, etc.), function, and dependency (REQ-235, 237, 238).
+
+- Identify unused code segments that could be removed via linker optimizations (REQ-239).
+
+- Provide actionable optimization suggestions (REQ-236).
+
+**User-facing behavior:**
+
+- Detailed visibility into contributors to flash usage and executable size.
+
+#### SPEC-QUARRY-0115: Continuous Binary Size Tracking and Budgets
+
+**Kind:** LEAF
+
+**Source:** REQ-240, REQ-241, SSOT Section 8.18
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Track binary size changes against versioned baselines.
+
+- Support size budgets in `Quarry.toml` and fail builds if exceeded.
+
+- Provide aggressive size optimization flags (`--optimize=size`, `--strip-all`, `--minimal-panic`).
+
+**User-facing behavior:**
+
+- Automated prevention of binary size regressions.
+
 #### SPEC-QUARRY-0200: Interactive Learning and Exploration
 
 **Kind:** NODE
@@ -13762,6 +13812,12 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-QUARRY-0305: License compliance (quarry license-check)
 
+- SPEC-QUARRY-0306: Cryptographic package signing (quarry sign)
+
+- SPEC-QUARRY-0307: Collaborative trust manifests
+
+- SPEC-QUARRY-0308: Security and vetting dashboard
+
 #### SPEC-QUARRY-0301: Vulnerability Scanner (quarry audit)
 
 **Kind:** LEAF
@@ -13774,15 +13830,19 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Implement `quarry audit` command
+- Implement `quarry audit` command.
 
-- Scans `Quarry.lock` against a local/remote vulnerability database
+- Scans `Quarry.lock` against a local/remote vulnerability database.
 
-- Reports known CVEs and suggests updates
+- Reports known CVEs and suggests updates.
+
+- Supports `--fix` flag to automatically update dependencies to patched versions (REQ-226).
+
+- Integration with CI pipelines to fail builds on new vulnerabilities (REQ-227).
 
 **User-facing behavior:**
 
-- Automated security health check for dependencies
+- Automated security health check and remediation for dependencies.
 
 **Errors/diagnostics:**
 
@@ -13812,15 +13872,17 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Implement `quarry vet` command
+- Implement `quarry vet` command.
 
-- Allows recording "audited" status for specific package versions
+- Allows recording "audited" status for specific package versions.
 
-- Blocks builds if unaudited dependencies are introduced (configurable)
+- Blocks builds if unaudited dependencies are introduced (configurable) (REQ-228).
+
+- Highlights unsafe code blocks within dependencies during vetting process (REQ-229).
 
 **User-facing behavior:**
 
-- Enforces human review process for third-party code
+- Enforces human review process for third-party code with visibility into risk areas.
 
 **Tests required:**
 
@@ -13842,13 +13904,15 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Implement build flags to ensure deterministic output (zero non-determinism in IR/binary)
+- Implement build flags to ensure deterministic output (zero non-determinism in IR/binary) by normalizing timestamps, symbol order, and random seeds (REQ-233, REQ-242).
 
-- Provide `quarry verify-build` to compare local build with remote artifact
+- Provide `quarry verify-build` to confirm a binary was correctly produced from source/config (REQ-243).
+
+- Generate `BuildManifest.toml` capturing exact hashes of sources, dependencies, and compiler version (REQ-244).
 
 **User-facing behavior:**
 
-- Guaranteed reproducible binaries for security audits
+- Guaranteed byte-for-byte identical binaries for security audits and verification.
 
 **Tests required:**
 
@@ -13874,15 +13938,15 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Implement `quarry sbom` command
+- Implement `quarry sbom` command.
 
-- Generates Software Bill of Materials in SPDX or CycloneDX format
+- Generates Software Bill of Materials in SPDX or CycloneDX format (REQ-232).
 
-- Includes all direct and transitive dependencies with hashes and licenses
+- Includes all direct and transitive dependencies with hashes and licenses.
 
 **User-facing behavior:**
 
-- Industry-standard transparency for software supply chain
+- Industry-standard transparency for software supply chain.
 
 **Tests required:**
 
@@ -13891,6 +13955,68 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Dependencies:**
 
 - SPEC-QUARRY-0300
+
+#### SPEC-QUARRY-0306: Cryptographic Package Signing (quarry sign)
+
+**Kind:** LEAF
+
+**Source:** REQ-231, SSOT Section 8.17
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `quarry sign` command.
+
+- Supports cryptographic signing of packages using public/private key pairs.
+
+- Automated signature verification upon installation.
+
+**User-facing behavior:**
+
+- Prevents tampering and ensures author authenticity for packages.
+
+#### SPEC-QUARRY-0307: Collaborative Trust Manifests
+
+**Kind:** LEAF
+
+**Source:** REQ-230, SSOT Section 8.17
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Support sharing and merging trust manifests and community reviews.
+
+- Enable organizations to leverage collective auditing results.
+
+**User-facing behavior:**
+
+- Faster certification of common dependencies.
+
+#### SPEC-QUARRY-0308: Security and Vetting Dashboard
+
+**Kind:** LEAF
+
+**Source:** REQ-234, SSOT Section 8.17
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Provide a dashboard view (CLI or Web) to track vulnerability status and vetting coverage.
+
+- Displays signature verification status across projects.
+
+**User-facing behavior:**
+
+- Centralized visibility into project security posture.
 
 #### SPEC-QUARRY-0105: Energy Profiling (quarry energy)
 
@@ -13904,15 +14030,17 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Command measures system power usage during execution
+- Implement `quarry energy` command to measure system power usage during execution (REQ-245).
 
-- Provides per-component breakdown (CPU, DRAM) where supported
+- Provides per-component breakdown (CPU, DRAM, GPU) where supported (REQ-246).
 
-- Implements energy budget warnings via `@energy_budget`
+- Implements energy budget warnings via `@energy_budget` (REQ-248).
+
+- Suggests optimizations to reduce energy impact (e.g., adaptive polling, SIMD adjustments) (REQ-247, 249, 250).
 
 **User-facing behavior:**
 
-- `quarry energy` shows joules consumed and estimated battery life
+- `quarry energy` shows joules consumed and estimated battery life.
 
 **Tests required:**
 
@@ -14773,7 +14901,7 @@ Total new P1 LEAFs: 34.
 
     - Goal: Design by Contract and advanced compiler passes.
 
-    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207, SPEC-FORGE-0208, SPEC-QUARRY-0031, SPEC-QUARRY-0032.
+    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207, SPEC-FORGE-0208, SPEC-QUARRY-0031, SPEC-QUARRY-0032, SPEC-QUARRY-0306, SPEC-QUARRY-0307, SPEC-QUARRY-0308.
 
     - Dependency satisfaction note: Depends on M6 (Ownership).
 
@@ -14803,7 +14931,7 @@ Total new P1 LEAFs: 34.
   
     - Goal: Tooling for static and runtime performance analysis.
     
-    - Included: SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-QUARRY-0113, SPEC-QUARRY-0036, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0604, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903, SPEC-FORGE-0305, SPEC-FORGE-0306, SPEC-FORGE-0307.
+    - Included: SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-QUARRY-0113, SPEC-QUARRY-0114, SPEC-QUARRY-0115, SPEC-QUARRY-0036, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0604, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903, SPEC-FORGE-0305, SPEC-FORGE-0306, SPEC-FORGE-0307.
     
     - Dependency satisfaction note: Depends on M10 (for benchmarking) and M11 (for allocation tracking).
     
@@ -15143,6 +15271,14 @@ Total new P1 LEAFs: 34.
 - **New LEAFs created:** 5 (SPEC-LANG-0021, SPEC-FORGE-0030, SPEC-FORGE-0301..0302, SPEC-QUARRY-0037)
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
 - **Roadmap Placement:** Consistent (M0, M2, M3, M4, M7, M12, M13)
+- **Status:** PASS
+
+### REQ-to-LEAF Mapping Verification (Batch 10)
+
+- **REQ Range:** REQ-226..REQ-250
+- **New LEAFs created:** 5 (SPEC-QUARRY-0306..0308, SPEC-QUARRY-0114..0115)
+- **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+- **Roadmap Placement:** Consistent (M11, M13, M15)
 - **Status:** PASS
 
 ### Loop B (Scoped): Newly added LEAFs
