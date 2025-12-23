@@ -1592,6 +1592,10 @@ class TypeChecker:
                                         return expected_type
                                     # Otherwise, return a GenericType with unknown type parameters
                                     # Type inference will fill in the parameters later
+                                    type_decl = self.resolver.global_scope.lookup_type(type_name)
+                                    if isinstance(type_decl, StructType) and type_decl.generic_params:
+                                        num_params = len(type_decl.generic_params)
+                                        return GenericType(name=type_name, base_type=type_decl, type_args=[UNKNOWN] * num_params)
                                     return GenericType(name=type_name, base_type=None, type_args=[UNKNOWN])
                             # If return type is a StructType with the same name, return it
                             elif isinstance(return_type, StructType) and return_type.name == type_name:

@@ -401,8 +401,24 @@ def types_compatible(t1: Type, t2: Type) -> bool:
     if isinstance(t1, FloatType) and isinstance(t2, FloatType):
         return t1 == t2
     
+    # Unknown matches anything
+    if isinstance(t1, UnknownType) or isinstance(t2, UnknownType):
+        return True
+
     # Handle TypeVariables - they match any type (for generic parameters)
     if isinstance(t1, TypeVariable) or isinstance(t2, TypeVariable):
+        return True
+
+    # Handle GenericType compatibility
+    if isinstance(t1, GenericType) and isinstance(t2, GenericType):
+        if t1.name != t2.name:
+            return False
+        if len(t1.type_args) != len(t2.type_args):
+            return False
+        return all(types_compatible(a1, a2) for a1, a2 in zip(t1.type_args, t2.type_args))
+    
+    # Unknown matches anything
+    if isinstance(t1, UnknownType) or isinstance(t2, UnknownType):
         return True
     
     # Handle generic enum constructor return types

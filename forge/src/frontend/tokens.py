@@ -42,6 +42,7 @@ class TokenType(Enum):
     OR = auto()
     NOT = auto()
     TYPE = auto()
+    PASS = auto()
     
     # Identifiers and Literals
     IDENTIFIER = auto()
@@ -131,6 +132,7 @@ KEYWORDS = {
     'or': TokenType.OR,
     'not': TokenType.NOT,
     'type': TokenType.TYPE,
+    'pass': TokenType.PASS,
 }
 
 

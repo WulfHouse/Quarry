@@ -120,3 +120,10 @@ void map_drop(Map* map) {
     map->cap = 0;
 }
 
+/* Pyrite wrappers */
+Map Map_new(int64_t key, int64_t val) { return map_new(key, val); }
+void Map_insert(Map* m, void* k, void* v) { map_insert(m, k, v); }
+void* Map_get(Map* map, void* key) { return map_get(map, key); }
+int Map_contains(Map* m, void* k) { return map_contains(m, k); }
+int64_t Map_length(Map* m) { return map_length(m); }
+void Map_drop(Map* m) { map_drop(m); }

@@ -191,10 +191,13 @@ class LLVMCodeGen:
                     ir.IntType(64)
                 ])
             elif typ.name == "Map":
-                # Map[K, V]: { *mut void } - opaque pointer to C Map implementation
-                # For MVP, Map is just an opaque pointer to the C Map struct
+                # Map[K, V]: { buckets: *void, len: i64, cap: i64, key_size: i64, value_size: i64 }
                 return ir.LiteralStructType([
-                    ir.IntType(8).as_pointer()  # void* (opaque pointer)
+                    ir.IntType(8).as_pointer(),  # buckets
+                    ir.IntType(64),              # len
+                    ir.IntType(64),              # cap
+                    ir.IntType(64),              # key_size
+                    ir.IntType(64)               # value_size
                 ])
             # If GenericType wraps an EnumType (e.g., Type enum), use the base_type
             elif typ.base_type and isinstance(typ.base_type, EnumType):

@@ -1,15 +1,6 @@
 # M9 Map Generic Test
 
-struct Map[K, V]:
-    _ptr: *u8
-    _len: i64
-    _cap: i64
-    _key_size: i64
-    _val_size: i64
-
-impl Map[K, V]:
-    fn new() -> Map[K, V]:
-        pass
+import std.collections.map
 
 fn main():
     # Use generic Map - should trigger built-in support in codegen
@@ -18,4 +9,3 @@ fn main():
     let val = my_map.get(1)
     print("Value:", val)
     print("Success")
-

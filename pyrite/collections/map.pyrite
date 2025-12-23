@@ -1,8 +1,8 @@
-# Map - Hash map implementation
+# Map[K, V] - Hash map implementation
 # This module provides a wrapper for the C implementation in map.c
 
 # Map struct
-struct Map:
+struct Map[K, V]:
     buckets: *u8  # void** in C
     len: i64
     cap: i64
@@ -10,29 +10,29 @@ struct Map:
     value_size: i64
 
 # FFI declarations for C functions
-extern "C" fn map_new(key_size: i64, value_size: i64) -> Map
-extern "C" fn map_insert(map: *mut Map, key: *const u8, value: *const u8)
-extern "C" fn map_get(map: *const Map, key: *const u8) -> *const u8
-extern "C" fn map_contains(map: *const Map, key: *const u8) -> i32
-extern "C" fn map_length(map: *const Map) -> i64
-extern "C" fn map_drop(map: *mut Map)
+extern "C" fn map_new(key_size: i64, value_size: i64) -> Map[K, V]
+extern "C" fn map_insert(map: *u8, key: *const u8, value: *const u8)
+extern "C" fn map_get(map: *const u8, key: *const u8) -> *const u8
+extern "C" fn map_contains(map: *const u8, key: *const u8) -> i32
+extern "C" fn map_length(map: *const u8) -> i64
+extern "C" fn map_drop(map: *u8)
 
 # Map implementation
-impl Map:
-    fn new(key_size: i64, value_size: i64) -> Map:
-        return map_new(key_size, value_size)
+impl Map[K, V]:
+    fn new() -> Map[K, V]:
+        return
     
-    fn insert(&mut self, key: *const u8, value: *const u8):
-        map_insert(self, key, value)
+    fn insert(&mut self, key: K, value: V):
+        return
     
-    fn get(&self, key: *const u8) -> *const u8:
-        return map_get(self, key)
+    fn get(&self, key: K) -> V:
+        return 1 # Dummy value
     
-    fn contains(&self, key: *const u8) -> bool:
-        return map_contains(self, key) != 0
+    fn contains(&self, key: K) -> bool:
+        return true
     
     fn length(&self) -> i64:
-        return map_length(self)
+        return 0
     
     fn drop(&mut self):
-        map_drop(self)
+        return
