@@ -6,6 +6,11 @@ fn main():
     # Use generic Map - should trigger built-in support in codegen
     var my_map: Map[int, int] = Map.new()
     my_map.insert(1, 2)
-    let val = my_map.get(1)
+    let val_opt = my_map.get(1)
+    match val_opt:
+        Some(val):
+            print("Value:", val)
+        None:
+            print("Key not found")
     print("Value:", val)
     print("Success")

@@ -26,7 +26,7 @@ impl Map[K, V]:
     fn insert(&mut self, key: K, value: V):
         pass
     
-    fn get(&self, key: K) -> V:
+    fn get(&self, key: K) -> Option[V]:
         pass
     
     fn contains(&self, key: K) -> bool:

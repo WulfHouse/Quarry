@@ -2585,13 +2585,105 @@ class LLVMCodeGen:
                         key_ptr = self.builder.bitcast(key_val, ir.IntType(8).as_pointer())
                     
                     if method_name == "get":
-                        # map.get(key) -> V
+                        # map.get(key) -> Option[V]
                         result_ptr = self.builder.call(self.map_get, [map_ptr, key_ptr])
-                        # Bitcast to value type and load
+                        
+                        # Check if result_ptr is NULL (key not found)
+                        null_ptr = ir.Constant(ir.IntType(8).as_pointer(), None)
+                        is_null = self.builder.icmp_unsigned('==', result_ptr, null_ptr)
+                        
+                        # Create basic blocks for the two cases
+                        some_block = self.function.append_basic_block(name="map_get.some")
+                        none_block = self.function.append_basic_block(name="map_get.none")
+                        merge_block = self.function.append_basic_block(name="map_get.merge")
+                        
+                        # Branch based on null check
+                        self.builder.cbranch(is_null, none_block, some_block)
+                        
+                        # Some block: load value and construct Option.Some(value)
+                        self.builder.position_at_end(some_block)
                         value_type = obj_type.type_args[1]
                         value_llvm = self.type_to_llvm(value_type)
                         typed_ptr = self.builder.bitcast(result_ptr, value_llvm.as_pointer())
-                        return self.builder.load(typed_ptr)
+                        loaded_value = self.builder.load(typed_ptr)
+                        
+                        # Get Option[V] type and construct Option.Some(value)
+                        if not self.type_checker:
+                            raise CodeGenError("Type checker required for Map.get Option return type", call.span)
+                        
+                        # Look up Option type
+                        option_type_obj = self.type_checker.resolver.lookup_type("Option")
+                        if not option_type_obj:
+                            raise CodeGenError("Option type not found in type checker", call.span)
+                        
+                        # Create GenericType(Option, base_type, [value_type])
+                        # Determine the base EnumType
+                        option_enum_base = None
+                        if isinstance(option_type_obj, EnumType):
+                            option_enum_base = option_type_obj
+                        elif hasattr(option_type_obj, 'base_type') and isinstance(option_type_obj.base_type, EnumType):
+                            option_enum_base = option_type_obj.base_type
+                        else:
+                            # Try to get the base EnumType
+                            if self.type_checker:
+                                # Option should be an EnumType
+                                from ..types import EnumType as ET, TypeVariable
+                                # Create a synthetic Option enum type for codegen
+                                option_enum_base = ET("Option", {"Some": [TypeVariable("T")], "None": None}, ["T"])
+                        
+                        # Create GenericType with correct field order: name, base_type, type_args
+                        option_type = GenericType("Option", option_enum_base, [value_type])
+                        
+                        # Get the base EnumType (should be set above)
+                        option_enum_type = option_enum_base
+                        if not option_enum_type:
+                            raise CodeGenError("Could not determine Option enum type", call.span)
+                        
+                        # Create Option.Some(value) - construct enum value directly in LLVM
+                        option_llvm_type = self.type_to_llvm(option_type)
+                        # Determine variant index dynamically (Some should be 0, None should be 1)
+                        variant_names = list(option_enum_type.variants.keys())
+                        some_index = variant_names.index("Some") if "Some" in variant_names else 0
+                        some_tag = ir.Constant(ir.IntType(32), some_index)
+                        option_some_val = self._create_zero_constant(option_llvm_type)
+                        option_some_val = self.builder.insert_value(option_some_val, some_tag, 0)
+                        
+                        # Insert the value as payload (field 1)
+                        if len(option_llvm_type.elements) > 1:
+                            # Cast value to i64 if needed for storage
+                            payload_type = option_llvm_type.elements[1]
+                            payload_val = loaded_value
+                            if payload_val.type != payload_type:
+                                if isinstance(payload_val.type, ir.PointerType):
+                                    payload_val = self.builder.ptrtoint(payload_val, payload_type)
+                                elif isinstance(payload_val.type, ir.IntType):
+                                    if payload_val.type.width < payload_type.width:
+                                        payload_val = self.builder.zext(payload_val, payload_type)
+                                    elif payload_val.type.width > payload_type.width:
+                                        payload_val = self.builder.trunc(payload_val, payload_type)
+                                elif isinstance(payload_val.type, (ir.FloatType, ir.DoubleType)):
+                                    payload_val = self.builder.bitcast(payload_val, payload_type)
+                            option_some_val = self.builder.insert_value(option_some_val, payload_val, 1)
+                        
+                        self.builder.branch(merge_block)
+                        
+                        # None block: construct Option.None
+                        self.builder.position_at_end(none_block)
+                        option_none_val = self._create_zero_constant(option_llvm_type)
+                        # Determine variant index dynamically
+                        variant_names = list(option_enum_type.variants.keys())
+                        none_index = variant_names.index("None") if "None" in variant_names else 1
+                        none_tag = ir.Constant(ir.IntType(32), none_index)
+                        option_none_val = self.builder.insert_value(option_none_val, none_tag, 0)
+                        self.builder.branch(merge_block)
+                        
+                        # Merge block: phi node to combine results
+                        self.builder.position_at_end(merge_block)
+                        phi = self.builder.phi(option_llvm_type, name="map_get.result")
+                        phi.add_incoming(option_some_val, some_block)
+                        phi.add_incoming(option_none_val, none_block)
+                        
+                        return phi
                     elif method_name == "set" or method_name == "insert":
                         # map.set(key, value) or map.insert(key, value)
                         if len(call.arguments) < 2:

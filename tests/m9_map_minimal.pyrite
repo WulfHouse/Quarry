@@ -6,7 +6,12 @@ fn main():
     print("[MARKER 1] STARTING INSERTS")
     my_map.insert(1, 2)
     print("[MARKER 2] STARTING VERIFY")
-    let val = my_map.get(1)
+    let val_opt = my_map.get(1)
+    match val_opt:
+        Some(val):
+            print("Value:", val)
+        None:
+            print("Key not found")
     print("Value:", val)
     print("[MARKER 3] CLEANUP")
     my_map.drop()
