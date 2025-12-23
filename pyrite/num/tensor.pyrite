@@ -1,4 +1,9 @@
-# Numerics and Tensors
+# Numerics and Tensors (SPEC-LANG-0806)
+import std.string
+
+# High-performance Tensor Abstraction (SPEC-LANG-0870)
+# For Stage0, we implement a 2D Matrix of f64 as a baseline.
+# Future stages will support Tensor[T, Rank].
 
 struct Tensor:
     data: *mut f64
@@ -11,34 +16,76 @@ extern "C" fn tensor_set(t: *mut Tensor, r: i64, c: i64, val: f64)
 extern "C" fn tensor_drop(t: *mut Tensor)
 
 impl Tensor:
-    # Creates a new tensor. May return an uninitialized tensor (data == null) on allocation failure.
-    # For explicit error handling, use try_new() instead.
     fn new(rows: i64, cols: i64) -> Tensor:
         return tensor_new(rows, cols)
     
-    # Creates a new tensor with explicit error handling.
-    # Returns Ok(tensor) on success, Err("Allocation failed") if memory allocation fails.
     fn try_new(rows: i64, cols: i64) -> Result[Tensor, String]:
         let t = tensor_new(rows, cols)
         if t.data == 0 as *mut f64:
-            return Err("Allocation failed")
+            return Err(string_new("Allocation failed"))
         return Ok(t)
     
     fn get(&self, r: i64, c: i64) -> f64:
-        # Safety: This FFI call dereferences raw pointers. The caller must ensure:
-        # 1. The tensor is initialized (data pointer is valid)
-        # 2. The indices are in bounds (0 <= r < rows, 0 <= c < cols)
-        # 3. The pointer passed to tensor_get is valid
+        # Safety: Accessing raw data from C
         unsafe:
             return tensor_get(self, r, c)
     
     fn set(&mut self, r: i64, c: i64, val: f64):
-        # Safety: This FFI call dereferences raw pointers. The caller must ensure:
-        # 1. The tensor is initialized (data pointer is valid)
-        # 2. The indices are in bounds (0 <= r < rows, 0 <= c < cols)
-        # 3. The pointer passed to tensor_set is valid
+        # Safety: Setting raw data via C
         unsafe:
             tensor_set(self, r, c, val)
     
+    # Arithmetic operations (SPEC-LANG-0870 DoD)
+    fn add(&self, other: &Tensor) -> Result[Tensor, String]:
+        if self.rows != other.rows or self.cols != other.cols:
+            return Err(string_new("Dimension mismatch for addition"))
+        
+        let res = Tensor.new(self.rows, self.cols)
+        var r = 0
+        while r < self.rows:
+            var c = 0
+            while c < self.cols:
+                res.set(r, c, self.get(r, c) + other.get(r, c))
+                c = c + 1
+            r = r + 1
+        return Ok(res)
+
+    fn sub(&self, other: &Tensor) -> Result[Tensor, String]:
+        if self.rows != other.rows or self.cols != other.cols:
+            return Err(string_new("Dimension mismatch for subtraction"))
+        
+        let res = Tensor.new(self.rows, self.cols)
+        var r = 0
+        while r < self.rows:
+            var c = 0
+            while c < self.cols:
+                res.set(r, c, self.get(r, c) - other.get(r, c))
+                c = c + 1
+            r = r + 1
+        return Ok(res)
+
+    fn mul(&self, other: &Tensor) -> Result[Tensor, String]:
+        # Element-wise multiplication
+        if self.rows != other.rows or self.cols != other.cols:
+            return Err(string_new("Dimension mismatch for multiplication"))
+        
+        let res = Tensor.new(self.rows, self.cols)
+        var r = 0
+        while r < self.rows:
+            var c = 0
+            while c < self.cols:
+                res.set(r, c, self.get(r, c) * other.get(r, c))
+                c = c + 1
+            r = r + 1
+        return Ok(res)
+
+    # Tensor Layouts (SPEC-LANG-0871) - Placeholder
+    fn to_layout(&self, layout: String) -> Tensor:
+        return Tensor.new(self.rows, self.cols) # Stub
+    
+    # Tensor Views (SPEC-LANG-0872) - Placeholder
+    fn view(&self, r_start: i64, r_end: i64, c_start: i64, c_end: i64) -> Tensor:
+        return Tensor.new(r_end - r_start, c_end - c_start) # Stub
+
     fn drop(&mut self):
         tensor_drop(self)

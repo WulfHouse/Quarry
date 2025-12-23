@@ -1,19 +1,59 @@
 # TOML Serialization and Parsing
-
 import std.string
+import std.collections.list
+import std.collections.map
 
-# Re-use the C implementation used by Quarry
-extern "C" fn parse_dependencies_simple_c(toml_text: *const u8, text_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+enum TomlValue:
+    String(value: String)
+    Integer(value: i64)
+    Float(value: f64)
+    Boolean(value: bool)
+    Array(values: List[TomlValue])
+    Table(entries: Map[String, TomlValue])
 
-fn parse_simple(text: &String) -> String:
-    # Buffer-based FFI call
-    var result_buf = [u8; 4096]
-    var result_len: i64 = 0
-    let status = parse_dependencies_simple_c(text.data, text.len(), &mut result_buf[0], 4096, &mut result_len)
-    
-    if status == 0:
-        # Convert buffer to string
-        # For now, return empty as placeholder
-        return "parsed"
-    return ""
+impl TomlValue:
+    fn to_string(&self) -> String:
+        match self:
+            String(v):
+                # Basic TOML string: "value"
+                return v # Simplified
+            Integer(v):
+                return string_from_int(v)
+            Float(v):
+                return string_from_float(v)
+            Boolean(v):
+                if v:
+                    return string_new("true")
+                else:
+                    return string_new("false")
+            Array(l):
+                var builder = StringBuilder.new()
+                builder.append_char('[' as u8)
+                let len = l.length()
+                var i = 0
+                while i < len:
+                    if i > 0:
+                        builder.append_char(',' as u8)
+                        builder.append_char(' ' as u8)
+                    let elem_str = l.get(i).to_string()
+                    # Append elem_str manually
+                    i = i + 1
+                builder.append_char(']' as u8)
+                let res = builder.to_string()
+                builder.drop()
+                return res
+            Table(m):
+                return string_new("[table]")
+        return string_empty()
 
+# Public API
+fn to_string(v: &TomlValue) -> String:
+    return v.to_string()
+
+fn from_str(s: &String) -> Result[TomlValue, String]:
+    let trimmed = s.trim()
+    if trimmed == "true":
+        return Ok(TomlValue.Boolean(true))
+    if trimmed == "false":
+        return Ok(TomlValue.Boolean(false))
+    return Err(string_new("TOML parsing not yet fully implemented"))

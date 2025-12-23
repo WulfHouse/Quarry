@@ -1,12 +1,11 @@
-Last updated: 2025-01-27
-Milestone: M10 | Last SPEC: [None] | Next: SPEC-LANG-0804
-Phase: 3 (Beta) | Status: READY | Branch: main
-Tests: 0/1813 (full) OR 0/457 (fast) | Notes: Starting M10 Extended Stdlib milestone
+Last updated: 2025-12-23
+Milestone: M11 | Last SPEC: SPEC-LANG-0404 | Next: SPEC-LANG-0406
+Phase: 3 (Beta) | Status: READY | Branch: 1.2.0-alpha
+Tests: 1825/1826 (full) OR 466/466 (fast) | Notes: Completed State Capture Function (old()) support.
 
 State History (Last 5):
-1. 2025-01-27 M10 START → SPEC-LANG-0804 | Initial state setup - M10 Extended Stdlib
-2. [Date] M[X] SPEC-[ID]→SPEC-[ID] | [Notes]
-3. [Date] M[X] SPEC-[ID]→SPEC-[ID] | [Notes]
-4. [Date] M[X] SPEC-[ID]→SPEC-[ID] | [Notes]
-5. [Date] M[X] SPEC-[ID]→SPEC-[ID] | [Notes]
-
+1. 2025-12-23 M11 SPEC-LANG-0404->SPEC-LANG-0406 | Implemented old() support in Parser, TypeChecker, and Codegen.
+2. 2025-12-23 M11 SPEC-LANG-0403->SPEC-LANG-0404 | Implemented @invariant support for loops and structs.
+3. 2025-12-23 M11 SPEC-LANG-0402->SPEC-LANG-0403 | Implemented @ensures support in Parser, TypeChecker, and Codegen.
+4. 2025-12-23 M11 SPEC-LANG-0401->SPEC-LANG-0402 | Implemented @requires support in Parser, TypeChecker, and Codegen.
+5. 2025-12-23 M10 SPEC-LANG-0806->SPEC-LANG-0401 | Implemented Tensor stdlib primitives in C and Pyrite.

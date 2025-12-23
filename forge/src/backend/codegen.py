@@ -93,6 +93,12 @@ class LLVMCodeGen:
         self.break_targets: List[ir.Block] = []  # Stack of break target blocks
         self.continue_targets: List[ir.Block] = []  # Stack of continue target blocks
         
+        # Postcondition tracking
+        self.current_postcondition_value: Optional[ir.Value] = None
+        self.current_function_def: Optional[ast.FunctionDef] = None
+        self.current_struct_name: Optional[str] = None
+        self.old_values: Dict[ast.OldExpr, ir.Value] = {}  # Mapping from OldExpr node to captured value
+        
         # Cost analysis tracking
         self.track_costs: bool = False  # Enable cost tracking
         self.warn_costs: bool = False  # Enable cost warnings
@@ -548,6 +554,9 @@ class LLVMCodeGen:
 
     def declare_struct(self, struct_def: ast.StructDef):
         """Declare a struct type"""
+        # Register the struct definition for invariant checking
+        self.struct_defs = getattr(self, 'struct_defs', {})
+        self.struct_defs[struct_def.name] = struct_def
         # For now, just register it (will be created on first use)
         pass
     
@@ -637,6 +646,8 @@ class LLVMCodeGen:
                 continue  # Skip if not declared
             
             func = self.functions[method_name]
+            self.current_function_def = method
+            self.current_struct_name = type_name
             
             # Create entry block
             block = func.append_basic_block(name="entry")
@@ -658,16 +669,41 @@ class LLVMCodeGen:
                     param_type = self.type_checker.resolve_type(param_def.type_annotation)
                     self.variable_types[param_def.name] = param_type
             
+            # Capture old() expressions at method entry
+            self._gen_old_captures(method)
+            
+            # Generate struct invariants at entry (@invariant)
+            self._gen_struct_invariants()
+            
+            # Generate preconditions (@requires)
+            if method.attributes:
+                for attr in method.attributes:
+                    if attr.name == "requires":
+                        for condition_expr in attr.args:
+                            if isinstance(condition_expr, ast.Expression):
+                                self._gen_precondition(condition_expr)
+            
             # Generate body
             self.gen_block(method.body)
             
             # Add implicit return if needed
             if not self.builder.block.is_terminated:
-                self.execute_defers(scope_start=0)
                 if isinstance(func.ftype.return_type, ir.VoidType):
+                    # Generate postconditions and invariants for void return
+                    self._gen_postconditions(None)
+                    self.execute_defers(scope_start=0)
                     self.builder.ret_void()
                 else:
-                    self.builder.ret(self._create_zero_constant(func.ftype.return_type))
+                    # Return zero as default
+                    zero_val = self._create_zero_constant(func.ftype.return_type)
+                    # Generate postconditions and invariants for default return
+                    self._gen_postconditions(zero_val)
+                    self.execute_defers(scope_start=0)
+                    self.builder.ret(zero_val)
+            
+            # Clear context
+            self.current_function_def = None
+            self.current_struct_name = None
     
     def declare_function(self, func_def: ast.FunctionDef):
         """Declare a function (signature only)"""
@@ -722,6 +758,7 @@ class LLVMCodeGen:
             return
         
         func = self.functions[func_def.name]
+        self.current_function_def = func_def
         
         # Create entry block
         block = func.append_basic_block(name="entry")
@@ -744,20 +781,39 @@ class LLVMCodeGen:
                 param_type = self.type_checker.resolve_type(param_def.type_annotation)
                 self.variable_types[param_def.name] = param_type
         
+        # Capture old() expressions at function entry
+        self._gen_old_captures(func_def)
+        
+        # Generate preconditions (@requires)
+        if func_def.attributes:
+            for attr in func_def.attributes:
+                if attr.name == "requires":
+                    for condition_expr in attr.args:
+                        if isinstance(condition_expr, ast.Expression):
+                            self._gen_precondition(condition_expr)
+        
         # Generate body
         self.gen_block(func_def.body)
         
         # Add implicit return if needed
         if not self.builder.block.is_terminated:
-            # Execute any remaining defers before implicit return (all defers from function scope)
-            self.execute_defers(scope_start=0)
-            
             if isinstance(func.ftype.return_type, ir.VoidType):
+                # Generate postconditions for void return
+                self._gen_postconditions(None)
+                # Execute any remaining defers before implicit return
+                self.execute_defers(scope_start=0)
                 self.builder.ret_void()
             else:
                 # Return zero as default
-                # This is normal for main() which should return 0 on success
-                self.builder.ret(self._create_zero_constant(func.ftype.return_type))
+                zero_val = self._create_zero_constant(func.ftype.return_type)
+                # Generate postconditions for default return
+                self._gen_postconditions(zero_val)
+                # Execute any remaining defers
+                self.execute_defers(scope_start=0)
+                self.builder.ret(zero_val)
+        
+        # Clear current function def
+        self.current_function_def = None
     
     def gen_block(self, block: ast.Block):
         """Generate code for a block"""
@@ -1019,15 +1075,20 @@ class LLVMCodeGen:
     
     def gen_return(self, ret: ast.ReturnStmt):
         """Generate code for return statement"""
-        # Execute all deferred blocks in reverse order before returning
-        # This executes all defers from function scope (scope_start=0 means all defers)
-        # (defers are stored in LIFO order, so reversed iteration gives correct execution order)
-        self.execute_defers(scope_start=0)
-        
         if ret.value:
             value = self.gen_expression(ret.value)
+            # Generate postconditions before defers and return
+            self._gen_postconditions(value)
+            
+            # Execute all deferred blocks in reverse order before returning
+            self.execute_defers(scope_start=0)
             self.builder.ret(value)
         else:
+            # Generate postconditions for void return
+            self._gen_postconditions(None)
+            
+            # Execute all deferred blocks
+            self.execute_defers(scope_start=0)
             self.builder.ret_void()
     
     def gen_break(self, break_stmt: ast.BreakStmt):
@@ -1213,6 +1274,15 @@ class LLVMCodeGen:
         
         # Generate condition block
         self.builder.position_at_end(cond_block)
+        
+        # Generate loop invariants (@invariant)
+        if hasattr(while_stmt, 'attributes') and while_stmt.attributes:
+            for attr in while_stmt.attributes:
+                if attr.name == "invariant":
+                    for expr in attr.args:
+                        if isinstance(expr, ast.Expression):
+                            self._gen_loop_invariant(expr)
+        
         cond = self.gen_expression(while_stmt.condition)
         self.builder.cbranch(cond, body_block, end_block)
         
@@ -1258,8 +1328,18 @@ class LLVMCodeGen:
             # Branch to condition
             self.builder.branch(cond_block)
             
-            # Condition: i < end
+            # Condition block
             self.builder.position_at_end(cond_block)
+            
+            # Generate loop invariants (@invariant)
+            if hasattr(for_stmt, 'attributes') and for_stmt.attributes:
+                for attr in for_stmt.attributes:
+                    if attr.name == "invariant":
+                        for expr in attr.args:
+                            if isinstance(expr, ast.Expression):
+                                self._gen_loop_invariant(expr)
+            
+            # Condition: i < end
             i_val = self.builder.load(loop_var)
             cond = self.builder.icmp_signed('<', i_val, end)
             self.builder.cbranch(cond, body_block, end_block)
@@ -1416,6 +1496,8 @@ class LLVMCodeGen:
             return string_const
         
         elif isinstance(expr, ast.Identifier):
+            if expr.name == "result" and self.current_postcondition_value is not None:
+                return self.current_postcondition_value
             if expr.name in self.variables:
                 val = self.variables[expr.name]
                 # If it's a pointer (alloca), load it (unless it's a reference type)
@@ -1466,6 +1548,12 @@ class LLVMCodeGen:
         
         elif isinstance(expr, ast.TryExpr):
             return self.gen_try_expr(expr)
+        
+        elif isinstance(expr, ast.OldExpr):
+            if id(expr) in self.old_values:
+                return self.old_values[id(expr)]
+            else:
+                return self.gen_expression(expr.expression)
         
         elif isinstance(expr, ast.TernaryExpr):
             return self.gen_ternary_expr(expr)
@@ -3156,20 +3244,55 @@ class LLVMCodeGen:
             # Get object type
             if isinstance(access.object, ast.Identifier):
                 var_name = access.object.name
+                obj_type = None
                 if hasattr(self, 'variable_types') and var_name in self.variable_types:
                     obj_type = self.variable_types.get(var_name)
+                
+                # Special handling for 'self' in methods if not in variable_types
+                if obj_type is None and var_name == "self" and self.current_struct_name:
+                    if self.type_checker.resolver:
+                        obj_type = self.type_checker.resolver.lookup_type(self.current_struct_name)
+                
+                # If not in variable_types, try to lookup in resolver
+                if obj_type is None and self.type_checker.resolver:
+                    symbol = self.type_checker.resolver.lookup_variable(var_name)
+                    if symbol:
+                        obj_type = symbol.type
+                
+                if obj_type:
+                    # Unwrap reference types
+                    while hasattr(obj_type, 'inner') and (isinstance(obj_type, ReferenceType) or obj_type.__class__.__name__ == 'ReferenceType'):
+                        obj_type = obj_type.inner
+                        
+                    is_struct = isinstance(obj_type, StructType) or obj_type.__class__.__name__ == 'StructType'
                     
-                    if isinstance(obj_type, StructType):
-                        # Get field index
-                        # Sort field names for deterministic order
-                        field_names = sorted(obj_type.fields.keys()) if self.deterministic else list(obj_type.fields.keys())
+                    if is_struct:
+                        # Get field names from the Pyrite type
+                        field_names = []
+                        if hasattr(obj_type, 'fields'):
+                            field_names = sorted(obj_type.fields.keys()) if self.deterministic else list(obj_type.fields.keys())
+                        
                         if access.field in field_names:
                             field_index = field_names.index(access.field)
                             
-                            # If obj is a struct value, extract field
-                            if isinstance(obj.type, ir.LiteralStructType):
-                                # Extract field from struct
-                                return self.builder.extract_value(obj, field_index)
+                            # Determine the actual object value (might need loading)
+                            actual_obj = obj
+                            
+                            # If actual_obj is a pointer to a struct, use GEP and load
+                            if isinstance(actual_obj.type, ir.PointerType) and isinstance(actual_obj.type.pointee, ir.LiteralStructType):
+                                field_ptr = self.builder.gep(actual_obj, [ir.Constant(ir.IntType(32), 0), ir.Constant(ir.IntType(32), field_index)])
+                                return self.builder.load(field_ptr)
+                            
+                            # If actual_obj is a struct value, extract field
+                            if isinstance(actual_obj.type, ir.LiteralStructType):
+                                return self.builder.extract_value(actual_obj, field_index)
+                            
+                            # Fallback: if it's a pointer to a pointer, load once and retry
+                            if isinstance(actual_obj.type, ir.PointerType) and isinstance(actual_obj.type.pointee, ir.PointerType):
+                                actual_obj = self.builder.load(actual_obj)
+                                if isinstance(actual_obj.type.pointee, ir.LiteralStructType):
+                                    field_ptr = self.builder.gep(actual_obj, [ir.Constant(ir.IntType(32), 0), ir.Constant(ir.IntType(32), field_index)])
+                                    return self.builder.load(field_ptr)
         
         # Fallback: return the object itself (or raise error if static access failed)
         if is_static_access:
@@ -3494,6 +3617,241 @@ class LLVMCodeGen:
         struct_val = self.builder.insert_value(struct_val, ptr, 0)
         struct_val = self.builder.insert_value(struct_val, length_val, 1)
         return struct_val
+
+    def _gen_old_captures(self, func_def: ast.FunctionDef):
+        """Capture values for all old() expressions at function entry"""
+        self.old_values = {}
+        if not func_def.attributes:
+            return
+            
+        for attr in func_def.attributes:
+            if attr.name == "ensures":
+                old_exprs = []
+                for expr in attr.args:
+                    if isinstance(expr, ast.Expression):
+                        self._collect_old_exprs(expr, old_exprs)
+                
+                for old_expr in old_exprs:
+                    # Capture the current value of the expression
+                    val = self.gen_expression(old_expr.expression)
+                    self.old_values[id(old_expr)] = val
+
+    def _collect_old_exprs(self, node: ast.ASTNode, old_exprs: List[ast.OldExpr]):
+        """Recursively find all OldExpr nodes"""
+        if isinstance(node, ast.OldExpr):
+            old_exprs.append(node)
+        elif isinstance(node, ast.BinOp):
+            self._collect_old_exprs(node.left, old_exprs)
+            self._collect_old_exprs(node.right, old_exprs)
+        elif isinstance(node, ast.UnaryOp):
+            self._collect_old_exprs(node.operand, old_exprs)
+        elif isinstance(node, ast.MethodCall):
+            self._collect_old_exprs(node.object, old_exprs)
+            for arg in node.arguments:
+                self._collect_old_exprs(arg, old_exprs)
+        elif isinstance(node, ast.FunctionCall):
+            self._collect_old_exprs(node.function, old_exprs)
+            for arg in node.arguments:
+                self._collect_old_exprs(arg, old_exprs)
+        elif isinstance(node, ast.FieldAccess):
+            self._collect_old_exprs(node.object, old_exprs)
+        elif isinstance(node, ast.TernaryExpr):
+            self._collect_old_exprs(node.condition, old_exprs)
+            self._collect_old_exprs(node.true_expr, old_exprs)
+            self._collect_old_exprs(node.false_expr, old_exprs)
+        elif isinstance(node, ast.IndexAccess):
+            self._collect_old_exprs(node.object, old_exprs)
+            self._collect_old_exprs(node.index, old_exprs)
+        elif isinstance(node, ast.TryExpr):
+            self._collect_old_exprs(node.expression, old_exprs)
+        elif isinstance(node, ast.AsExpression):
+            self._collect_old_exprs(node.expression, old_exprs)
+
+    def _gen_precondition(self, condition_expr: ast.Expression):
+        """Generate a runtime check for a precondition (@requires)"""
+        # Omit check if proven at compile-time (SPEC-LANG-0406)
+        if getattr(condition_expr, 'is_proven', False):
+            return
+            
+        # 1. Generate condition expression
+        cond_val = self.gen_expression(condition_expr)
+        
+        # 2. Check if true, if not panic
+        fail_block = self.function.append_basic_block(name="precondition_fail")
+        ok_block = self.function.append_basic_block(name="precondition_ok")
+        
+        # Ensure condition is a boolean
+        if not isinstance(cond_val.type, ir.IntType) or cond_val.type.width != 1:
+            cond_val = self.builder.icmp_signed('!=', cond_val, self._create_zero_constant(cond_val.type))
+            
+        self.builder.cbranch(cond_val, ok_block, fail_block)
+        
+        # Fail path
+        self.builder.position_at_end(fail_block)
+        expr_str = self._expr_to_string(condition_expr)
+        msg = f"ContractViolation: Precondition failed: {expr_str}"
+        msg_const = self.create_string_constant(msg)
+        
+        # Call pyrite_fail
+        if self.fail_func:
+            # Extract i8* ptr from {i8*, i64} String struct
+            ptr = self.builder.extract_value(msg_const, 0)
+            self.builder.call(self.fail_func, [ptr])
+        
+        self.builder.unreachable()
+        
+        # Success path
+        self.builder.position_at_end(ok_block)
+
+    def _gen_loop_invariant(self, condition_expr: ast.Expression):
+        """Generate a runtime check for a loop invariant (@invariant)"""
+        # Omit check if proven at compile-time (SPEC-LANG-0406)
+        if getattr(condition_expr, 'is_proven', False):
+            return
+            
+        cond_val = self.gen_expression(condition_expr)
+        
+        fail_block = self.function.append_basic_block(name="invariant_fail")
+        ok_block = self.function.append_basic_block(name="invariant_ok")
+        
+        if not isinstance(cond_val.type, ir.IntType) or cond_val.type.width != 1:
+            cond_val = self.builder.icmp_signed('!=', cond_val, self._create_zero_constant(cond_val.type))
+            
+        self.builder.cbranch(cond_val, ok_block, fail_block)
+        
+        self.builder.position_at_end(fail_block)
+        expr_str = self._expr_to_string(condition_expr)
+        msg = f"ContractViolation: Loop invariant failed: {expr_str}"
+        msg_const = self.create_string_constant(msg)
+        
+        if self.fail_func:
+            ptr = self.builder.extract_value(msg_const, 0)
+            self.builder.call(self.fail_func, [ptr])
+        
+        self.builder.unreachable()
+        
+        # Success path
+        self.builder.position_at_end(ok_block)
+
+    def _gen_struct_invariants(self):
+        """Generate runtime checks for struct invariants (@invariant)"""
+        if not self.current_struct_name:
+            return
+            
+        # Register if needed
+        self.struct_defs = getattr(self, 'struct_defs', {})
+        struct_def = self.struct_defs.get(self.current_struct_name)
+        if not struct_def or not struct_def.attributes:
+            return
+            
+        for attr in struct_def.attributes:
+            if attr.name == "invariant":
+                for condition_expr in attr.args:
+                    if isinstance(condition_expr, ast.Expression):
+                        self._gen_struct_invariant_check(condition_expr)
+
+    def _gen_struct_invariant_check(self, condition_expr: ast.Expression):
+        """Generate a single struct invariant check"""
+        # Omit check if proven at compile-time (SPEC-LANG-0406)
+        if getattr(condition_expr, 'is_proven', False):
+            return
+            
+        cond_val = self.gen_expression(condition_expr)
+        
+        fail_block = self.function.append_basic_block(name="invariant_fail")
+        ok_block = self.function.append_basic_block(name="invariant_ok")
+        
+        if not isinstance(cond_val.type, ir.IntType) or cond_val.type.width != 1:
+            cond_val = self.builder.icmp_signed('!=', cond_val, self._create_zero_constant(cond_val.type))
+            
+        self.builder.cbranch(cond_val, ok_block, fail_block)
+        
+        self.builder.position_at_end(fail_block)
+        expr_str = self._expr_to_string(condition_expr)
+        msg = f"ContractViolation: Struct invariant failed: {expr_str}"
+        msg_const = self.create_string_constant(msg)
+        
+        if self.fail_func:
+            ptr = self.builder.extract_value(msg_const, 0)
+            self.builder.call(self.fail_func, [ptr])
+        
+        self.builder.unreachable()
+        self.builder.position_at_end(ok_block)
+
+    def _gen_postconditions(self, value: Optional[ir.Value]):
+        """Generate runtime checks for postconditions (@ensures) and struct invariants"""
+        if not self.current_function_def:
+            return
+            
+        # 1. Check method postconditions
+        if self.current_function_def.attributes:
+            self.current_postcondition_value = value
+            for attr in self.current_function_def.attributes:
+                if attr.name == "ensures":
+                    for condition_expr in attr.args:
+                        if isinstance(condition_expr, ast.Expression):
+                            self._gen_postcondition_check(condition_expr)
+            self.current_postcondition_value = None
+            
+        # 2. Check struct invariants (if this is a method)
+        self._gen_struct_invariants()
+
+    def _gen_postcondition_check(self, condition_expr: ast.Expression):
+        """Generate a single postcondition check"""
+        # Omit check if proven at compile-time (SPEC-LANG-0406)
+        if getattr(condition_expr, 'is_proven', False):
+            return
+            
+        cond_val = self.gen_expression(condition_expr)
+        
+        fail_block = self.function.append_basic_block(name="postcondition_fail")
+        ok_block = self.function.append_basic_block(name="postcondition_ok")
+        
+        if not isinstance(cond_val.type, ir.IntType) or cond_val.type.width != 1:
+            cond_val = self.builder.icmp_signed('!=', cond_val, self._create_zero_constant(cond_val.type))
+            
+        self.builder.cbranch(cond_val, ok_block, fail_block)
+        
+        self.builder.position_at_end(fail_block)
+        expr_str = self._expr_to_string(condition_expr)
+        msg = f"ContractViolation: Postcondition failed: {expr_str}"
+        msg_const = self.create_string_constant(msg)
+        
+        if self.fail_func:
+            ptr = self.builder.extract_value(msg_const, 0)
+            self.builder.call(self.fail_func, [ptr])
+        
+        self.builder.unreachable()
+        self.builder.position_at_end(ok_block)
+
+    def _expr_to_string(self, expr: ast.Expression) -> str:
+        """Convert an AST expression to a string representation for error messages"""
+        if isinstance(expr, ast.BinOp):
+            return f"({self._expr_to_string(expr.left)} {expr.op} {self._expr_to_string(expr.right)})"
+        elif isinstance(expr, ast.UnaryOp):
+            return f"({expr.op}{self._expr_to_string(expr.operand)})"
+        elif isinstance(expr, ast.Identifier):
+            return expr.name
+        elif isinstance(expr, ast.IntLiteral):
+            return str(expr.value)
+        elif isinstance(expr, ast.FloatLiteral):
+            return str(expr.value)
+        elif isinstance(expr, ast.BoolLiteral):
+            return "true" if expr.value else "false"
+        elif isinstance(expr, ast.StringLiteral):
+            return f'"{expr.value}"'
+        elif isinstance(expr, ast.MethodCall):
+            args = ", ".join([self._expr_to_string(a) for a in expr.arguments])
+            return f"{self._expr_to_string(expr.object)}.{expr.method}({args})"
+        elif isinstance(expr, ast.FunctionCall):
+            args = ", ".join([self._expr_to_string(a) for a in expr.arguments])
+            func_name = self._expr_to_string(expr.function)
+            return f"{func_name}({args})"
+        elif isinstance(expr, ast.FieldAccess):
+            return f"{self._expr_to_string(expr.object)}.{expr.field}"
+        elif isinstance(expr, ast.OldExpr):
+            return f"old({self._expr_to_string(expr.expression)})"
+        return "expression"
 
 
 def generate_llvm(program: ast.Program, deterministic: bool = False, type_checker=None) -> str:

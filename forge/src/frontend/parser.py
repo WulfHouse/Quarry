@@ -903,36 +903,42 @@ class Parser:
                 args = []
                 if self.match_token(TokenType.LPAREN):
                     self.advance()
-                    # Parse arguments (key=value or just value)
+                    # Parse arguments (key=value or expression)
                     while not self.match_token(TokenType.RPAREN):
-                        # Check for key=value syntax
-                        if self.match_token(TokenType.IDENTIFIER):
-                            key = self.advance().value
-                            if self.match_token(TokenType.ASSIGN):
-                                self.advance()
-                                # Parse value
-                                if self.match_token(TokenType.IDENTIFIER):
-                                    value = self.advance().value
-                                    args.append(f"{key}={value}")
-                                elif self.match_token(TokenType.INTEGER):
-                                    value = str(self.advance().value)
-                                    args.append(f"{key}={value}")
-                                elif self.match_token(TokenType.STRING):
-                                    value = self.advance().value
-                                    args.append(f"{key}={value}")
-                                else:
-                                    args.append(f"{key}=")
-                            else:
-                                # Just an identifier, no =value
-                                args.append(key)
-                        elif self.match_token(TokenType.STRING):
-                            args.append(self.advance().value)
-                        elif self.match_token(TokenType.INTEGER):
-                            args.append(str(self.advance().value))
+                        if name in ["requires", "ensures", "invariant"]:
+                            # Parse as full expression for contracts
+                            args.append(self.parse_expression())
                         else:
-                            break
+                            # Check for key=value syntax
+                            if self.match_token(TokenType.IDENTIFIER):
+                                key = self.advance().value
+                                if self.match_token(TokenType.ASSIGN):
+                                    self.advance()
+                                    # Parse value
+                                    if self.match_token(TokenType.IDENTIFIER):
+                                        value = self.advance().value
+                                        args.append(f"{key}={value}")
+                                    elif self.match_token(TokenType.INTEGER):
+                                        value = str(self.advance().value)
+                                        args.append(f"{key}={value}")
+                                    elif self.match_token(TokenType.STRING):
+                                        value = self.advance().value
+                                        args.append(f"{key}={value}")
+                                    else:
+                                        args.append(f"{key}=")
+                                else:
+                                    # Just an identifier, no =value
+                                    args.append(key)
+                            elif self.match_token(TokenType.STRING):
+                                args.append(self.advance().value)
+                            elif self.match_token(TokenType.INTEGER):
+                                args.append(str(self.advance().value))
+                            else:
+                                break
+                        
                         if not self.match_token(TokenType.RPAREN):
                             self.expect(TokenType.COMMA)
+                            self.skip_newlines()
                     self.expect(TokenType.RPAREN)
                 
                 attr = ast.Attribute(
@@ -953,36 +959,42 @@ class Parser:
                 args = []
                 if self.match_token(TokenType.LPAREN):
                     self.advance()
-                    # Parse arguments (key=value or just value)
+                    # Parse arguments (key=value or expression)
                     while not self.match_token(TokenType.RPAREN):
-                        # Check for key=value syntax
-                        if self.match_token(TokenType.IDENTIFIER):
-                            key = self.advance().value
-                            if self.match_token(TokenType.ASSIGN):
-                                self.advance()
-                                # Parse value
-                                if self.match_token(TokenType.IDENTIFIER):
-                                    value = self.advance().value
-                                    args.append(f"{key}={value}")
-                                elif self.match_token(TokenType.INTEGER):
-                                    value = str(self.advance().value)
-                                    args.append(f"{key}={value}")
-                                elif self.match_token(TokenType.STRING):
-                                    value = self.advance().value
-                                    args.append(f"{key}={value}")
-                                else:
-                                    args.append(f"{key}=")
-                            else:
-                                # Just an identifier, no =value
-                                args.append(key)
-                        elif self.match_token(TokenType.STRING):
-                            args.append(self.advance().value)
-                        elif self.match_token(TokenType.INTEGER):
-                            args.append(str(self.advance().value))
+                        if name in ["requires", "ensures", "invariant"]:
+                            # Parse as full expression for contracts
+                            args.append(self.parse_expression())
                         else:
-                            break
+                            # Check for key=value syntax
+                            if self.match_token(TokenType.IDENTIFIER):
+                                key = self.advance().value
+                                if self.match_token(TokenType.ASSIGN):
+                                    self.advance()
+                                    # Parse value
+                                    if self.match_token(TokenType.IDENTIFIER):
+                                        value = self.advance().value
+                                        args.append(f"{key}={value}")
+                                    elif self.match_token(TokenType.INTEGER):
+                                        value = str(self.advance().value)
+                                        args.append(f"{key}={value}")
+                                    elif self.match_token(TokenType.STRING):
+                                        value = self.advance().value
+                                        args.append(f"{key}={value}")
+                                    else:
+                                        args.append(f"{key}=")
+                                else:
+                                    # Just an identifier, no =value
+                                    args.append(key)
+                            elif self.match_token(TokenType.STRING):
+                                args.append(self.advance().value)
+                            elif self.match_token(TokenType.INTEGER):
+                                args.append(str(self.advance().value))
+                            else:
+                                break
+                        
                         if not self.match_token(TokenType.RPAREN):
                             self.expect(TokenType.COMMA)
+                            self.skip_newlines()
                     self.expect(TokenType.RPAREN)
                 
                 self.expect(TokenType.RBRACKET)
@@ -1122,29 +1134,41 @@ class Parser:
     def parse_statement(self) -> ast.Statement:
         """Parse a statement"""
         # Check for top-level item tokens - these should not appear in statements
-        # This is a safety check for parser bugs where we're in the wrong context
         if self.match_token(TokenType.FN) and self.peek().type == TokenType.IDENTIFIER:
-            # This looks like a function declaration, not a closure
-            # If we're here, the parser is in the wrong context (should be in parse_item, not parse_statement)
             raise ParseError(
-                f"Unexpected function declaration in statement context. This may indicate a missing DEDENT token or parser state issue.",
+                f"Unexpected function declaration in statement context.",
                 self.current().span
             )
         
+        # Check for attributes on statements (like @invariant on loops)
+        attributes = []
+        if self.match_token(TokenType.AT_SIGN, TokenType.HASH):
+            attributes = self.parse_attributes()
+        
         if self.match_token(TokenType.LET, TokenType.VAR):
+            if attributes:
+                raise ParseError("Attributes not supported on variable declarations", self.current().span)
             return self.parse_var_decl()
         elif self.match_token(TokenType.RETURN):
+            if attributes:
+                raise ParseError("Attributes not supported on return statement", self.current().span)
             return self.parse_return()
         elif self.match_token(TokenType.BREAK):
             return self.parse_break()
         elif self.match_token(TokenType.CONTINUE):
             return self.parse_continue()
         elif self.match_token(TokenType.IF):
+            if attributes:
+                raise ParseError("Attributes not supported on if statement", self.current().span)
             return self.parse_if()
         elif self.match_token(TokenType.WHILE):
-            return self.parse_while()
+            stmt = self.parse_while()
+            stmt.attributes = attributes
+            return stmt
         elif self.match_token(TokenType.FOR):
-            return self.parse_for()
+            stmt = self.parse_for()
+            stmt.attributes = attributes
+            return stmt
         elif self.match_token(TokenType.MATCH):
             return self.parse_match()
         elif self.match_token(TokenType.DEFER):
@@ -1156,6 +1180,8 @@ class Parser:
         elif self.match_token(TokenType.PASS):
             return self.parse_pass()
         else:
+            if attributes:
+                raise ParseError("Attributes not supported on this statement", self.current().span)
             # Try to parse as assignment or expression statement
             return self.parse_assignment_or_expression()
     
@@ -2076,6 +2102,13 @@ class Parser:
         # Identifier (might be struct literal or type expression)
         if self.match_token(TokenType.IDENTIFIER):
             name = self.advance().value
+            
+            # Check for old(expr) for DbC postconditions
+            if name == "old" and self.match_token(TokenType.LPAREN):
+                self.advance()
+                expr = self.parse_expression()
+                self.expect(TokenType.RPAREN)
+                return ast.OldExpr(expression=expr, span=self.make_span(start_span))
             
             # Check for struct literal
             if self.match_token(TokenType.LBRACE):

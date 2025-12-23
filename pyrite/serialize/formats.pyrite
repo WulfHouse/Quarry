@@ -7,127 +7,20 @@ import std.string
 import std.collections.list
 import std.collections.map
 
+# Re-export types for convenience
+type JsonValue = std.serialize.json.JsonValue
+type TomlValue = std.serialize.toml.TomlValue
+
 # JSON serialization/deserialization
 fn json_to_string(value: &JsonValue) -> String:
-    return value.to_string()
+    return std.serialize.json.to_string(value)
 
 fn json_from_str(s: &String) -> Result[JsonValue, String]:
-    # Basic JSON parser - handles primitive values
-    let trimmed = s.trim()
-    if trimmed.is_empty():
-        return Err(string_new("Empty JSON string"))
-    
-    # Check for null
-    if trimmed == string_new("null"):
-        return Ok(JsonValue.Null)
-    
-    # Check for boolean
-    if trimmed == string_new("true"):
-        return Ok(JsonValue.Bool(true))
-    if trimmed == string_new("false"):
-        return Ok(JsonValue.Bool(false))
-    
-    # Check for string (starts and ends with quotes)
-    if trimmed.starts_with(string_new("\"")):
-        let len = trimmed.len()
-        # Check if ends with quote (manual check since ends_with not available)
-        let last_char = trimmed.substring(len - 1, len)
-        if last_char == string_new("\""):
-            # Extract string value (simplified - doesn't handle escapes yet)
-            if len >= 2:
-                let content = trimmed.substring(1, len - 1)
-                return Ok(JsonValue.String(content))
-            return Ok(JsonValue.String(string_empty()))
-    
-    # Check for number (starts with digit or minus sign)
-    let first = trimmed.substring(0, 1)
-    let zero = string_new("0")
-    let nine = string_new("9")
-    let minus = string_new("-")
-    # Note: String comparison operators not available, use substring matching
-    # For MVP, return error for numbers - full parsing requires C implementation
-    if first == minus:
-        return Err(string_new("Number parsing not yet implemented"))
-    
-    # Arrays and objects not yet supported
-    if trimmed.starts_with(string_new("[")) or trimmed.starts_with(string_new("{")):
-        return Err(string_new("Complex JSON structures not yet implemented"))
-    
-    return Err(string_new("Invalid JSON format"))
-
-# TOML value type
-enum TomlValue:
-    String(value: String)
-    Integer(value: i64)
-    Float(value: f64)
-    Boolean(value: bool)
-    Array(values: List[TomlValue])
-    Table(entries: Map[String, TomlValue])
-
-impl TomlValue:
-    fn to_string(&self) -> String:
-        match self:
-            String(v):
-                return v
-            Integer(v):
-                return string_from_int(v)
-            Float(v):
-                return string_from_float(v)
-            Boolean(v):
-                if v:
-                    return string_new("true")
-                else:
-                    return string_new("false")
-            Array(l):
-                var builder = StringBuilder.new()
-                builder.append_char('[' as u8)
-                let len = l.length()
-                var i = 0
-                while i < len:
-                    if i > 0:
-                        builder.append_char(',' as u8)
-                        builder.append_char(' ' as u8)
-                    let elem = l.get(i)
-                    let elem_str = elem.to_string()
-                    # Note: Full string appending requires more work
-                    builder.append_char('"' as u8)
-                    builder.append_char('"' as u8)
-                    i = i + 1
-                builder.append_char(']' as u8)
-                return builder.to_string()
-            Table(m):
-                # TOML table serialization
-                return string_new("[table]")
-        return string_empty()
+    return std.serialize.json.from_str(s)
 
 # TOML serialization/deserialization
 fn toml_to_string(value: &TomlValue) -> String:
-    return value.to_string()
+    return std.serialize.toml.to_string(value)
 
 fn toml_from_str(s: &String) -> Result[TomlValue, String]:
-    # Basic TOML parser - handles simple key-value pairs
-    let trimmed = s.trim()
-    if trimmed.is_empty():
-        return Err(string_new("Empty TOML string"))
-    
-    # Check for boolean
-    if trimmed == string_new("true"):
-        return Ok(TomlValue.Boolean(true))
-    if trimmed == string_new("false"):
-        return Ok(TomlValue.Boolean(false))
-    
-    # Check for string (quoted)
-    if trimmed.starts_with(string_new("\"")):
-        let len = trimmed.len()
-        let last_char = trimmed.substring(len - 1, len)
-        if last_char == string_new("\""):
-            if len >= 2:
-                let content = trimmed.substring(1, len - 1)
-                return Ok(TomlValue.String(content))
-            return Ok(TomlValue.String(string_empty()))
-    
-    # Check for integer or float
-    # Note: Full parsing requires C implementation
-    return Err(string_new("TOML parsing not fully implemented"))
-
-
+    return std.serialize.toml.from_str(s)

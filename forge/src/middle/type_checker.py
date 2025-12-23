@@ -52,6 +52,8 @@ class TypeChecker:
         self.function_defs: Dict[str, ast.FunctionDef] = {}
         # Track type aliases: {alias_name: (generic_params, target_type)}
         self.type_aliases: Dict[str, tuple[List[ast.GenericParam], Type]] = {}
+        # Track if we are inside an @ensures attribute for old() validation
+        self.is_inside_ensures = False
         self.register_builtins()
     
     def error(self, message: str, span: Span):
@@ -350,6 +352,18 @@ class TypeChecker:
         
         struct_type = StructType(struct.name, fields, generic_param_names)
         self.resolver.define_type(struct.name, struct_type, struct.span)
+        
+        # Check attributes (@invariant)
+        if struct.attributes:
+            for attr in struct.attributes:
+                if attr.name == "invariant":
+                    self.resolver.enter_scope()
+                    # For struct invariants, 'self' refers to the struct instance
+                    self.resolver.define_variable("self", ReferenceType(False, struct_type), False, attr.span)
+                    for expr in attr.args:
+                        if isinstance(expr, ast.Expression):
+                            self.check_expression(expr, expected_type=BOOL)
+                    self.resolver.exit_scope()
     
     def register_enum(self, enum: ast.EnumDef):
         """Register an enum type"""
@@ -667,6 +681,35 @@ class TypeChecker:
             param_type = self.resolve_type(param.type_annotation)
             self.resolver.define_variable(param.name, param_type, False, param.span)
         
+        # Check attributes (@requires, @ensures)
+        for attr in func.attributes:
+            if attr.name == "requires":
+                for expr in attr.args:
+                    if isinstance(expr, ast.Expression):
+                        self.check_expression(expr, expected_type=BOOL)
+                        # Compile-time verification (SPEC-LANG-0406)
+                        val = self.evaluate_constant_bool(expr)
+                        if val is False:
+                            self.error(f"Precondition will always fail: {self._expr_to_string(expr)}", expr.span)
+                        elif val is True:
+                            expr.is_proven = True
+            elif attr.name == "ensures":
+                # For @ensures, 'result' refers to the return value
+                self.resolver.enter_scope()
+                # Use current_function_return_type (resolved above)
+                ret_type = self.current_function_return_type if self.current_function_return_type else VOID
+                self.resolver.define_variable("result", ret_type, False, attr.span)
+                
+                # Set flag for old() validation
+                self.is_inside_ensures = True
+                for expr in attr.args:
+                    if isinstance(expr, ast.Expression):
+                        self.check_expression(expr, expected_type=BOOL)
+                        # Note: we don't prove postconditions easily as they depend on function logic
+                self.is_inside_ensures = False
+                
+                self.resolver.exit_scope()
+        
         # Check function body
         self.check_block(func.body)
         
@@ -836,6 +879,20 @@ class TypeChecker:
         if not isinstance(cond_type, BoolType):
             self.error(f"While condition must be bool, got {cond_type}", while_stmt.span)
         
+        # Check loop invariants
+        if while_stmt.attributes:
+            for attr in while_stmt.attributes:
+                if attr.name == "invariant":
+                    for expr in attr.args:
+                        if isinstance(expr, ast.Expression):
+                            self.check_expression(expr, expected_type=BOOL)
+                            # Compile-time verification
+                            val = self.evaluate_constant_bool(expr)
+                            if val is False:
+                                self.error(f"Loop invariant will always fail: {self._expr_to_string(expr)}", expr.span)
+                            elif val is True:
+                                expr.is_proven = True
+        
         self.resolver.enter_scope()
         self.check_block(while_stmt.body)
         self.resolver.exit_scope()
@@ -845,8 +902,21 @@ class TypeChecker:
         # Check iterable (simplified - just check it has a type)
         iterable_type = self.check_expression(for_stmt.iterable)
         
+        # Check loop invariants
+        if for_stmt.attributes:
+            for attr in for_stmt.attributes:
+                if attr.name == "invariant":
+                    for expr in attr.args:
+                        if isinstance(expr, ast.Expression):
+                            self.check_expression(expr, expected_type=BOOL)
+                            # Compile-time verification
+                            val = self.evaluate_constant_bool(expr)
+                            if val is False:
+                                self.error(f"Loop invariant will always fail: {self._expr_to_string(expr)}", expr.span)
+                            elif val is True:
+                                expr.is_proven = True
+        
         # For MVP, assume loop variable is int
-        # TODO: Implement proper iterator trait checking
         loop_var_type = INT
         
         self.resolver.enter_scope()
@@ -1066,6 +1136,8 @@ class TypeChecker:
             return TupleType(element_types)
         elif isinstance(expr, ast.TryExpr):
             return self.check_try_expr(expr)
+        elif isinstance(expr, ast.OldExpr):
+            return self.check_old_expr(expr)
         elif isinstance(expr, ast.ParameterClosure):
             return self.check_parameter_closure(expr)
         elif isinstance(expr, ast.RuntimeClosure):
@@ -2075,6 +2147,14 @@ class TypeChecker:
                 try_expr.span
             )
             return UNKNOWN
+
+    def check_old_expr(self, old_expr: ast.OldExpr) -> Type:
+        """Type check old() expression for DbC"""
+        if not self.is_inside_ensures:
+            self.error("old() can only be used within @ensures postconditions", old_expr.span)
+        
+        # Type of old(expr) is the same as type of expr
+        return self.check_expression(old_expr.expression)
     
     def evaluate_constant_int(self, expr: ast.Expression) -> Optional[int]:
         """Evaluate a constant integer expression (SPEC-LANG-0216)"""
@@ -2104,6 +2184,61 @@ class TypeChecker:
                 if expr.op == "-": return -operand
                 if expr.op == "+": return operand
         
+        return None
+
+    def evaluate_constant_bool(self, expr: ast.Expression) -> Optional[bool]:
+        """Evaluate a constant boolean expression (SPEC-LANG-0406)"""
+        if isinstance(expr, ast.BoolLiteral):
+            return expr.value
+        elif isinstance(expr, ast.BinOp):
+            if expr.op == '==':
+                left = self.evaluate_constant_int(expr.left)
+                right = self.evaluate_constant_int(expr.right)
+                if left is not None and right is not None:
+                    return left == right
+                
+                # Also handle bool comparison
+                left_b = self.evaluate_constant_bool(expr.left)
+                right_b = self.evaluate_constant_bool(expr.right)
+                if left_b is not None and right_b is not None:
+                    return left_b == right_b
+            elif expr.op == '!=':
+                val = self.evaluate_constant_bool(ast.BinOp(expr.left, '==', expr.right, expr.span))
+                return not val if val is not None else None
+            elif expr.op == '>':
+                left = self.evaluate_constant_int(expr.left)
+                right = self.evaluate_constant_int(expr.right)
+                if left is not None and right is not None:
+                    return left > right
+            elif expr.op == '<':
+                left = self.evaluate_constant_int(expr.left)
+                right = self.evaluate_constant_int(expr.right)
+                if left is not None and right is not None:
+                    return left < right
+            elif expr.op == '>=':
+                left = self.evaluate_constant_int(expr.left)
+                right = self.evaluate_constant_int(expr.right)
+                if left is not None and right is not None:
+                    return left >= right
+            elif expr.op == '<=':
+                left = self.evaluate_constant_int(expr.left)
+                right = self.evaluate_constant_int(expr.right)
+                if left is not None and right is not None:
+                    return left <= right
+            elif expr.op == 'and':
+                left = self.evaluate_constant_bool(expr.left)
+                right = self.evaluate_constant_bool(expr.right)
+                if left is not None and right is not None:
+                    return left and right
+            elif expr.op == 'or':
+                left = self.evaluate_constant_bool(expr.left)
+                right = self.evaluate_constant_bool(expr.right)
+                if left is not None and right is not None:
+                    return left or right
+        elif isinstance(expr, ast.UnaryOp):
+            if expr.op == 'not':
+                val = self.evaluate_constant_bool(expr.operand)
+                return not val if val is not None else None
         return None
 
     def resolve_type(self, type_annotation: ast.Type) -> Type:

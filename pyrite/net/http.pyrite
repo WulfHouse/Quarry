@@ -1,0 +1,46 @@
+# HTTP Client and Server
+import std.net.tcp
+import std.string
+import std.collections.list
+import std.collections.map
+
+struct HttpRequest:
+    method: String
+    url: String
+    headers: Map[String, String]
+    body: String
+
+struct HttpResponse:
+    status_code: i32
+    headers: Map[String, String]
+    body: String
+
+struct HttpClient:
+    # Basic HTTP client
+    pass
+
+impl HttpClient:
+    fn new() -> HttpClient:
+        return HttpClient {}
+        
+    fn get(&self, url: &String) -> Result[HttpResponse, String]:
+        # Simple HTTP GET implementation placeholder
+        return Err(string_new("HTTP GET not yet fully implemented"))
+
+    fn post(&self, url: &String, body: &String) -> Result[HttpResponse, String]:
+        # Simple HTTP POST implementation placeholder
+        return Err(string_new("HTTP POST not yet fully implemented"))
+
+struct HttpServer:
+    listener: TcpListener
+
+impl HttpServer:
+    fn new(port: i32) -> Result[HttpServer, String]:
+        let listener = TcpListener.bind(string_new("0.0.0.0"), port)?
+        return Ok(HttpServer { listener: listener })
+        
+    fn handle_requests(&mut self):
+        # Basic HTTP server loop placeholder
+        # In a real implementation, this would parse HTTP requests and route them
+        pass
+

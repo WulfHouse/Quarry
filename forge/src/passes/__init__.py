@@ -16,5 +16,6 @@ See Also:
 from .closure_inline_pass import ClosureInlinePass
 from .closure_inlining import ClosureInliner
 from .with_desugar_pass import WithDesugarPass
+from .derive_pass import DerivePass
 
-__all__ = ['ClosureInlinePass', 'ClosureInliner', 'WithDesugarPass']
+__all__ = ['ClosureInlinePass', 'ClosureInliner', 'WithDesugarPass', 'DerivePass']

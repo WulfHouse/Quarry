@@ -10,6 +10,7 @@ from .frontend.tokens import Span
 class ASTNode:
     """Base class for all AST nodes"""
     span: Span
+    is_proven: bool = False  # For SPEC-LANG-0406 (compile-time contract verification)
 
 
 # Program structure
@@ -116,7 +117,7 @@ class StructDef(ASTNode):
 class Attribute(ASTNode):
     """Attribute: #[name] or #[name(args)]"""
     name: str
-    args: List[str] = None  # Arguments like "C" in #[repr(C)]
+    args: List[str | 'Expression'] = None  # Arguments: can be strings or expressions
     
     def __post_init__(self):
         if self.args is None:
@@ -295,6 +296,11 @@ class WhileStmt(ASTNode):
     """While loop"""
     condition: 'Expression'
     body: 'Block'
+    attributes: List['Attribute'] = None
+
+    def __post_init__(self):
+        if self.attributes is None:
+            self.attributes = []
 
 
 @dataclass
@@ -303,6 +309,11 @@ class ForStmt(ASTNode):
     variable: str
     iterable: 'Expression'
     body: 'Block'
+    attributes: List['Attribute'] = None
+
+    def __post_init__(self):
+        if self.attributes is None:
+            self.attributes = []
 
 
 @dataclass
@@ -483,6 +494,12 @@ class TryExpr(ASTNode):
 
 
 @dataclass
+class OldExpr(ASTNode):
+    """Old expression for DbC: old(expression)"""
+    expression: 'Expression'
+
+
+@dataclass
 class ParameterClosure(ASTNode):
     """
     Parameter closure: fn[params] -> Type
@@ -627,7 +644,7 @@ Expression = (IntLiteral | FloatLiteral | StringLiteral | CharLiteral |
               BoolLiteral | NoneLiteral | Identifier | BinOp | UnaryOp |
               TernaryExpr | FunctionCall | MethodCall | FieldAccess |
               IndexAccess | SliceAccess | StructLiteral | ListLiteral | TupleLiteral | TryExpr |
-              GenericType | AsExpression)  # Allow GenericType as expression for Type[Args].method() syntax
+              GenericType | AsExpression | OldExpr)  # Allow GenericType as expression for Type[Args].method() syntax
 Pattern = (LiteralPattern | IdentifierPattern | TuplePattern | WildcardPattern |
            EnumPattern | OrPattern)
 Type = (PrimitiveType | ReferenceType | PointerType | ArrayType |

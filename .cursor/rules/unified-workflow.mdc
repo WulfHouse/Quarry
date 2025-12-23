@@ -3,7 +3,7 @@ alwaysApply: true
 ---
 **SSOT:** `docs/specification/technical-ssot.md` (FROZEN Dec 23, 2025)
 **Structure:** REQ-IDs → SPEC-IDs (NODE=grouping, LEAF=atomic work unit)
-**Command Prefix (MANDATORY):** `& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh`
+**Command Prefix (MANDATORY):** `& "C:\Program Files\Git\bin\bash.exe" -- scripts/run_gates.sh`
 
 ---
 

@@ -262,3 +262,63 @@ void tcp_close(int64_t sock) {
 #endif
 }
 
+int64_t tcp_listen(const char* address, int32_t port) {
+    int64_t sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) return -1;
+    
+    int opt = 1;
+#ifdef _WIN32
+    setsockopt((SOCKET)sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&opt, sizeof(opt));
+#else
+    setsockopt((int)sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+#endif
+
+    struct sockaddr_in serv_addr;
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port);
+    
+    if (address == NULL || strlen(address) == 0 || strcmp(address, "0.0.0.0") == 0) {
+        serv_addr.sin_addr.s_addr = INADDR_ANY;
+    } else if (inet_pton(AF_INET, address, &serv_addr.sin_addr) <= 0) {
+#ifdef _WIN32
+        closesocket(sock);
+#else
+        close(sock);
+#endif
+        return -1;
+    }
+    
+    if (bind(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+#ifdef _WIN32
+        closesocket(sock);
+#else
+        close(sock);
+#endif
+        return -1;
+    }
+    
+    if (listen(sock, 128) < 0) {
+#ifdef _WIN32
+        closesocket(sock);
+#else
+        close(sock);
+#endif
+        return -1;
+    }
+    
+    return sock;
+}
+
+int64_t tcp_accept(int64_t sock) {
+    struct sockaddr_in client_addr;
+#ifdef _WIN32
+    int addr_len = sizeof(client_addr);
+    int64_t client_sock = accept((SOCKET)sock, (struct sockaddr *)&client_addr, &addr_len);
+#else
+    socklen_t addr_len = sizeof(client_addr);
+    int64_t client_sock = accept((int)sock, (struct sockaddr *)&client_addr, &addr_len);
+#endif
+    return client_sock;
+}
+

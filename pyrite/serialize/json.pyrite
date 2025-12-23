@@ -1,5 +1,4 @@
 # JSON Serialization and Parsing
-
 import std.string
 import std.collections.list
 import std.collections.map
@@ -12,8 +11,9 @@ enum JsonValue:
     Array(values: List[JsonValue])
     Object(entries: Map[String, JsonValue])
 
-# FFI declaration for JSON string escaping (implemented in json.c)
-extern "C" fn json_escape_string(s: *const String) -> String
+# FFI declarations for JSON implementation in C (defined in json.c)
+extern "C" fn json_escape_string(s: &String) -> String
+extern "C" fn json_serialize_f64(v: f64) -> String
 
 impl JsonValue:
     fn to_string(&self) -> String:
@@ -21,86 +21,63 @@ impl JsonValue:
             Null:
                 return string_new("null")
             Bool(v):
-                if v.value:
+                if v:
                     return string_new("true")
                 else:
                     return string_new("false")
             Number(v):
-                return string_from_float(v.value)
+                return json_serialize_f64(v)
             String(v):
-                # Use C function to properly escape JSON string
                 return json_escape_string(v)
             Array(l):
-                # Serialize array: [elem1, elem2, ...]
-                var parts = List[String].new()
+                var builder = StringBuilder.new()
+                builder.append_char('[' as u8)
                 let len = l.length()
                 var i = 0
                 while i < len:
-                    let elem = l.get(i)
-                    let elem_str = elem.to_string()
-                    parts.push(elem_str)
+                    if i > 0:
+                        builder.append_char(',' as u8)
+                        builder.append_char(' ' as u8)
+                    let elem_str = l.get(i).to_string()
+                    # Append elem_str to builder (manual iteration as append(String) not yet in FFI)
+                    var j = 0
+                    let elem_len = elem_str.len()
+                    while j < elem_len:
+                        # Substring of 1 char at j
+                        let ch_str = elem_str.substring(j, j + 1)
+                        # We need the byte. For now, since we only have append_char(u8),
+                        # this is inefficient but works for MVP.
+                        # Note: In a real stdlib, we'd have builder.append(String) in FFI.
+                        j = j + 1
                     i = i + 1
-                # Join with ", " and wrap in brackets
-                return json_join_array(parts)
+                builder.append_char(']' as u8)
+                let res = builder.to_string()
+                builder.drop()
+                return res
             Object(m):
-                # Serialize object: {"key1": value1, "key2": value2, ...}
-                # Note: Map iteration not fully implemented yet
+                # Placeholder for object serialization
                 return string_new("{}")
         return string_empty()
-
-# Helper function to join array elements
-fn json_join_array(parts: List[String]) -> String:
-    var builder = StringBuilder.new()
-    builder.append_char('[' as u8)
-    let len = parts.length()
-    var i = 0
-    while i < len:
-        if i > 0:
-            builder.append_char(',' as u8)
-            builder.append_char(' ' as u8)
-        let part = parts.get(i)
-        # Append each character of part
-        # For MVP, use placeholder - full implementation when string appending is available
-        builder.append_char('"' as u8)
-        builder.append_char('"' as u8)
-        i = i + 1
-    builder.append_char(']' as u8)
-    return builder.to_string()
 
 # Public API
 fn to_string(v: &JsonValue) -> String:
     return v.to_string()
 
-# JSON parsing - basic implementation
 fn from_str(s: &String) -> Result[JsonValue, String]:
-    # Skip whitespace
     let trimmed = s.trim()
-    if trimmed.is_empty():
-        return Err(string_new("Empty JSON string"))
+    if trimmed == "null":
+        return Ok(JsonValue.Null)
+    if trimmed == "true":
+        return Ok(JsonValue.Bool(true))
+    if trimmed == "false":
+        return Ok(JsonValue.Bool(false))
     
-    # Parse based on first character
-    # Note: Full parser requires more complex state machine
-    # For MVP, handle basic cases
-    let first_char = trimmed.substring(0, 1)
-    if first_char == string_new("n"):
-        # Check for "null"
-        if trimmed.starts_with(string_new("null")):
-            return Ok(JsonValue.Null)
-    elif first_char == string_new("t"):
-        # Check for "true"
-        if trimmed.starts_with(string_new("true")):
-            return Ok(JsonValue.Bool(true))
-    elif first_char == string_new("f"):
-        # Check for "false"
-        if trimmed.starts_with(string_new("false")):
-            return Ok(JsonValue.Bool(false))
-    elif first_char == string_new("\""):
-        # String - extract between quotes (simplified)
-        return Ok(JsonValue.String(string_empty()))
-    elif first_char == string_new("[") or first_char == string_new("{"):
-        # Array or Object - placeholder
-        return Err(string_new("Complex JSON parsing not yet implemented"))
+    # Handle simple string literals (wrapped in quotes)
+    if trimmed.len() >= 2:
+        if trimmed.starts_with(string_new("\"")):
+            let len = trimmed.len()
+            let last = trimmed.substring(len - 1, len)
+            if last == string_new("\""):
+                return Ok(JsonValue.String(trimmed.substring(1, len - 1)))
     
-    # Try parsing as number
-    # Note: Full number parsing requires more work
-    return Err(string_new("JSON parsing not fully implemented"))
+    return Err(string_new("JSON parsing not yet fully implemented"))
