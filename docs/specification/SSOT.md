@@ -135,14 +135,10 @@ When updating the specification:
 
 ## See Also
 
-- [technical-ssot.md](../technical-ssot.md) - Complete technical, itemized specifications with zero-to-final implementation guidance
+- [technical-ssot.md](./technical-ssot.md) - Complete technical, itemized specifications with zero-to-final implementation guidance
 
-- [SSOT_DISCLAIMER.md](SSOT_DISCLAIMER.md) - Important information about this specification
-
-- [LIMITATIONS.md](../LIMITATIONS.md) - Current implementation status
+- [SSOT_DISCLAIMER.md](../SSOT_DISCLAIMER.md) - Important information about this specification
 
 - [Compiler Source](../forge/src/README.md) - Compiler implementation
 
-- [Bootstrap Guide](bootstrap.md) - Self-hosting process
-
-- [Testing Documentation](testing/) - Test organization
+- [Bootstrap Guide](../bootstrap.md) - Self-hosting process
