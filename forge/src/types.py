@@ -82,21 +82,24 @@ class NoneType(Type):
 
 @dataclass
 class ReferenceType(Type):
-    """Reference type: &T or &mut T"""
+    """Reference type: &'a T or &'a mut T"""
     inner: Type
     mutable: bool = False
+    lifetime: Optional[str] = None  # Inferred or explicit lifetime
     
     def __eq__(self, other):
         return (isinstance(other, ReferenceType) and 
                 self.inner == other.inner and 
-                self.mutable == other.mutable)
+                self.mutable == other.mutable and
+                self.lifetime == other.lifetime)
     
     def __hash__(self):
-        return hash(("ref", self.inner, self.mutable))
+        return hash(("ref", self.inner, self.mutable, self.lifetime))
     
     def __str__(self):
         mut = "mut " if self.mutable else ""
-        return f"&{mut}{self.inner}"
+        life = f"'{self.lifetime} " if self.lifetime else ""
+        return f"&{life}{mut}{self.inner}"
 
 
 @dataclass

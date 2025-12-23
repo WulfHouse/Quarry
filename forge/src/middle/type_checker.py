@@ -255,6 +255,26 @@ class TypeChecker:
                         span
                     )
     
+    def apply_lifetime_elision(self, param_types: List[Type], return_type: Optional[Type]):
+        """Apply basic lifetime elision rules (SPEC-LANG-0205)"""
+        # Find all input references
+        input_refs = []
+        for t in param_types:
+            if isinstance(t, ReferenceType):
+                input_refs.append(t)
+        
+        # Rule 1: If there is exactly one input reference, 
+        # its lifetime is assigned to all output references.
+        if len(input_refs) == 1:
+            in_ref = input_refs[0]
+            if not in_ref.lifetime:
+                in_ref.lifetime = "a"
+            
+            # Apply to return type
+            if isinstance(return_type, ReferenceType):
+                if not return_type.lifetime:
+                    return_type.lifetime = in_ref.lifetime
+
     def register_function(self, func: ast.FunctionDef):
         # Store function definition for FFI detection
         self.function_defs[func.name] = func
@@ -301,6 +321,9 @@ class TypeChecker:
         
         # Exit the temporary scope
         self.resolver.exit_scope()
+        
+        # Apply lifetime elision (SPEC-LANG-0205)
+        self.apply_lifetime_elision(param_types, return_type)
         
         func_type = FunctionType(param_types, return_type)
         self.resolver.define_function(func.name, func_type, func.span, is_extern=func.is_extern)
