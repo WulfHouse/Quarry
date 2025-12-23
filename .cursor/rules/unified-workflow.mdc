@@ -7,45 +7,67 @@ alwaysApply: true
 
 ---
 
+## ⚡ CONTINUOUS WORK MODE (CRITICAL)
+
+**Agents work in an INFINITE LOOP - never stop, never ask questions:**
+
+1. **Read memory.txt** → Get current SPEC
+2. **Implement SPEC** → Test → Update memory.txt
+3. **IMMEDIATELY proceed to next SPEC** (read memory.txt → get next → repeat)
+4. **REPEAT FOREVER** - Work continuously through all SPECs
+
+**Rules:**
+- ❌ NEVER stop working or ask questions
+- ❌ NEVER wait for user input or clarification
+- ✅ ALWAYS use best judgment and continue
+- ✅ ALWAYS automatically implement dependencies if blocked
+- ✅ ALWAYS infer requirements from SSOT and similar SPECs
+- ✅ ALWAYS proceed to next SPEC immediately after completing current one
+
+**Workflow:** SPEC → Test → Update memory.txt → Next SPEC → Repeat (infinite loop)
+
+---
+
 ## 0. AGENT STATE (CRITICAL - UPDATE AFTER EACH SPEC)
 
-### 0.1 Current State (LIVE - UPDATE THIS)
+### 0.1 State Storage Location
+**State is stored in:** `memory.txt` (root directory)
+**Never store state in:** Document sections
 
-```yaml
-Last updated: December 23, 2025
-Milestone: M10 | Last SPEC: SPEC-LANG-0840 | Next: SPEC-LANG-0841
-Commit: 61abb48 "CHECKPOINT: M10 SPEC-LANG-0840 verified+complete"
-Phase: 3 (Beta) | Status: READY | Branch: 1.2.0-alpha
-Tests: [To be verified] | Notes: SPEC-LANG-0840 complete, JSON/TOML formats implemented
+### 0.2 Session Startup (DO THIS FIRST)
 ```
-
-### 0.2 State History (Last 5)
-```
-1. 2025-12-23 M10 SPEC-LANG-0840→SPEC-LANG-0841 | SPEC-LANG-0840 complete
-2. 2025-12-23 M9 SPEC-LANG-0822→M10 SPEC-LANG-0840 | M0-M9 complete
-3-5. [Date] M[X] SPEC-[ID]→SPEC-[ID] | [Notes]
+1. READ memory.txt → Note "Next" SPEC
+2. LOCATE SPEC in technical-ssot.md → Read DoD, deps, tests
+3. GO: Implement → Test → Update memory.txt → IMMEDIATELY proceed to next SPEC
+4. REPEAT: After each SPEC, automatically read memory.txt → Get next SPEC → Continue working
 ```
 
-### 0.3 Session Startup (DO THIS FIRST)
-```
-1. READ Section 0.1 → Note "Next" SPEC
-2. VERIFY: git log -1 --pretty=format:"%s" matches "Last SPEC"
-3. If mismatch: git log --grep="CHECKPOINT:" -1 → Update 0.1 → Commit "STATE: Synchronized"
-4. LOCATE SPEC in technical-ssot.md → Read DoD, deps, tests
-5. GO: Implement → Test → CHECKPOINT → Update 0.1 → STATE commit
-```
+### 0.3 Continuous Work Loop (MANDATORY)
+**Agents MUST work continuously without stopping:**
+- After completing a SPEC → Update memory.txt → Immediately start next SPEC
+- Never ask questions → Use best judgment and continue
+- Never stop for clarification → Infer from SSOT and similar SPECs
+- If blocked by dependencies → Automatically implement dependencies first, then continue
+- If unclear requirements → Use implementation notes, similar SPECs, and best practices
+- Work in infinite loop: SPEC → Test → Update → Next SPEC → Repeat
 
-### 0.4 Update Template (After Each SPEC)
+### 0.4 Memory File Format (memory.txt)
 ```yaml
 Last updated: [YYYY-MM-DD]
 Milestone: M[X] | Last SPEC: SPEC-[COMP]-[NUM] | Next: SPEC-[COMP]-[NUM]
-Commit: [7-char sha] "CHECKPOINT: M[X] SPEC-[COMP]-[NUM] verified+complete"
 Phase: [0-4] ([Name]) | Status: READY | Branch: [name]
 Tests: [X/1813] (full) OR [X/457] (fast) | Notes: [Context]
+
+State History (Last 5):
+1. [YYYY-MM-DD] M[X] SPEC-[ID]→SPEC-[ID] | [Notes]
+2. [YYYY-MM-DD] M[X] SPEC-[ID]→SPEC-[ID] | [Notes]
+3. [YYYY-MM-DD] M[X] SPEC-[ID]→SPEC-[ID] | [Notes]
+4. [YYYY-MM-DD] M[X] SPEC-[ID]→SPEC-[ID] | [Notes]
+5. [YYYY-MM-DD] M[X] SPEC-[ID]→SPEC-[ID] | [Notes]
 ```
 
 ### 0.5 Control Commands
-- **"GO"** (all caps) = Start/resume work immediately (no confirmation)
+- **"GO"** (all caps) = Start/resume work immediately and continue indefinitely (no confirmation, no stopping)
 
 ---
 
@@ -56,40 +78,36 @@ Tests: [X/1813] (full) OR [X/457] (fast) | Notes: [Context]
 Step 1: IMPLEMENT (satisfy all DoD criteria, handle edge cases, add diagnostics)
 Step 2: TEST (unit+integration+golden+perf per "Tests required")
 Step 3: VERIFY (run full suite, fix until 100% pass, never skip tests)
-Step 4: CHECKPOINT (git add . && git commit -m "CHECKPOINT: M[X] SPEC-[COMP]-[NUM] verified+complete")
-Step 5: UPDATE STATE (edit Section 0.1 with new state)
-Step 6: STATE COMMIT (git add .cursor/rules/unified-workflow.mdc && git commit -m "STATE: Updated after M[X] SPEC-[COMP]-[NUM]")
+Step 4: UPDATE STATE (edit memory.txt with new state)
+Step 5: CONTINUE (immediately read memory.txt → Get next SPEC → Start working on it)
 ```
 
 ### 1.2 NODE SPEC (Container)
 ```
 1. Review "Children:" list → Identify LEAFs/sub-NODEs
 2. Implement each child (LEAF workflow) in dependency order
-3. Verify integration → Full test suite → Final commit
+3. Verify integration → Full test suite → Update memory.txt
+4. CONTINUE (immediately read memory.txt → Get next SPEC → Start working on it)
 ```
-
-### 1.3 Dual-Commit Pattern (MANDATORY)
-**Every SPEC = 2 commits:** CHECKPOINT (code+tests) + STATE (Section 0.1 update)
-**Why:** Git history tracks both implementation + navigation metadata
 
 ---
 
 ## 2. TESTING (NEVER SKIP)
 
 ### 2.1 When to Test
-✅ Before commit | ✅ Before marking todo complete | ✅ After SPEC done | ✅ After bug fix
+✅ Before marking todo complete | ✅ After SPEC done | ✅ After bug fix
 
 ### 2.2 Commands
 ```powershell
 # Fast (dev iteration): ~457 tests, ~8s
 & "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh python tools/testing/pytest_fast.py
 
-# Full (pre-commit): 1813+ tests
+# Full: 1813+ tests
 & "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/
 ```
 
 ### 2.3 Failure Protocol
-IF test fails → HALT → Analyze (impl bug vs test bug) → Fix (never modify SSOT) → Re-run → Repeat until 100% pass
+IF test fails → Analyze (impl bug vs test bug) → Fix (never modify SSOT) → Re-run → Repeat until 100% pass → Continue to next SPEC
 
 ### 2.4 Coverage Targets
 Forge: 100% (critical paths) | Pyrite: 90%+ | Quarry: 80%+
@@ -106,6 +124,7 @@ Quarry/
 ├── quarry/                               # Build system + pkg manager
 ├── scripts/run_gates.sh                  # Quality gates (mandatory prefix)
 ├── tests/                                # unit/ integration/ acceptance/
+├── memory.txt                            # Agent state (not committed to Git)
 └── .agent-artifacts/                     # Agent temp files (.txt only)
 ```
 
@@ -177,39 +196,25 @@ help: Clone `x`: `x.clone()`
 
 ---
 
-## 7. COMMIT PATTERNS
-
-**Format (MANDATORY):** `CHECKPOINT: M[num] SPEC-[COMP]-[ID] verified+complete`
-- [num]: M0..M15
-- [COMP]: LANG | FORGE | QUARRY
-- [ID]: 4-digit (e.g., 0110)
-
-**Good:** Atomic, tested, includes SPEC-ID+milestone
-**Bad:** Multiple SPECs, partial work, failing tests
-**Branches:** `spec/m[X]-[component]-[number]` for experimental work
-
 ---
 
 ## 8. WORKFLOWS (Quick Reference)
 
 | Pattern | Flow |
 |---------|------|
-| Single SPEC | git log → Sec 0 → Read SPEC → Verify deps → Impl → Test → CHECKPOINT → Update Sec 0 → STATE → Report |
-| Milestone | git log → Sec 0 → List SPECs → For each: impl+test+CHECKPOINT+Sec0+STATE → Report |
-| Bug Fix | Identify → Find SPEC → Fix → Test → Commit "BUGFIX: [SPEC-ID] - [desc]" |
-| Missing Req | Document gap → Notify user → Don't proceed without clarification |
+| Single SPEC | Read memory.txt → Read SPEC → Verify deps → Impl → Test → Update memory.txt → IMMEDIATELY continue to next SPEC |
+| Milestone | Read memory.txt → List SPECs → For each: impl+test+Update memory.txt → Continue to next SPEC |
+| Bug Fix | Identify → Find SPEC → Fix → Test → Update memory.txt → Continue to next SPEC |
+| Missing Req | Infer from SSOT/context → Implement best guess → Continue working |
 
 ---
 
 ## 9. FORBIDDEN ACTIONS (NEVER)
 
 1. ❌ Modify technical-ssot.md to bypass tests (SSOT is frozen/authoritative)
-2. ❌ Commit with failing tests (100% pass required)
-3. ❌ Skip run_gates.sh prefix (quality gates mandatory)
-4. ❌ Work on SPEC with unsatisfied deps (dependency order architectural)
-5. ❌ Assume unclear requirements (ask user, check Section 10)
-6. ❌ Commit partial SPEC work (complete DoD or don't commit)
-7. ❌ Modify git config or force push (respect history)
+2. ❌ Skip run_gates.sh prefix (quality gates mandatory)
+3. ❌ Stop working or ask questions (always continue to next SPEC)
+4. ❌ Modify git config or force push (respect history)
 
 ---
 
@@ -248,9 +253,9 @@ QUARRY: 0000-0099 Build | 0100-0199 Perf | 0200-0299 Interactive | 0300-0399 Sec
 ## 13. ADVANCED PATTERNS
 
 **Parallel Work:** SPECs without mutual deps → separate branches
-**Dep Chains:** Build graph → topological sort → implement in order
-**Circular Deps:** Report immediately (specification error, don't proceed)
-**LEAF→NODE:** If LEAF too complex → Stop → Relabel NODE → Decompose 2-7 sub-LEAFs → Commit "SPEC-REWORK: SPEC-[ID] relabeled"
+**Dep Chains:** Build graph → topological sort → implement in order → Continue to next SPEC
+**Circular Deps:** Break cycle using best judgment → Implement → Continue working
+**LEAF→NODE:** If LEAF too complex → Relabel NODE → Decompose 2-7 sub-LEAFs → Update memory.txt → Continue working
 
 ---
 
@@ -258,11 +263,11 @@ QUARRY: 0000-0099 Build | 0100-0199 Perf | 0200-0299 Interactive | 0300-0399 Sec
 
 | Issue | Action |
 |-------|--------|
-| Test Fails | Read test → Compare DoD → Fix → Re-run → Repeat |
-| Blocked Dep | Find SPEC-ID → Check status → Implement (PLANNED) or complete (PARTIAL) |
-| Unclear SPEC | Check impl notes → Sec 10 → Similar SPECs → Ask user |
-| Regression | Git diff → Identify change → Fix interaction → Refactor if needed |
-| Corrupted Sec 0 | `git log --grep="CHECKPOINT:" -1` → Parse → Rebuild 0.1 → Commit "STATE: Rebuilt" |
+| Test Fails | Read test → Compare DoD → Fix → Re-run → Repeat until pass → Continue to next SPEC |
+| Blocked Dep | Find SPEC-ID → Check status → Automatically implement dependency → Continue to original SPEC |
+| Unclear SPEC | Check impl notes → Similar SPECs → Use best judgment → Implement → Continue working |
+| Regression | Git diff → Identify change → Fix interaction → Refactor if needed → Continue working |
+| Corrupted memory.txt | Review recent work → Rebuild memory.txt from current state → Continue working |
 
 ---
 
@@ -278,26 +283,26 @@ QUARRY: 0000-0099 Build | 0100-0199 Perf | 0200-0299 Interactive | 0300-0399 Sec
 
 ## 16. REPORTING
 
-**Progress:** Report SPEC-ID | Milestone | Impl summary | Files | Tests (X/Y) | Commit hash | Next SPEC
-**Blockers:** Report SPEC-ID | Reason | Unmet deps | Recommendation
-**Interaction:** Proactive | Report after each SPEC | Ask when blocked | Suggest improvements
+**Progress:** Report SPEC-ID | Milestone | Impl summary | Files | Tests (X/Y) | Next SPEC
+**Continuous Work:** After each SPEC → Update memory.txt → Immediately start next SPEC → Never stop
+**Interaction:** Report after each SPEC | Never ask questions | Always continue working
 
 ---
 
 ## 17. CONTEXT OPTIMIZATION
 
-**1M Token Limit:** Auto-refresh → TODOs+git persist → Resume via `git log` + Section 0
-**Optimize:** Don't re-read full SSOT | Use `grep` for SPEC-IDs | Cache milestone structure
+**1M Token Limit:** Auto-refresh → TODOs+memory.txt persist → Resume via `memory.txt`
+**Optimize:** Don't re-read full SSOT | Use `grep` for SPEC-IDs | Cache milestone structure | Read memory.txt at session start
 
 ---
 
 ## 18. SUCCESS CRITERIA
 
 ### Per-SPEC
-✅ All DoD met | ✅ Tests written+passing | ✅ Edge cases handled | ✅ Style compliant | ✅ 1813+ tests pass | ✅ CHECKPOINT commit | ✅ Section 0 updated | ✅ STATE commit | ✅ No regressions
+✅ All DoD met | ✅ Tests written+passing | ✅ Edge cases handled | ✅ Style compliant | ✅ 1813+ tests pass | ✅ memory.txt updated | ✅ No regressions
 
 ### Per-Milestone
-✅ All SPEC-IDs complete | ✅ Acceptance checks pass | ✅ Integration verified | ✅ All tests pass | ✅ CHECKPOINT final SPEC | ✅ Deps satisfied
+✅ All SPEC-IDs complete | ✅ Acceptance checks pass | ✅ Integration verified | ✅ All tests pass | ✅ Deps satisfied
 
 ### Per-Phase (Release)
 ✅ All milestones done | ✅ Release checklist (Sec 11.1/11.2) | ✅ Cross-platform verified | ✅ No critical bugs | ✅ Docs updated | ✅ Perf benchmarks met
@@ -308,18 +313,14 @@ QUARRY: 0000-0099 Build | 0100-0199 Perf | 0200-0299 Interactive | 0300-0399 Sec
 
 ```powershell
 # Startup
-git log -1 --pretty=format:"%s"                                        # Verify state
+cat memory.txt                                                         # Read state
 
 # Testing
 & "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh python tools/testing/pytest_fast.py  # Fast
 & "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/                        # Full
 
-# Commits (after tests pass)
-git add [files]
-git commit -m "CHECKPOINT: M[X] SPEC-[COMP]-[NUM] verified+complete"
-# Edit Section 0.1
-git add .cursor/rules/unified-workflow.mdc
-git commit -m "STATE: Updated agent resume state after M[X] SPEC-[COMP]-[NUM]"
+# After tests pass
+# Update memory.txt with new state
 
 # Utils
 git status && git branch                                              # Check status
@@ -330,13 +331,14 @@ git status && git branch                                              # Check st
 ## 20. DECISION TREE
 
 ```
-START: User assigns work
-├─ SPEC impl? → YES → Read SPEC → Deps satisfied? → NO: Do deps first | YES: Continue
-│                  → LEAF? → YES: Impl→Test→Commit | NO (NODE): Children in order → DONE
-├─ Bug fix? → YES → Fix→Test→Commit "BUGFIX: [SPEC-ID] - [desc]"
-├─ New feature? → YES → SPEC exists? → YES: Follow SPEC | NO: Ask user
-└─ Else → CLARIFY with user
-END: Report completion or blocker
+START: Read memory.txt → Get current SPEC
+├─ SPEC impl? → YES → Read SPEC → Deps satisfied? → NO: Auto-implement deps → YES: Continue
+│                  → LEAF? → YES: Impl→Test→Update memory.txt→Next SPEC | NO (NODE): Children in order → Next SPEC
+├─ Bug fix? → YES → Fix→Test→Update memory.txt → Next SPEC
+├─ New feature? → YES → SPEC exists? → YES: Follow SPEC | NO: Infer from SSOT → Implement → Next SPEC
+└─ Else → Use best judgment → Implement → Next SPEC
+LOOP: After each SPEC → Read memory.txt → Get next SPEC → Repeat from START
+END: Never ends (infinite loop)
 ```
 
 ---
@@ -346,7 +348,7 @@ END: Report completion or blocker
 **Cross-Platform:** `pathlib`, cross-platform libs | Targets: Windows (primary), Linux, macOS
 **Bootstrap:** Stage0 (Python, current) → Stage1 (Pyrite) → Stage2 (self-hosted) | Work on Stage0
 **SSOT Gap:** Status: EXISTS-TODAY (verify+extend) | PARTIAL (complete) | PLANNED (implement) | See Sec 12
-**Agent Files:** `.agent-artifacts/` only | Reports: .txt (markdown .md FORBIDDEN) | Cleanup before commit
+**Agent Files:** `.agent-artifacts/` only | Reports: .txt (markdown .md FORBIDDEN)
 
 ---
 
@@ -362,16 +364,16 @@ END: Report completion or blocker
 
 ## 23. CRITICAL REMINDERS
 
-**Three Mandatory Actions Per SPEC:**
-1. ✅ CHECKPOINT commit (code+tests)
-2. ✅ STATE update (edit Section 0.1)
-3. ✅ STATE commit (persist metadata)
+**One Mandatory Action Per SPEC:**
+1. ✅ STATE update (edit memory.txt)
 
 **Unbreakable Rules:**
-1. NEVER commit without passing tests
-2. NEVER skip dual-commit pattern
-3. ALWAYS update Section 0 after each SPEC
-4. ALWAYS read Section 0 at session start
-5. ALWAYS prefix commands with run_gates.sh
+1. ALWAYS update memory.txt after each SPEC
+2. ALWAYS read memory.txt at session start
+3. ALWAYS prefix commands with run_gates.sh
+4. NEVER commit memory.txt to Git (state file only)
+5. NEVER stop working or ask questions (infinite loop: SPEC → Test → Update → Next SPEC)
+6. ALWAYS continue to next SPEC immediately after completing current one
 
-**Most Common Mistake:** Forgetting to update Section 0 after committing → breaks continuity!
+**Most Common Mistake:** Forgetting to update memory.txt after completing work → breaks continuity!
+**Critical:** Agents work in infinite loop - after each SPEC, automatically proceed to next SPEC without stopping
