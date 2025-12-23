@@ -87,11 +87,11 @@ def test_match_literal_pattern():
     source = """
 fn test(x: int):
     match x:
-        0:
+        case 0:
             print(0)
-        1:
+        case 1:
             print(1)
-        _:
+        case _:
             print(999)
 """
     llvm_ir = compile_with_types(source)
@@ -106,7 +106,7 @@ def test_match_with_binding():
     source = """
 fn test(x: int):
     match x:
-        n:
+        case n:
             print(n)
 """
     llvm_ir = compile_with_types(source)

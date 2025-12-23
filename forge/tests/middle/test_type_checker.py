@@ -307,9 +307,9 @@ def test_match_statement():
     source = """fn main():
     let x = 5
     match x:
-        0:
+        case 0:
             let y = 1
-        _:
+        case _:
             let y = 2
 """
     checker = compile_and_check(source)
@@ -550,7 +550,7 @@ def test_match_guard_non_bool():
     """Test error for match guard that's not bool"""
     source = """fn main():
     match 5:
-        5 if 42:
+        case 5 if 42:
             pass
 """
     checker = compile_and_check(source)
@@ -927,7 +927,7 @@ def test_match_scrutinee_type():
     """Test match statement scrutinee type checking"""
     source = """fn main():
     match true:
-        5:
+        case 5:
             pass
 """
     checker = compile_and_check(source)

@@ -310,9 +310,9 @@ const MAX_SIZE: int = 100
 
 fn process_data(data: Optional[int]) -> Result[int, String]:
     match data:
-        Some(value):
+        case Some(value):
             return Result.Ok(value * 2)
-        None:
+        case None:
             return Result.Err("No data")
 
 fn main():

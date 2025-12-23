@@ -1434,6 +1434,7 @@ class Parser:
                 break
             
             arm_start = self.current().span
+            self.expect(TokenType.CASE)
             pattern = self.parse_pattern()
             
             # Optional guard

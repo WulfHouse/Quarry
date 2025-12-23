@@ -198,13 +198,12 @@ fn main():
 
 def test_with_in_match_desugars():
     """Test with statement inside match statement desugars (covers line 105-117)"""
-    source = """
-fn main():
+    source = """fn main():
     match x:
-        1:
+        case 1:
             with file = try File.open("test.txt"):
                 print(file)
-        _:
+        case _:
             pass
 """
     tokens = lex(source, "<test>")

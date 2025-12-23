@@ -296,9 +296,9 @@ def test_match_pattern_binding():
     source = """fn main():
     let x = 5
     match x:
-        0:
+        case 0:
             let y = 1
-        n:
+        case n:
             let z = n + 1
 """
     analyzer = compile_and_analyze(source)
@@ -403,9 +403,9 @@ def test_analyze_match_statement():
     source = """fn test():
     let x = 5
     match x:
-        1:
+        case 1:
             let y = 1
-        _:
+        case _:
             let z = 0
 """
     analyzer = compile_and_analyze(source)
@@ -462,9 +462,9 @@ def test_analyze_match_with_guard():
     source = """fn test():
     let x = 5
     match x:
-        n if n > 0:
+        case n if n > 0:
             let y = n
-        _:
+        case _:
             let z = 0
 """
     analyzer = compile_and_analyze(source)
@@ -489,7 +489,7 @@ def test_bind_pattern_variables():
     source = """fn test():
     let x = 5
     match x:
-        n:
+        case n:
             let y = n
 """
     analyzer = compile_and_analyze(source)
