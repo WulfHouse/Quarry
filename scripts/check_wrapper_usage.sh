@@ -11,21 +11,14 @@ fi
 echo "Scanning for direct command usage bypassing the wrapper..."
 
 # Prohibited direct patterns (heuristic)
-# These are common command starts that should probably be wrapped.
-# We look for them in READMEs, .md files, and .sh scripts.
 PROHIBITED_DIRECT=("python scripts/pyrite" "python tools/runtime/pyrite" "python tools/runtime/quarry" "python forge/src/compiler.py" "python tools/testing/pytest.py")
 
-WARNINGS_FOUND=0
+WARNING_COUNT=0
 
 for PATTERN in "${PROHIBITED_DIRECT[@]}"; do
     # Search for lines containing the pattern but NOT the wrapper prefix
-    # Excluding .git, node_modules, etc.
-    # We want to match lines like "python scripts/pyrite hello.pyrite"
-    # but not "./scripts/run_gates.sh -- python scripts/pyrite hello.pyrite"
-    
-    # Using grep -v to exclude lines containing the wrapper
-    # and grep -F for literal string matching
-    MATCHES=$(grep -r "$PATTERN" . \
+    # Use -n for line numbers
+    MATCHES=$(grep -rn "$PATTERN" . \
         --include="*.md" --include="*.sh" --include="*.txt" \
         --exclude-dir=.git \
         --exclude-dir=node_modules \
@@ -36,19 +29,20 @@ for PATTERN in "${PROHIBITED_DIRECT[@]}"; do
         --exclude=check_wrapper_usage.sh | grep -v "./scripts/run_gates.sh --")
     
     if [ -n "$MATCHES" ]; then
-        echo "WARNING: Found potential unwrapped command: '$PATTERN'"
-        echo "$MATCHES"
-        echo ""
-        WARNINGS_FOUND=$((WARNINGS_FOUND + 1))
+        # Process each match to format as WARN <n>: <path>:<line>: <snippet>
+        while IFS= read -r line; do
+            WARNING_COUNT=$((WARNING_COUNT + 1))
+            echo "WARN $WARNING_COUNT: $line"
+        done <<< "$MATCHES"
     fi
 done
 
-if [ $WARNINGS_FOUND -eq 0 ]; then
+if [ $WARNING_COUNT -eq 0 ]; then
     echo "Success: No unwrapped command usage found (heuristics pass)."
     exit 0
 else
-    echo "Summary: Found $WARNINGS_FOUND unwrapped usage patterns."
+    echo ""
+    echo "Summary: Found $WARNING_COUNT unwrapped usage instances."
     echo "Note: This is a soft check (warning only)."
     exit 0 # Non-failing for now
 fi
-

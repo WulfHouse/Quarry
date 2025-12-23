@@ -6,11 +6,11 @@ import std.collections.map
 
 enum JsonValue:
     Null
-    Bool(bool)
-    Number(f64)
-    String(String)
-    Array(List)
-    Object(Map)
+    Bool(value: bool)
+    Number(value: f64)
+    String(value: String)
+    Array(values: List[JsonValue])
+    Object(entries: Map[String, JsonValue])
 
 impl JsonValue:
     fn to_string(&self) -> String:
@@ -18,12 +18,14 @@ impl JsonValue:
             Null:
                 return "null"
             Bool(v):
-                if v: return "true"
-                else: return "false"
+                if v.value:
+                    return "true"
+                else:
+                    return "false"
             Number(v):
-                return string_from_float(v)
+                return string_from_float(v.value)
             String(v):
-                return "\"" + v + "\""
+                return "\"" + v.value + "\""
             Array(l):
                 return "[...]" # Placeholder for now
             Object(m):
