@@ -4316,6 +4316,364 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 
 ---
 
+## 2.y Post-freeze SSOT Coverage Addendum (2025-12-23)
+
+This section contains normative requirements identified during the Post-freeze SSOT Coverage Audit. These requirements are append-only and do not modify existing REQ-IDs.
+
+### REQ-374: GPU kernel @no_panic requirement
+**Type:** Constraint
+**Scope:** Compiler + Runtime
+**Source:** SSOT Section 9.13 (09-standard-library.md:2522)
+**Statement:** Functions marked with the @kernel attribute implicitly inherit the @no_panic constraint, as GPU hardware cannot support graceful termination or error reporting via panics.
+
+### REQ-375: Async structured concurrency compiler enforcement
+**Type:** Constraint
+**Scope:** Compiler + Runtime
+**Source:** SSOT Section 9.15, 11.0 (09-standard-library.md:2989-2991, 3016)
+**Statement:** The compiler must guarantee that all tasks spawned within an async with block are completed or cancelled before the block exits, preventing background task leaks.
+
+### REQ-376: CPU multi-versioning baseline guarantee
+**Type:** Constraint
+**Scope:** Compiler
+**Source:** SSOT Section 9.12 (09-standard-library.md:1292)
+**Statement:** For any function using @multi_version, the compiler must always generate a baseline version that is guaranteed to run on the minimum supported instruction set for the target architecture.
+
+### REQ-377: Performance-critical stdlib documentation requirement
+**Type:** Standard
+**Scope:** Stdlib
+**Source:** SSOT Section 9.1 (09-standard-library.md:2164-2187)
+**Statement:** Every performance-critical function in the standard library must include documented performance characteristics, including time complexity, allocation counts, and stack usage.
+
+### REQ-378: Performance-critical stdlib benchmark requirement
+**Type:** Standard
+**Scope:** Stdlib
+**Source:** SSOT Section 9.1 (09-standard-library.md:2225)
+**Statement:** Every performance-critical function in the standard library must be accompanied by a built-in benchmark harness accessible via the quarry bench command.
+
+### REQ-379: Design by Contract SMT solver integration
+**Type:** Feature
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 14.3 (14-roadmap.md:433)
+**Statement:** The quarry verify tool must support integration with industry-standard SMT solvers (e.g., Z3, CVC5) to provide formal verification of @requires and @ensures contracts.
+
+### REQ-380: Python interop explicit GIL boundaries
+**Type:** Constraint
+**Scope:** Language + Runtime
+**Source:** SSOT Section 11.4 (11-ffi.md:132-135, 152-153)
+**Statement:** Python interoperability must use explicit GIL (Global Interpreter Lock) boundaries, with no hidden acquisition or release of the lock to maintain performance transparency.
+
+### REQ-381: Python interop optional runtime dependency
+**Type:** Constraint
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 11.4 (11-ffi.md:139; 14-roadmap.md:728)
+**Statement:** The Python runtime must remain an optional dependency for Pyrite; programs that do not import std::python must compile without requiring a Python environment.
+
+### REQ-382: Python interop exception conversion
+**Type:** Feature
+**Scope:** Language + Runtime
+**Source:** SSOT Section 11.4 (11-ffi.md:145)
+**Statement:** Exceptions raised within the Python runtime must be automatically converted into Pyrite Result types at the interoperability boundary to maintain consistent error handling.
+
+### REQ-383: Formal semantics certification standards
+**Type:** Goal
+**Scope:** Language + Compiler
+**Source:** SSOT Section 14.3, 16.2 (14-roadmap.md:646)
+**Statement:** Pyrite's formal semantics and development processes must enable compliance with high-assurance standards such as DO-178C Level A and Common Criteria EAL 7.
+
+### REQ-384: Internationalized errors specific languages
+**Type:** Standard
+**Scope:** Compiler
+**Source:** SSOT Section 2.7, 14.3 (02-diagnostics.md:631-656)
+**Statement:** Pyrite must support internationalized error messages for specific high-priority languages, including Chinese (zh), Spanish (es), Hindi (hi), Japanese (ja), and Korean (ko).
+
+### REQ-385: GPU backend priority order
+**Type:** Standard
+**Scope:** Compiler
+**Source:** SSOT Section 14.4 (14-roadmap.md:683-695)
+**Statement:** Implementation of GPU backends must follow the priority order: CUDA (Priority 1), HIP (Priority 2), Metal (Priority 3), followed by Vulkan Compute.
+
+### REQ-386: Hot reloading debug-only restriction
+**Type:** Constraint
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 8.23 (08-tooling.md:4229)
+**Statement:** Hot reloading functionality (quarry dev) is restricted to debug builds only and must not be available for production binaries to ensure system integrity.
+
+### REQ-387: quarry bindgen Zig-style parsing
+**Type:** Feature
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 11.3 (11-ffi.md:77-80; 14-roadmap.md:457)
+**Statement:** The quarry bindgen tool must use Zig-style header parsing to automatically generate Pyrite declarations without requiring manual C function declarations.
+
+### REQ-388: Deterministic builds supply-chain integration
+**Type:** Constraint
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 8.19 (08-tooling.md:3651-3655)
+**Statement:** Deterministic builds must integrate with the supply-chain security suite, enabling verification that a binary hash matches its signed BuildManifest and SBOM.
+
+### REQ-389: High-level loop transforms
+**Type:** Feature
+**Scope:** Compiler
+**Source:** SSOT Section 9.12 (09-standard-library.md:1654-1657)
+**Statement:** The Pyrite compiler must support advanced loop transformations, including loop unswitching, fusion, splitting, and peeling, to optimize performance-critical paths.
+
+### REQ-390: String + operator performance constraint
+**Type:** Constraint
+**Scope:** Language + Compiler
+**Source:** SSOT Section 3.1 (03-syntax.md:167-168)
+**Statement:** To prevent hidden performance costs, the string + operator may only be allowed in contexts where the concatenation can be evaluated at compile time.
+
+### REQ-391: Zig-style comptime inspection
+**Type:** Feature
+**Scope:** Language + Compiler
+**Source:** SSOT Section 7.6 (07-advanced-features.md:1984-1996)
+**Statement:** Pyrite must provide mechanisms for inspecting compile-time configuration (e.g., target OS, features) within regular code, similar to Zig's @import("builtin") pattern.
+
+### REQ-392: Higher-kinded types (HKT)
+**Type:** Feature
+**Scope:** Language + Compiler
+**Source:** SSOT Section 14.2 (14-roadmap.md:194)
+**Statement:** Pyrite must support higher-kinded types if required for the self-hosting compiler implementation to ensure sufficiently powerful abstractions.
+
+### REQ-393: FFI function pointer types
+**Type:** Feature
+**Scope:** Language + Compiler
+**Source:** SSOT Section 14.2 (14-roadmap.md:203)
+**Statement:** The foreign function interface (FFI) must support function pointer types to enable the use of callbacks when interfacing with external C libraries.
+
+### REQ-394: Zero-copy Python interop
+**Type:** Feature
+**Scope:** Language + Runtime
+**Source:** SSOT Section 11.4 (11-ffi.md:157-158)
+**Statement:** Python interoperability must support zero-copy data transfer between Pyrite slices and Python buffers (e.g., NumPy arrays) where memory layouts are compatible.
+
+### REQ-395: `quarry pyext` tool
+**Type:** Feature
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 11.4 (11-ffi.md:189-190)
+**Statement:** Quarry must provide a dedicated tool (quarry pyext) to automate the generation of Python extension modules from Pyrite source code.
+
+### REQ-396: `quarry vet` certification levels
+**Type:** Standard
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 8.17 (08-tooling.md:2975-2985)
+**Statement:** The quarry vet command must support explicit certification levels for dependencies, specifically "full", "safe-to-deploy", and "safe-to-run".
+
+### REQ-397: `quarry config` signature enforcement
+**Type:** Feature
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 8.17 (08-tooling.md:3029)
+**Statement:** Quarry must provide a configuration option to enforce cryptographic signature verification for all package installations (quarry config set verify-signatures always).
+
+### REQ-398: SIMD portable types (Vec2, Vec4, etc.)
+**Type:** Standard
+**Scope:** Stdlib
+**Source:** SSOT Section 9.12 (09-standard-library.md:1019-1030)
+**Statement:** The std::simd module must provide specific portable vector types, including Vec2, Vec4, Vec8, and Vec16, for common data widths.
+
+### REQ-399: `quarry translate --coverage`
+**Type:** Feature
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 2.7 (02-diagnostics.md:737-744)
+**Statement:** Quarry must include functionality to track and report translation coverage for compiler diagnostics (quarry translate --coverage).
+
+### REQ-400: Entry Point Count
+**Type:** Constraint
+**Scope:** Compiler
+**Source:** SSOT Section 3.3 (03-syntax.md:231)
+**Statement:** A Pyrite program must have exactly one function defined as the entry point (fn main()), preventing ambiguity in multi-module applications.
+
+### REQ-401: Boolean Strictness (No Truthiness)
+**Type:** Constraint
+**Scope:** Language + Compiler
+**Source:** SSOT Section 3.1, 6.1 (06-control-flow.md:28-30)
+**Statement:** Only expressions of the type bool can be used in conditional contexts (if, while); automatic truthiness conversion from integers or other types is forbidden.
+
+### REQ-402: None Literal Assignment Constraint
+**Type:** Constraint
+**Scope:** Language + Compiler
+**Source:** SSOT Section 3.1 (03-syntax.md:175-178)
+**Statement:** The None literal can only be assigned to variables whose type explicitly permits it (e.g., Option[T]), preventing accidental null assignment to non-optional types.
+
+### REQ-403: Union Safety Constraint
+**Type:** Constraint
+**Scope:** Language + Compiler
+**Source:** SSOT Section 5.3 (05-memory-model.md:271)
+**Statement:** Reading from a union field is only considered safe if the programmer manually tracks the current active variant; otherwise, it must be performed within an unsafe block.
+
+### REQ-404: No Operator Overloading
+**Type:** Constraint
+**Scope:** Language
+**Source:** SSOT Section 6.4 (06-control-flow.md:242)
+**Statement:** Pyrite forbids operator overloading by default to ensure that operator symbols in code always have predictable, non-misleading performance and semantics.
+
+### REQ-405: `with` Statement Trait Requirement
+**Type:** Constraint
+**Scope:** Language + Compiler
+**Source:** SSOT Section 6.7 (06-control-flow.md:495-496)
+**Statement:** Resources used in a with statement must implement the Closeable trait, and the expression must return a Result[T, E] where T: Closeable.
+
+### REQ-406: Edition Binary Compatibility
+**Type:** Constraint
+**Scope:** Compiler + Runtime
+**Source:** SSOT Section 8.14 (08-tooling.md:2641)
+**Statement:** Language editions must maintain binary compatibility (ABI stability), ensuring that compiled artifacts remain compatible across different editions of the language.
+
+### REQ-407: Edition Security Support window
+**Type:** Standard
+**Scope:** Ecosystem
+**Source:** SSOT Section 8.14 (08-tooling.md:2763)
+**Statement:** The Pyrite ecosystem must provide security fixes for the current edition and at least two previous editions to support long-term production deployments.
+
+### REQ-408: Device Memory Access Restriction
+**Type:** Constraint
+**Scope:** Language + Compiler
+**Source:** SSOT Section 9.13 (09-standard-library.md:2648-2652)
+**Statement:** Device memory (DevicePtr[T]) can only be accessed within functions marked with the @kernel attribute to ensure memory safety in heterogeneous environments.
+
+### REQ-409: Undefined Behavior Catalog
+**Type:** Standard
+**Scope:** Language + Compiler
+**Source:** SSOT Section 16.1
+**Statement:** The Pyrite formal specification must maintain an explicit catalog of undefined behaviors, including null dereferences, data races, and uninitialized memory reads.
+
+### REQ-410: Data-Race-Free Theorem
+**Type:** Goal
+**Scope:** Language + Formal Methods
+**Source:** SSOT Section 16.1
+**Statement:** Pyrite must formally prove the theorem: "Safe Pyrite is Data-Race-Free", ensuring that well-typed programs without unsafe blocks are free of concurrent data races.
+
+### REQ-411: Memory-Safety Theorem
+**Type:** Goal
+**Scope:** Language + Formal Methods
+**Source:** SSOT Section 16.1
+**Statement:** Pyrite must formally prove the theorem: "Well-Typed Programs Are Memory-Safe", ensuring the absence of use-after-free, double-free, and other memory errors.
+
+### REQ-412: Script Mode Safety Guarantee
+**Type:** Constraint
+**Scope:** Tooling (Pyrite)
+**Source:** SSOT Section 8.1
+**Statement:** Script mode (pyrite run) must use the same compiler and enforce the same safety guarantees as the standard build system, ensuring consistent behavior across workflows.
+
+### REQ-413: Automatic Script Recompilation
+**Type:** Feature
+**Scope:** Tooling (Pyrite)
+**Source:** SSOT Section 8.1
+**Statement:** Script mode must automatically detect source code changes and recompile the binary before execution to ensure that the script always reflects the latest source state.
+
+### REQ-414: Script Mode Cache Management
+**Type:** Feature
+**Scope:** Tooling (Pyrite)
+**Source:** SSOT Section 8.1
+**Statement:** Pyrite must provide dedicated commands for managing the script mode cache, including functionality to list, clean, and clear cached binaries.
+
+### REQ-415: Ownership Consumption Linter Warning
+**Type:** Constraint
+**Scope:** Compiler + Linter
+**Source:** SSOT Section 9.1
+**Statement:** The compiler or linter must issue a warning if a function takes ownership of a parameter without the explicit @consumes annotation, enforcing the "views-by-default" convention.
+
+### REQ-416: REPL Unsafe Block Enforcement
+**Type:** Constraint
+**Scope:** Tooling (Pyrite)
+**Source:** SSOT Section 8.7
+**Statement:** The interactive REPL must require the use of explicit unsafe blocks for any operation that violates compile-time safety guarantees, maintaining consistency with source-based code.
+
+### REQ-417: Standard Indentation Constraint
+**Type:** Standard
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 8.4
+**Statement:** The official Pyrite formatter (quarry fmt) must enforce a standard indentation of 4 spaces to ensure consistent code appearance across the ecosystem.
+
+### REQ-418: Standard Line Length Constraint
+**Type:** Standard
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 8.4
+**Statement:** The official Pyrite formatter must enforce a maximum line length of 100 characters, promoting readability and side-by-side code review.
+
+### REQ-419: Publication Test Requirement
+**Type:** Constraint
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 8.3
+**Statement:** Quarry must require that all tests pass (quarry test) before allowing a package to be published to the official registry, ensuring ecosystem quality.
+
+### REQ-420: Publication License Requirement
+**Type:** Constraint
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 8.3
+**Statement:** Quarry must require a valid license declaration in the package manifest before allowing publication to ensure legal compliance and transparency.
+
+### REQ-421: Fuzzing Coverage Prioritization
+**Type:** Feature
+**Scope:** Tooling (Quarry)
+**Source:** SSOT Section 8.10
+**Statement:** The built-in fuzzing engine must track code coverage and prioritize the generation of inputs that explore previously unvisited execution paths.
+
+### REQ-422: Hot Reload Code Garbage Collection
+**Type:** Feature
+**Scope:** Runtime
+**Source:** SSOT Section 8.23
+**Statement:** The hot reloading runtime must support garbage collection of old code versions once they are no longer referenced by any active function pointers or stack frames.
+
+### 2.y.1 Mapping Index for New Requirements
+
+- REQ-374 -> SPEC-LANG-0700
+- REQ-375 -> SPEC-LANG-1004
+- REQ-376 -> SPEC-FORGE-0303
+- REQ-377 -> SPEC-LANG-1302
+- REQ-378 -> SPEC-QUARRY-0108
+- REQ-379 -> SPEC-LANG-0400
+- REQ-380 -> SPEC-LANG-1202
+- REQ-381 -> SPEC-LANG-1202
+- REQ-382 -> SPEC-LANG-1202
+- REQ-383 -> SPEC-LANG-1500
+- REQ-384 -> SPEC-LANG-0100
+- REQ-385 -> SPEC-LANG-0700
+- REQ-386 -> SPEC-QUARRY-0007
+- REQ-387 -> SPEC-QUARRY-0404
+- REQ-388 -> SPEC-QUARRY-0300
+- REQ-389 -> SPEC-LANG-0800
+- REQ-390 -> SPEC-LANG-0802
+- REQ-391 -> SPEC-LANG-0200
+- REQ-392 -> SPEC-LANG-0203
+- REQ-393 -> SPEC-LANG-1101
+- REQ-394 -> SPEC-LANG-1202
+- REQ-395 -> SPEC-QUARRY-0400
+- REQ-396 -> SPEC-QUARRY-0302
+- REQ-397 -> SPEC-QUARRY-0300
+- REQ-398 -> SPEC-LANG-0600
+- REQ-399 -> SPEC-QUARRY-0400
+- REQ-400 -> SPEC-LANG-0100
+- REQ-401 -> SPEC-LANG-0100
+- REQ-402 -> SPEC-LANG-0100
+- REQ-403 -> SPEC-LANG-0500
+- REQ-404 -> SPEC-LANG-0100
+- REQ-405 -> SPEC-LANG-1004
+- REQ-406 -> SPEC-LANG-0100
+- REQ-407 -> SPEC-LANG-0100
+- REQ-408 -> SPEC-LANG-0700
+- REQ-409 -> SPEC-LANG-1500
+- REQ-410 -> SPEC-LANG-1500
+- REQ-411 -> SPEC-LANG-1500
+- REQ-412 -> SPEC-QUARRY-0001
+- REQ-413 -> SPEC-QUARRY-0001
+- REQ-414 -> SPEC-QUARRY-0001
+- REQ-415 -> SPEC-FORGE-0100
+- REQ-416 -> SPEC-QUARRY-0201
+- REQ-417 -> SPEC-QUARRY-0003
+- REQ-418 -> SPEC-QUARRY-0003
+- REQ-419 -> SPEC-QUARRY-0400
+- REQ-420 -> SPEC-QUARRY-0400
+- REQ-421 -> SPEC-QUARRY-0301
+- REQ-422 -> SPEC-QUARRY-0007
+
+### 2.y.2 Audit Ledger
+
+| Date | Auditor | Type | Result |
+|------|---------|------|--------|
+| 2025-12-23 | Planning + Coding Agent | Post-freeze SSOT Coverage Audit | 49 new REQs added (REQ-374 to REQ-422). No existing REQs renumbered. |
+
+---
+
 ## 3. Ecosystem Architecture
 
 ### High-Level Architecture (ASCII Diagram)
@@ -12265,3 +12623,201 @@ This section provides objective, checklist-driven criteria for determining relea
 - Script mode working
 
 - Basic tooling functional
+
+## 2.z SSOT.txt Coverage Audit Ledger (WIP, 2025-12-23)
+
+AUDIT-TXT-0001 | HARD | High | SSOT.txt:L16-L18 | Pyrite combines low-level power of C with readability of Python, safety of Rust, and simplicity of Zig.
+AUDIT-TXT-0002 | HARD | High | SSOT.txt:L22-L28 | Syntax and feature set are minimal and straightforward; advanced features are opt-in.
+AUDIT-TXT-0003 | HARD | High | SSOT.txt:L30-L33 | Favors clear, transparent constructs over magic or implicit behavior; no hidden surprises.
+AUDIT-TXT-0004 | HARD | High | SSOT.txt:L38-L41 | Compiles to efficient native machine code on par with C; every high-level construct is zero-cost.
+AUDIT-TXT-0005 | HARD | High | SSOT.txt:L43-L45 | No heavyweight runtime or VM: no global interpreter loop, no JIT, no stop-the-world GC.
+AUDIT-TXT-0006 | HARD | High | SSOT.txt:L45-L48 | Minimal runtime footprint suitable for embedded; dynamic memory allocation is never implicit.
+AUDIT-TXT-0007 | HARD | High | SSOT.txt:L56-L63 | Eliminates common memory bugs at compile time (overflows, UAF, null, data races) through strict compile-time checks inspired by Rust's ownership model.
+AUDIT-TXT-0008 | HARD | High | SSOT.txt:L67-L70 | Permits manual memory management (pointer manipulation, allocate/free) if marked unsafe or using special APIs.
+AUDIT-TXT-0009 | HARD | High | SSOT.txt:L79-L82 | Syntax influenced by Python: indentation for blocks (significant whitespace), no curly braces or heavy punctuation.
+AUDIT-TXT-0010 | HARD | High | SSOT.txt:L82-L82 | Keywords and control flow structures read like English.
+AUDIT-TXT-0011 | HARD | High | SSOT.txt:L98-L102 | Language makes a clear distinction between stack-allocated value types and heap-allocated objects in syntax and semantics.
+AUDIT-TXT-0012 | HARD | High | SSOT.txt:L104-L106 | Expensive operations (copying large structures, growing arrays) require explicit action or are documented.
+AUDIT-TXT-0013 | HARD | High | SSOT.txt:L117-L120 | Supports low-level hardware manipulation in embedded systems and OS kernels, as well as high-level application programming.
+AUDIT-TXT-0014 | HARD | High | SSOT.txt:L122-L125 | Imposes no runtime or library requirements that hinder writing OS kernels or bare-metal code.
+AUDIT-TXT-0015 | HARD | High | SSOT.txt:L128-L131 | Provides foreign function interface (FFI) to call C functions directly and conforms to C ABI conventions.
+AUDIT-TXT-0016 | HARD | High | SSOT.txt:L142-L147 | Supports generics, algebraic data types, pattern matching, compile-time code execution, built-in package system, and advanced concurrency primitives.
+AUDIT-TXT-0017 | HARD | High | SSOT.txt:L155-L159 | No magic features: no implicit class destructors or unexpected operator overloads; significant events (allocation, locking) are obvious.
+AUDIT-TXT-0018 | HARD | High | SSOT.txt:L177-L184 | Defines a "Core" subset that is a semantic subset of features, not a separate syntax, enforced via tooling.
+AUDIT-TXT-0019 | HARD | High | SSOT.txt:L187-L188 | Core subset forbids/warns about: unsafe blocks, manual allocators, complex lifetimes, advanced generics.
+AUDIT-TXT-0020 | HARD | High | SSOT.txt:L189-L190 | Core subset includes: basic types, structs, enums, pattern matching, ownership/borrowing basics, standard collections, defer, with.
+AUDIT-TXT-0021 | HARD | High | SSOT.txt:L196-L199 | Implementation of Core via: pyritec --core-only, quarry lint --beginner, core:: namespace, and dedicated documentation.
+AUDIT-TXT-0022 | INTENT | Medium | SSOT.txt:L208-L210 | Primarily optimized for Python-first beginners, secondary for Rust-curious developers.
+AUDIT-TXT-0023 | HARD | High | SSOT.txt:L241-L243 | Keep &str working alongside Text alias; ownership model identical to Rust.
+AUDIT-TXT-0024 | HARD | High | SSOT.txt:L263-L265 | World-class diagnostics with auto-fix and visual learning tools; Quarry build system with cost analysis.
+AUDIT-TXT-0025 | HARD | High | SSOT.txt:L283-L286 | Interactive REPL with ownership visualization (real-time state, :cost, :type, :ownership commands).
+AUDIT-TXT-0026 | HARD | High | SSOT.txt:L289-L291 | Built-in energy profiling (quarry energy) showing power consumption and battery impact.
+AUDIT-TXT-0027 | HARD | High | SSOT.txt:L295-L298 | Two-tier closure model: fn[...] (compile-time/zero-cost) vs fn(...) (runtime/may allocate); enables verifiable --no-alloc mode.
+AUDIT-TXT-0028 | HARD | High | SSOT.txt:L301-L304 | Call-graph blame tracking for performance contracts; @noalloc violations show complete call chain.
+AUDIT-TXT-0029 | HARD | High | SSOT.txt:L307-L309 | Community transparency dashboard with public real-time metrics (performance, safety, learning, adoption).
+AUDIT-TXT-0030 | HARD | High | SSOT.txt:L313-L315 | Internationalized compiler errors with professional translations (Chinese, Spanish, Hindi, Japanese, etc.).
+AUDIT-TXT-0031 | HARD | High | SSOT.txt:L319-L322 | Performance lockfile (Perf.lock) with regression detection and assembly diff/root cause.
+AUDIT-TXT-0032 | HARD | High | SSOT.txt:L325-L328 | Design by Contract integrated with ownership (@requires, @ensures, @invariant) and performance (@cost_budget).
+AUDIT-TXT-0033 | HARD | High | SSOT.txt:L334-L342 | Competitive parity: memory safety (Rust), zero-cost (Rust/C++), comptime (Zig), borrow checking (Rust), cross-comp (Zig), package manager (Cargo), fuzzing/sanitizers (Rust/Go), supply-chain (Rust).
+AUDIT-TXT-0034 | HARD | High | SSOT.txt:L347-L353 | Exceeds competitors: visual errors (flow diagrams), cost transparency (multi-level), binary size tools, deterministic builds, formal semantics.
+AUDIT-TXT-0035 | HARD | High | SSOT.txt:L386-L390 | Feature Matrix: memory safety default, zero-cost, no GC, no runtime overhead, Pythonic syntax.
+AUDIT-TXT-0036 | HARD | High | SSOT.txt:L392-L396 | Feature Matrix: Interactive REPL, ownership visualization, interactive exercises, multilingual errors, auto-fix.
+AUDIT-TXT-0037 | HARD | High | SSOT.txt:L398-L400 | Feature Matrix: Cost transparency, binary size profiling, energy profiling.
+AUDIT-TXT-0038 | HARD | High | SSOT.txt:L401-L403 | Tooling Feature: Performance lockfile, Call-graph blame tracking, Incremental compilation (Yes in SSOT, Partial in implementation).
+AUDIT-TXT-0039 | HARD | High | SSOT.txt:L405-L410 | Security & Verification: Deterministic builds, Supply-chain security, Fuzzing built-in, Sanitizers integrated, Design by Contract (Yes), Formal semantics (Partial).
+AUDIT-TXT-0040 | HARD | High | SSOT.txt:L412-L415 | Production & Deployment: Built-in observability, Hot reloading, Cross-compilation, No-alloc verification (Yes).
+AUDIT-TXT-0041 | HARD | High | SSOT.txt:L417-L420 | Ecosystem & Community: Official package manager, Metrics dashboard, License compliance, Dead code analysis (Yes).
+AUDIT-TXT-0042 | HARD | High | SSOT.txt:L429-L431 | Unique Features: REPL with ownership viz, energy profiling, performance lockfile, call-graph blame, contracts, formal semantics, community dashboard, internationalized errors.
+AUDIT-TXT-0043 | HARD | High | SSOT.txt:L433-L434 | Best-in-Class: Memory safety, supply-chain security, cost transparency, compiler diagnostics, binary size tools.
+AUDIT-TXT-0044 | HARD | High | SSOT.txt:L448-L449 | Installation: Single command install via curl/sh.
+AUDIT-TXT-0045 | HARD | High | SSOT.txt:L452-L457 | Developer Journey: pyrite run for script mode (zero config).
+AUDIT-TXT-0046 | HARD | High | SSOT.txt:L460-L465 | REPL: pyrite repl with ownership visualization (Stack/Heap info).
+AUDIT-TXT-0047 | HARD | High | SSOT.txt:L470-L480 | Interactive Learning: quarry learn ownership with exercises and hints.
+AUDIT-TXT-0048 | HARD | High | SSOT.txt:L484-L500 | Project Management: quarry new, quarry build, quarry fix --interactive for ownership errors.
+AUDIT-TXT-0049 | HARD | High | SSOT.txt:L506-L519 | Performance Optimization: quarry cost (allocation warnings), quarry perf (hot spot profiling), quarry tune (automatic suggestions/application).
+AUDIT-TXT-0050 | HARD | High | SSOT.txt:L524-L533 | Production: quarry add for dependencies, std::http, std::log for observability.
+AUDIT-TXT-0051 | HARD | High | SSOT.txt:L536-L545 | Deployment: quarry audit (security vulnerabilities), quarry build --release --lto --pgo, quarry sbom (SPDX format).
+AUDIT-TXT-0052 | HARD | High | SSOT.txt:L551-L567 | Embedded: quarry new --embedded, quarry build --no-alloc, quarry bloat, quarry flash.
+AUDIT-TXT-0053 | HARD | High | SSOT.txt:L572-L582 | Ecosystem: quarry publish, package dashboard, ecosystem metrics.
+AUDIT-TXT-0054 | HARD | High | SSOT.txt:L605-L607 | Diagnostics: Compiler as a teacher; primary mechanism for transparency.
+AUDIT-TXT-0055 | HARD | High | SSOT.txt:L617-L623 | Error Design: Structured format: WHAT HAPPENED, WHY, WHAT TO DO NEXT, LOCATION CONTEXT (multi-line).
+AUDIT-TXT-0056 | HARD | High | SSOT.txt:L642-L642 | Explain System: pyritec --explain CODE for detailed explanation.
+AUDIT-TXT-0057 | HARD | High | SSOT.txt:L648-L670 | Ownership Diagnostics: Timeline visualizations of borrows/conflicts.
+AUDIT-TXT-0058 | HARD | High | SSOT.txt:L672-L681 | Ownership Visualization: Flow diagrams (ASCII/Interactive).
+AUDIT-TXT-0059 | HARD | High | SSOT.txt:L704-L723 | Performance Diagnostics: warning[P1050]: heap allocation in loop body, performance suggestions, #[allow(heap_in_loop)].
+AUDIT-TXT-0060 | HARD | High | SSOT.txt:L727-L745 | Performance Diagnostics: warning[P1051]: large value copied implicitly, copy warnings for large values.
+AUDIT-TXT-0061 | HARD | High | SSOT.txt:L752-L760 | Explain System: Conceptual explanation, code examples (correct/incorrect), links to docs.
+AUDIT-TXT-0062 | HARD | High | SSOT.txt:L765-L779 | Enhanced Visual Mode: pyritec --explain CODE --visual for interactive diagrams (ownership timeline, borrow scope, conflict points, data flow).
+AUDIT-TXT-0063 | HARD | High | SSOT.txt:L868-L871 | IDE Integration: Render interactive visualizations, hover lifetime spans, click error codes, animated flow for move/borrow.
+AUDIT-TXT-0064 | HARD | High | SSOT.txt:L881-L908 | LSP/Hover: Rich tooltips showing Type, Badges (Heap/Move/MayAlloc), Memory layout (Stack/Heap bytes), Ownership state (Owner/Moved/Borrowed), and risks (move warnings).
+AUDIT-TXT-0065 | HARD | High | SSOT.txt:L912-L928 | LSP/Hover after move: Shows MOVED status, where it was moved, and fix options (borrow/clone/quarry fix).
+AUDIT-TXT-0066 | HARD | High | SSOT.txt:L934-L960 | LSP/Hover parameters: Shows ownership behavior (Takes ownership vs Borrows), warnings for ownership consumption, and zero-cost abstraction badges.
+AUDIT-TXT-0067 | HARD | High | SSOT.txt:L966-L991 | LSP/Hover Performance: Shows operation costs (bytes copied, memcpy cycles), allocation costs (initial/growth), and optimization tips (with_capacity).
+AUDIT-TXT-0068 | HARD | High | SSOT.txt:L998-L1017 | LSP/Hover Borrow Conflict: Shows active borrows, who borrowed it, where it's used, and fix suggestions.
+AUDIT-TXT-0069 | HARD | High | SSOT.txt:L1023-L1044 | LSP/Hover Types: Shows memory layout (Size/Alignment/Location), behavior badges (Copy/Drop/ThreadSafe), fields offsets, and quarry explain-type.
+AUDIT-TXT-0070 | HARD | High | SSOT.txt:L1051-L1070 | LSP/Hover Cost Analysis: Integration with static analysis to show allocation counts and estimated costs (e.g., in loops) with move-out suggestions.
+AUDIT-TXT-0071 | HARD | High | SSOT.txt:L1074-L1087 | LSP Configuration: Configurable hover detail levels (Beginner, Intermediate, Advanced) via settings.json.
+AUDIT-TXT-0072 | INTENT | Medium | SSOT.txt:L1099-L1103 | Design Goal: Use visual feedback to accelerate learning (aiming for 40-60% improvement).
+AUDIT-TXT-0073 | HARD | High | SSOT.txt:L1105-L1106 | Implementation Status: LSP integration in Beta release; requires static analyzer + quarry cost system.
+AUDIT-TXT-0074 | HARD | High | SSOT.txt:L1111-L1121 | Diagnostic Standards: Actionable, Contextual, Beginner-friendly, Multi-solution, Consistent, Precise; dedicated review gates for clarity.
+AUDIT-TXT-0075 | HARD | High | SSOT.txt:L1123-L1149 | Internationalized Diagnostics: Support for multiple languages (zh, es, ja, ko, pt, de, fr) via command flag, config.toml, or env var (PYRITE_LANG).
+AUDIT-TXT-0076 | HARD | High | SSOT.txt:L1203-L1207 | Translation Quality: Native speaker translators, technical accuracy, consistency, community review, integrated infrastructure.
+AUDIT-TXT-0077 | HARD | High | SSOT.txt:L1212-L1225 | Language Priorities: en (default), zh, es, hi (Stable Release); ja, pt, ko, de, fr, ru (Expansion).
+AUDIT-TXT-0078 | HARD | High | SSOT.txt:L1245-L1247 | Translation Tooling: quarry translate --language=CODE --coverage, --validate, --submit.
+AUDIT-TXT-0079 | HARD | High | SSOT.txt:L1256-L1258 | IDE Integration: pyrite.diagnostics.language setting (auto/en/zh/etc.).
+AUDIT-TXT-0080 | HARD | High | SSOT.txt:L1330-L1334 | Syntax: Indentation-based block structure (no braces); consistent indentation required (mixed tabs/spaces = error).
+AUDIT-TXT-0081 | HARD | High | SSOT.txt:L1340-L1345 | Control Flow Syntax: if condition:, elif condition:, else: with indented blocks.
+AUDIT-TXT-0082 | HARD | High | SSOT.txt:L1355-L1359 | Statement Termination: Newline-terminated (no semicolon required); optional semicolon for multiple statements on one line.
+AUDIT-TXT-0083 | HARD | High | SSOT.txt:L1362-L1363 | Line Continuation: Backslash or open parentheses/brackets.
+AUDIT-TXT-0084 | HARD | High | SSOT.txt:L1368-L1369 | Comments: Single-line start with #.
+AUDIT-TXT-0085 | HARD | High | SSOT.txt:L1375-L1378 | Comments: Multi-line enclosed in triple quotes """ ... """ (idiomatic) or /* ... */ (supported).
+AUDIT-TXT-0086 | HARD | High | SSOT.txt:L1380-L1382 | Documentation: Standalone triple-quoted strings serve as documentation comments.
+AUDIT-TXT-0087 | HARD | High | SSOT.txt:L1387-L1390 | Identifiers: Letters (including Unicode), digits, underscores; must not begin with digit; case-sensitive.
+AUDIT-TXT-0088 | HARD | High | SSOT.txt:L1392-L1394 | Naming Conventions: snake_case for variables/functions; CamelCase for types.
+AUDIT-TXT-0089 | HARD | High | SSOT.txt:L1402-L1405 | Keywords: fn, let, var, if, elif, else, for, while, break, continue, return, struct, enum, union, true, false, None, unsafe.
+AUDIT-TXT-0090 | HARD | High | SSOT.txt:L1418-L1420 | Integer Literals: Decimal, Hex (0x), Binary (0b), Octal (0o); underscores allowed (1_000_000).
+AUDIT-TXT-0091 | HARD | High | SSOT.txt:L1423-L1424 | Numeric Conversion: No implicit widening/narrowing without cast; automatic promotion only when well-defined.
+AUDIT-TXT-0092 | HARD | High | SSOT.txt:L1427-L1432 | Overflow Handling: Checked in debug (error/panic), wraps in release (two's complement) by default.
+AUDIT-TXT-0093 | HARD | High | SSOT.txt:L1434-L1439 | Float Literals: Standard/scientific notation; default f64; no implicit conversion between floats and ints.
+AUDIT-TXT-0094 | HARD | High | SSOT.txt:L1441-L1445 | Booleans: true, false; only booleans in conditionals (no truthiness conversion).
+AUDIT-TXT-0095 | HARD | High | SSOT.txt:L1446-L1448 | Logical Operators: and, or, not with short-circuit evaluation.
+AUDIT-TXT-0096 | HARD | High | SSOT.txt:L1450-L1451 | Char Type: Unicode code point (32-bit); single quotes (e.g., 'A').
+AUDIT-TXT-0097 | HARD | High | SSOT.txt:L1452-L1456 | String Type: Immutable; double quotes; standard escape sequences.
+AUDIT-TXT-0098 | HARD | High | SSOT.txt:L1458-L1465 | String Operations: Compile-time concatenation; runtime + may be restricted to avoid hidden allocations (encourages string builder/format).
+AUDIT-TXT-0099 | HARD | High | SSOT.txt:L1467-L1475 | None/Optional: None represents null; only valid for Optional[T] types; prevents null-pointer dereferences.
+AUDIT-TXT-0100 | HARD | High | SSOT.txt:L1483-L1484 | Modules: One module per file; import keyword.
+AUDIT-TXT-0101 | HARD | High | SSOT.txt:L1486-L1489 | Namespaces: Imported module names act as namespaces (e.g., math.sin(x)).
+AUDIT-TXT-0102 | HARD | High | SSOT.txt:L1490-L1492 | Packages: Group modules into hierarchies using dot notation (e.g., import graphics.image).
+AUDIT-TXT-0103 | HARD | High | SSOT.txt:L1495-L1498 | Import Resolution: Resolved at compile time; no dynamic importing; circular dependencies detected/errored.
+AUDIT-TXT-0104 | HARD | High | SSOT.txt:L1503-L1508 | Entry Point: fn main() is the entry point; returns integer exit code (default 0).
+AUDIT-TXT-0105 | HARD | High | SSOT.txt:L1519-L1520 | Runtime: Minimal startup (like C); no VM initialization.
+AUDIT-TXT-0106 | HARD | High | SSOT.txt:L1534-L1535 | Visibility: Explicit imports required; no implicit global scope.
+AUDIT-TXT-0107 | HARD | High | SSOT.txt:L1542-L1547 | Type System: Static, strong; extensive type inference.
+AUDIT-TXT-0108 | HARD | High | SSOT.txt:L1558-L1563 | Integer Types: Fixed-width (i8, i16, i32, i64, u8, u16, u32, u64); native-sized int and uint/usize.
+AUDIT-TXT-0109 | HARD | High | SSOT.txt:L1601-L1603 | Boolean Ops: and, or, not short-circuit; & and | are bitwise for integers.
+AUDIT-TXT-0110 | HARD | High | SSOT.txt:L1608-L1618 | Strings: String type is immutable; stored in contiguous memory; supports concatenation, slicing, iteration; literals interned/read-only.
+AUDIT-TXT-0111 | HARD | High | SSOT.txt:L1620-L1625 | String Performance: Runtime concatenation allocates; large concatenation encouraged via StringBuilder or formatting library.
+AUDIT-TXT-0112 | HARD | High | SSOT.txt:L1633-L1634 | Beginner Aliases: type Text = &str and type Bytes = &[u8] provided in stdlib for readability.
+AUDIT-TXT-0113 | HARD | High | SSOT.txt:L1658-L1660 | Generic Aliases: type Ref[T] = &T, type Mut[T] = &mut T, type View[T] = &[T] in prelude (optional pedagogy).
+AUDIT-TXT-0114 | HARD | High | SSOT.txt:L1726-L1733 | Unit Type: void or () for functions with no meaningful return value; assumed if no return type specified.
+AUDIT-TXT-0115 | HARD | High | SSOT.txt:L1747-L1755 | Fixed Arrays: [T; N] syntax; stack-allocated (or inline); value semantics (copies on assign/pass); useful for embedded/performance.
+AUDIT-TXT-0116 | HARD | High | SSOT.txt:L1762-L1769 | Dynamic Arrays: List[T] or Vector[T] manage heap memory; resizable.
+AUDIT-TXT-0117 | HARD | High | SSOT.txt:L1771-L1776 | Slices: &[T] (immutable) and &mut [T] (mutable) are fat pointers (ptr + len); safe access to array segments with bounds-checking.
+AUDIT-TXT-0118 | HARD | High | SSOT.txt:L1795-L1799 | Structs: Composite types with named fields; value semantics (copy-by-default); defined with struct.
+AUDIT-TXT-0119 | HARD | High | SSOT.txt:L1807-L1814 | Struct Features: Literal syntax Point { x: 3, y: 4 }; nested structs; all fields public by default (visibility modifiers optional).
+AUDIT-TXT-0120 | HARD | High | SSOT.txt:L1821-L1824 | Struct Memory: Deterministic layout (C-compatible); repr(C) support for FFI.
+AUDIT-TXT-0121 | HARD | High | SSOT.txt:L1829-L1832 | Enums: Enumerated types and ADTs/tagged unions via enum.
+AUDIT-TXT-0122 | HARD | High | SSOT.txt:L1840-L1845 | Enum Variants: Variants with data (e.g., Result[T, E]); tagged unions with discriminator + payload; exhaustiveness checking in matching.
+AUDIT-TXT-0123 | HARD | High | SSOT.txt:L1851-L1853 | Enum Usage: Namespaced (e.g., Color.Red); pattern matching for extraction.
+AUDIT-TXT-0124 | HARD | High | SSOT.txt:L1856-L1859 | Optionals: Optional[T] enum prevents null usage errors; forces explicit handling of None vs Some.
+AUDIT-TXT-0125 | HARD | High | SSOT.txt:L1873-L1878 | Unions: Untagged unions (C-like) for low-level; unsafe access required; used for type punning/aliasing.
+AUDIT-TXT-0126 | HARD | High | SSOT.txt:L1897-L1901 | References: &T (immutable) and &mut T (mutable) managed by borrow checker.
+AUDIT-TXT-0127 | HARD | High | SSOT.txt:L1903-L1910 | Reference Rules: Multiple &T OK; only one &mut T at a time; always non-null; lifetime analysis prevents dangling pointers.
+AUDIT-TXT-0128 | HARD | High | SSOT.txt:L1935-L1944 | Teaching Aliases: borrow, inout, take keywords desugar to &T, &mut T, and documentation marker.
+AUDIT-TXT-0129 | HARD | High | SSOT.txt:L1989-L1993 | Alias Implementation: Parser desugars immediately; error messages show underlying &T syntax; quarry fmt normalization.
+AUDIT-TXT-0130 | HARD | High | SSOT.txt:L1997-L1999 | Alias Configuration: allow-argument-aliases = true in Quarry.toml.
+AUDIT-TXT-0131 | HARD | High | SSOT.txt:L2005-L2020 | Linter: quarry lint --suggest-standard-syntax warns about teaching aliases and suggests transition to &T.
+AUDIT-TXT-0132 | HARD | High | SSOT.txt:L2041-L2047 | Raw Pointers: *T (constant) and *mut T (mutable) for C-interop/pointer arithmetic; no lifetime/nullability guarantees.
+AUDIT-TXT-0133 | HARD | High | SSOT.txt:L2051-L2053 | Raw Pointer Safety: Unsafe to dereference; must be inside unsafe context.
+AUDIT-TXT-0134 | HARD | High | SSOT.txt:L2055-L2060 | Pointer Arithmetic: Supported for raw pointers; used for low-level/FFI/data structures.
+AUDIT-TXT-0135 | HARD | High | SSOT.txt:L2065-L2071 | Pointer Conversions: Cast &T to *T (safe); cast *T to &T (unsafe).
+AUDIT-TXT-0136 | HARD | High | SSOT.txt:L2084-L2088 | Mutability: Immutable by default (let); mutable variables use var.
+AUDIT-TXT-0137 | HARD | High | SSOT.txt:L2104-L2114 | Constants: const declaration for compile-time values; inlined (no memory occupancy); must be compile-time evaluable.
+AUDIT-TXT-0138 | HARD | High | SSOT.txt:L2122-L2127 | Assignment: Simple types (integers, floats) are Copy (bitwise copy).
+AUDIT-TXT-0139 | HARD | High | SSOT.txt:L2128-L2133 | Move Semantics: Resource-managing types (heap allocations) are move-only by default; transfer ownership on assign/pass.
+AUDIT-TXT-0140 | HARD | High | SSOT.txt:L2139-L2141 | Ownership Guard: Using a moved value is a compile-time error.
+AUDIT-TXT-0141 | HARD | High | SSOT.txt:L2154-L2161 | RAII: Variables automatically destroyed/cleaned up at scope end (deterministic); tied to ownership model.
+AUDIT-TXT-0142 | HARD | High | SSOT.txt:L2168-L2173 | Destructors: Implementation of drop method for custom cleanup; side effects kept clear (no hidden effects unless opted-in).
+AUDIT-TXT-0143 | HARD | High | SSOT.txt:L2189-L2203 | Cost Transparency: @noalloc attribute guarantees zero heap allocations; compilation fails if violated.
+AUDIT-TXT-0144 | HARD | High | SSOT.txt:L2222-L2231 | Cost Transparency: @nocopy attribute prevents large value copies (passed by reference or move).
+AUDIT-TXT-0145 | HARD | High | SSOT.txt:L2242-L2251 | Cost Transparency: @nosyscall attribute forbids system calls.
+AUDIT-TXT-0146 | HARD | High | SSOT.txt:L2257-L2260 | Cost Transparency: @bounds_checked (always check) and @no_bounds_check (requires unsafe) for array access.
+AUDIT-TXT-0147 | HARD | High | SSOT.txt:L2272-L2285 | Performance Contracts: @cost_budget(cycles=N, allocs=N) enforced at compile-time.
+AUDIT-TXT-0148 | HARD | High | SSOT.txt:L2336-L2341 | Blame Tracking: Performance contracts compose across function boundaries; shows call chain for violations.
+AUDIT-TXT-0149 | HARD | High | SSOT.txt:L2380-L2401 | Cross-Module Blame: Blame tracking works across crates/dependencies.
+AUDIT-TXT-0150 | HARD | High | SSOT.txt:L2425-L2439 | Cost Warnings: [warn(heap_alloc)], [warn(large_copy, threshold=N)], [warn(dynamic_dispatch)] for expensive operations.
+AUDIT-TXT-0151 | HARD | High | SSOT.txt:L2443-L2453 | Linter Performance: quarry lint --level=performance reports allocations, copies, dispatch, and reallocation points.
+AUDIT-TXT-0152 | HARD | High | SSOT.txt:L2502-L2504 | Ownership: Every value owned by some variable/temporary; always a clear owner responsible for freeing.
+AUDIT-TXT-0153 | HARD | High | SSOT.txt:L2509-L2521 | Resource Management: Owner responsible for lifetime; automatic cleanup at scope end (inserted calls to destructors/free).
+AUDIT-TXT-0154 | HARD | High | SSOT.txt:L2541-L2547 | Ownership Analysis: Guaranteed no leaks/double frees; explicit move required for longer lifetimes.
+AUDIT-TXT-0155 | HARD | High | SSOT.txt:L2582-L2590 | Borrowing: Lend access via references (&T, &mut T) without giving up ownership.
+AUDIT-TXT-0156 | HARD | High | SSOT.txt:L2598-L2603 | Borrowing Rules: Multiple immutable OK; at most one mutable; mutable/immutable cannot coexist (exclusive write).
+AUDIT-TXT-0157 | HARD | High | SSOT.txt:L2628-L2636 | Lifetime Analysis: Reference cannot outlive its owner; prevents dangling pointers at compile time.
+AUDIT-TXT-0158 | HARD | High | SSOT.txt:L2691-L2700 | Unsafe Blocks: Explicitly marked unsafe: signals suspension of guarantees; programmer assumes responsibility.
+AUDIT-TXT-0159 | HARD | High | SSOT.txt:L2716-L2721 | Unsafe Capabilities: Dereference raw pointers, pointer arithmetic, incompatible casts, foreign function calls.
+AUDIT-TXT-0160 | HARD | High | SSOT.txt:L2733-L2750 | Explicit Memory: malloc, free, realloc in stdlib; encouraged to encapsulate in safe abstractions.
+AUDIT-TXT-0161 | HARD | High | SSOT.txt:L2752-L2768 | Low-Level: Type punning and untagged unions allowed in unsafe; UB includes invalid pointers, misalignment, data races.
+AUDIT-TXT-0162 | HARD | High | SSOT.txt:L2773-L2800 | Circumventing Rules: unsafe allows bypassing borrow checker (e.g., multiple mutable aliases) but requires manual synchronization.
+AUDIT-TXT-0163 | HARD | High | SSOT.txt:L2834-L2837 | Boolean Guard: Condition in if must be bool (no implicit conversion).
+AUDIT-TXT-0164 | HARD | High | SSOT.txt:L2844-L2848 | Ternary: x if condition else y expression.
+AUDIT-TXT-0165 | HARD | High | SSOT.txt:L2873-L2885 | For Loops: for item in collection iterates over iterators/ranges; no manual increment logic.
+AUDIT-TXT-0166 | HARD | High | SSOT.txt:L2887-L2893 | Range Syntax: Numeric loops via 0..10 or range(0, 10).
+AUDIT-TXT-0167 | HARD | High | SSOT.txt:L2915-L2919 | Pattern Matching: match construct for structured branching; exhaustiveness checked by compiler.
+AUDIT-TXT-0168 | HARD | High | SSOT.txt:L2923-L2933 | Match Syntax: match value: pattern: code; _: default; if guard.
+AUDIT-TXT-0169 | HARD | High | SSOT.txt:L2953-L2976 | Match Scope: Basic types, enums, tuples, struct destructuring.
+AUDIT-TXT-0170 | HARD | High | SSOT.txt:L3004-L3006 | Operators: No user-defined operator overloading by default; prevents hidden control flow/surprising costs.
+AUDIT-TXT-0171 | HARD | High | SSOT.txt:L3026-L3028 | Evaluation Order: Guaranteed left-to-right evaluation for expressions and arguments (deterministic).
+AUDIT-TXT-0172 | HARD | High | SSOT.txt:L3060-L3062 | Error Handling: No exceptions; use Result[T, E] or Optional[T] types (explicit, type-based).
+AUDIT-TXT-0173 | HARD | High | SSOT.txt:L3081-L3083 | Try Operator: try keyword for error propagation (similar to Rust's ?).
+AUDIT-TXT-0174 | HARD | High | SSOT.txt:L3145-L3147 | Defer Statement: defer schedules code for scope exit; explicit cleanup; zero runtime cost.
+AUDIT-TXT-0175 | HARD | High | SSOT.txt:L3160-L3161 | Defer Execution: Multiple defer statements execute in reverse order (LIFO).
+AUDIT-TXT-0176 | HARD | High | SSOT.txt:L3205-L3206 | With Statement: with statement desugars to try + defer (syntactic sugar).
+AUDIT-TXT-0177 | HARD | High | SSOT.txt:L3237-L3238 | With Requirements: Type must implement Closeable (or close() method); expression returns Result[T, E].
+AUDIT-TXT-0178 | HARD | High | SSOT.txt:L3285-L3289 | Type Introspection: quarry explain-type TypeName [--verbose] for memory layout and properties.
+AUDIT-TXT-0179 | HARD | High | SSOT.txt:L3399-L3423 | Type Badges: Standardized badges: [Stack], [Heap], [Inline], [Copy], [Move], [NotCopy], [MayAlloc], [NoAlloc], [ThreadSafe], [BorrowedView], [OwnedData].
+AUDIT-TXT-0180 | HARD | High | SSOT.txt:L3483-L3486 | Layout Inspection: quarry layout TypeName shows offsets, sizes, alignment, and padding.
+AUDIT-TXT-0181 | HARD | High | SSOT.txt:L3553-L3555 | Cache Analysis: quarry layout --cache-analysis shows cache-line implications (e.g., L1 boundaries).
+AUDIT-TXT-0182 | HARD | High | SSOT.txt:L3577-L3582 | Aliasing Analysis: quarry explain-aliasing shows when compiler assumes non-aliasing (noalias).
+AUDIT-TXT-0183 | HARD | High | SSOT.txt:L3584-L3585 | Noalias Guarantees: Exclusive mutable borrow (&mut T) implies noalias.
+AUDIT-TXT-0184 | HARD | High | SSOT.txt:L3596-L3597 | Noalias Attributes: Explicit @noalias attribute for expert optimization.
+AUDIT-TXT-0185 | HARD | High | SSOT.txt:L3646-L3647 | Cost Integration: quarry cost --aliasing-analysis suggests where @noalias would benefit performance.
+AUDIT-TXT-0186 | HARD | High | SSOT.txt:L3700-L3706 | Traits: Define sets of methods for types (static polymorphism); zero runtime cost (monomorphization).
+AUDIT-TXT-0187 | HARD | High | SSOT.txt:L3719-L3722 | Impl Blocks: impl Trait for Type blocks for trait implementations.
+AUDIT-TXT-0188 | HARD | High | SSOT.txt:L3744-L3746 | Generics: Type parameters (e.g., max_item[T: Comparable]) with constraints.
+AUDIT-TXT-0189 | HARD | High | SSOT.txt:L3771-L3774 | Dynamic Dispatch: dyn Trait for runtime polymorphism via vtables (opt-in).
+AUDIT-TXT-0190 | HARD | High | SSOT.txt:L3803-L3806 | Methods: Instance functions (&self/&mut self) and associated functions in impl blocks.
+AUDIT-TXT-0191 | HARD | High | SSOT.txt:L3833-L3835 | No Inheritance: No subclassing; use composition and traits.
+AUDIT-TXT-0192 | HARD | High | SSOT.txt:L3895-L3902 | Design by Contract: @requires, @ensures, @invariant attributes for logical correctness (Stable Release).
+AUDIT-TXT-0193 | HARD | High | SSOT.txt:L3909-L3911 | Contract Execution: Compile-time verification if possible; runtime checks in debug; zero cost in release.
+AUDIT-TXT-0194 | HARD | High | SSOT.txt:L3950-L3951 | Type Invariants: @invariant checked after construction, after methods (debug), and before destruction.
+AUDIT-TXT-0195 | HARD | High | SSOT.txt:L3978-L3979 | Loop Invariants: @invariant inside loops for algorithm verification.
