@@ -2,13 +2,13 @@
 
 - Last updated: December 23, 2025
 - Mode: REQ_TO_LEAF
-- Baseline totals: REQ=423 SPEC=305 NODE=40 LEAF=265
-- Progress: mapped_to_leaf=326/423
+- Baseline totals: REQ=423 SPEC=312 NODE=40 LEAF=272
+- Progress: mapped_to_leaf=351/423
 - Cursor:
-  - next_unmapped_req: REQ-327
+  - next_unmapped_req: REQ-352
   - batch_size: 25
-  - last_completed_req: REQ-326
-- This run targets: REQ -> LEAF Mapping (Batch 13)
+  - last_completed_req: REQ-351
+- This run targets: REQ -> LEAF Mapping (Batch 14)
 
 # Pyrite + Quarry Technical Specification (SSOT Implementation Guide)
 
@@ -4251,14 +4251,14 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-324 -> SPEC-QUARRY-0101
 - REQ-325 -> SPEC-LANG-1302
 - REQ-326 -> SPEC-LANG-1302
-- REQ-327 -> SPEC-LANG-0700
-- REQ-328 -> SPEC-LANG-0700
-- REQ-329 -> SPEC-LANG-0700
-- REQ-330 -> SPEC-LANG-0700
-- REQ-331 -> SPEC-LANG-0700
-- REQ-332 -> SPEC-LANG-0700
-- REQ-333 -> SPEC-LANG-0700
-- REQ-334 -> SPEC-LANG-0700
+- REQ-327 -> SPEC-LANG-0701
+- REQ-328 -> SPEC-LANG-0701
+- REQ-329 -> SPEC-LANG-0701
+- REQ-330 -> SPEC-LANG-0701
+- REQ-331 -> SPEC-LANG-0703
+- REQ-332 -> SPEC-LANG-0702
+- REQ-333 -> SPEC-LANG-0702
+- REQ-334 -> SPEC-LANG-0702
 - REQ-335 -> SPEC-LANG-0901, SPEC-LANG-0902
 - REQ-336 -> SPEC-LANG-0903
 - REQ-337 -> SPEC-LANG-1001
@@ -4269,7 +4269,7 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-342 -> SPEC-LANG-1004
 - REQ-343 -> SPEC-LANG-1005
 - REQ-344 -> SPEC-LANG-1101
-- REQ-345 -> SPEC-LANG-1100
+- REQ-345 -> SPEC-LANG-1101, SPEC-LANG-1102, SPEC-LANG-1103
 - REQ-346 -> SPEC-LANG-1104
 - REQ-347 -> SPEC-LANG-1101, SPEC-LANG-1102, SPEC-LANG-1103
 - REQ-348 -> SPEC-LANG-1104
@@ -9312,6 +9312,184 @@ let zeros = [0; 100]        # Repeat syntax
 
 - SPEC-LANG-0703: GPU thread/block primitives
 
+#### SPEC-LANG-0701: @kernel Attribute and Constraints
+
+**Kind:** LEAF
+
+**Source:** REQ-327, REQ-328, REQ-329, REQ-330, SSOT Section 9.13
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- Implement `@kernel` attribute for function declarations.
+
+- Enforce no heap allocation, no recursion, and no system calls in `@kernel` functions.
+
+- Transitively enforce these constraints on all functions called from a `@kernel`.
+
+- Implement call-graph blame tracking to identify functions violating constraints.
+
+- Support code generation for multiple GPU backends (CUDA, HIP, Metal, Vulkan) via LLVM.
+
+**User-facing behavior:**
+
+- Developers mark functions with `@kernel` to indicate GPU eligibility.
+
+- Compiler errors identify exactly where and why a kernel violates hardware constraints.
+
+**Semantics:**
+
+- `@kernel` functions are entry points for heterogeneous execution.
+
+- All calls within a kernel must be to functions also satisfying kernel constraints.
+
+**Examples:**
+
+- Positive:
+  ```
+  @kernel
+  fn vector_add(a: DevicePtr[f32], b: DevicePtr[f32], c: DevicePtr[f32]):
+      let i = gpu::thread_id()
+      c[i] = a[i] + b[i]
+  ```
+
+- Negative (Violation):
+  ```
+  fn recursive_fn(n: int) -> int:
+      if n <= 1: return 1
+      return n * recursive_fn(n - 1)
+
+  @kernel
+  fn invalid_kernel():
+      recursive_fn(10) # Error: recursion not allowed in kernel
+  ```
+
+**Tests required:**
+
+- Unit: Verify constraint enforcement on various incompatible operations.
+
+- Integration: Compile a simple kernel for multiple targets and verify IR output.
+
+**Implementation notes:**
+
+- Uses LLVM target features for GPU-specific constraint checking.
+
+**Dependencies:**
+
+- SPEC-LANG-0700
+
+#### SPEC-LANG-0702: Device Memory Management
+
+**Kind:** LEAF
+
+**Source:** REQ-332, REQ-333, REQ-334, SSOT Section 9.13
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- Implement `DevicePtr[T]` and `HostPtr[T]` pointer types.
+
+- Prevent implicit conversion or mixing of host and device pointers.
+
+- Provide `copy_to_device` and `copy_from_device` in stdlib for data movement.
+
+- Implement `DeviceVec[T]` RAII wrapper for automated GPU memory management.
+
+**User-facing behavior:**
+
+- Clear type-level distinction between host and accelerator memory.
+
+- Automated cleanup of GPU resources when `DeviceVec` goes out of scope.
+
+**Semantics:**
+
+- `DevicePtr` can only be dereferenced in a `@kernel` context.
+
+- `DeviceVec` handles allocation on creation and deallocation on drop.
+
+**Examples:**
+
+- Positive:
+  ```
+  let host_data = [1.0, 2.0, 3.0]
+  let mut dev_data = DeviceVec[f32]::new(host_data.len())
+  dev_data.copy_from(host_data)
+  # dev_data freed automatically here
+  ```
+
+**Tests required:**
+
+- Unit: Verify type-system prevents host/device pointer mixing.
+
+- Integration: Verify correct allocation/deallocation on a physical or mocked GPU device.
+
+**Implementation notes:**
+
+- Wraps backend-specific APIs (cudaMalloc, hipMalloc, etc.).
+
+**Dependencies:**
+
+- SPEC-LANG-0700
+
+#### SPEC-LANG-0703: GPU Thread and Block Primitives
+
+**Kind:** LEAF
+
+**Source:** REQ-331, SSOT Section 9.13
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- Implement `gpu::thread_id()`, `gpu::block_id()`, `gpu::block_dim()` intrinsics.
+
+- Implement `gpu::syncthreads()` for intra-block synchronization.
+
+- Implement `kernel.launch(grid, block, args...)` API in stdlib.
+
+**User-facing behavior:**
+
+- Standardized way to access hardware-specific execution indices.
+
+- Type-safe kernel launching from host code.
+
+**Semantics:**
+
+- `gpu` intrinsics are only valid within `@kernel` functions.
+
+- `launch` handles grid/block setup and argument marshalling.
+
+**Examples:**
+
+- Positive:
+  ```
+  let grid = Grid(1024, 1, 1)
+  let block = Block(256, 1, 1)
+  vector_add.launch(grid, block, dev_a, dev_b, dev_c)
+  ```
+
+**Tests required:**
+
+- Unit: Verify intrinsics map to correct LLVM metadata/builtins.
+
+- Integration: Run a simple kernel and verify correct indexing in output.
+
+**Implementation notes:**
+
+- Maps to `llvm.nvvm.read.ptx.sreg.tid.x` etc.
+
+**Dependencies:**
+
+- SPEC-LANG-0700
+
 #### SPEC-LANG-0300: Ownership System
 
 **Kind:** NODE  
@@ -11024,7 +11202,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-283, SSOT Section 1.12 Month 6
+**Source:** REQ-283, REQ-336, SSOT Section 1.12 Month 6, Section 9.14
 
 **Status:** PLANNED
 
@@ -11210,7 +11388,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-341, SSOT Section 11.0
+**Source:** REQ-341, REQ-342, SSOT Section 11.0
 
 **Status:** PLANNED
 
@@ -11222,11 +11400,15 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Ensure all tasks within block complete before exit
 
+- Implement automatic cancellation of sibling tasks when one task fails/panics (REQ-342)
+
 - Support propagation of panics from background tasks to parent
 
 **User-facing behavior:**
 
 - Simplified, reliable management of concurrent task groups
+
+- Automatic cleanup and error handling for group tasks
 
 **Semantics:**
 
@@ -11299,6 +11481,183 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-LANG-1103: Type-safe metrics collection
 
 - SPEC-LANG-1104: OpenTelemetry compatible exporters
+
+#### SPEC-LANG-1101: Structured Logging API
+
+**Kind:** LEAF
+
+**Source:** REQ-344, REQ-345, REQ-347, SSOT Section 9.17
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement `log::info!`, `log::warn!`, `log::error!`, and `log::debug!` macros.
+
+- Support structured key-value pairs (e.g., `log::info!("User login", user_id=123)`).
+
+- Ensure all log fields are type-checked against the provided schema or inferred types.
+
+- Implement compile-time feature flags to completely strip log calls based on severity.
+
+**User-facing behavior:**
+
+- High-performance, type-safe logging that can be disabled for production.
+
+**Semantics:**
+
+- Log macros expand to zero code if the corresponding severity level is disabled at compile time.
+
+**Examples:**
+
+- Positive: `log::info!("Request processed", duration=ms(15), status=200)`
+
+**Tests required:**
+
+- Unit: Verify type-checking of log arguments.
+
+- Integration: Verify log elimination when severity level is disabled in compiler flags.
+
+**Implementation notes:**
+
+- Uses procedural macros for zero-cost abstraction.
+
+**Dependencies:**
+
+- SPEC-LANG-1100
+
+#### SPEC-LANG-1102: Distributed Tracing Spans
+
+**Kind:** LEAF
+
+**Source:** REQ-345, REQ-347, SSOT Section 9.17
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement `trace::span!` macro for creating hierarchical tracing spans.
+
+- Support propagation of trace context across thread boundaries.
+
+- Ensure span attributes are type-safe and validated at compile time.
+
+- Support zero-cost elimination via compile-time feature flags.
+
+**User-facing behavior:**
+
+- Detailed visibility into request execution flow and timing.
+
+**Semantics:**
+
+- Spans automatically close when their RAII guard goes out of scope.
+
+**Examples:**
+
+- Positive:
+  ```
+  let span = trace::span!("database_query", db="users")
+  let result = db.query(...)
+  # span closed here
+  ```
+
+**Tests required:**
+
+- Unit: Verify span hierarchy and attribute type-safety.
+
+- Integration: Verify trace context propagation in multi-threaded scenarios.
+
+**Dependencies:**
+
+- SPEC-LANG-1100
+
+#### SPEC-LANG-1103: Type-safe Metrics Collection
+
+**Kind:** LEAF
+
+**Source:** REQ-345, REQ-347, SSOT Section 9.17
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement `metrics::counter!`, `metrics::gauge!`, and `metrics::histogram!` macros.
+
+- Enforce type-safety for metric labels and values.
+
+- Support zero-cost elimination via compile-time feature flags.
+
+**User-facing behavior:**
+
+- Performance-critical metrics collection with minimal runtime overhead.
+
+**Semantics:**
+
+- Metrics are updated atomically or via thread-local buffers to minimize contention.
+
+**Examples:**
+
+- Positive: `metrics::counter!("requests_total", method="GET", path="/api")`
+
+**Tests required:**
+
+- Unit: Verify metric name and label type-safety.
+
+- Integration: Verify metrics are correctly recorded and exposed to collectors.
+
+**Dependencies:**
+
+- SPEC-LANG-1100
+
+#### SPEC-LANG-1104: OpenTelemetry Compatible Exporters
+
+**Kind:** LEAF
+
+**Source:** REQ-346, REQ-348, SSOT Section 9.17
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement a pluggable `TelemetryExporter` trait.
+
+- Provide built-in exporters for OTLP (OpenTelemetry Protocol), Jaeger, and Prometheus.
+
+- Provide standard format exporters for JSON and Syslog.
+
+- Ensure compatibility with industry-standard observability tools.
+
+**User-facing behavior:**
+
+- Easy integration with existing monitoring and observability stacks.
+
+**Semantics:**
+
+- Exporters run in a background task or are invoked periodically to flush telemetry data.
+
+**Examples:**
+
+- Positive: `telemetry::init(JaegerExporter::new(endpoint="http://localhost:14268"))`
+
+**Tests required:**
+
+- Integration: Verify telemetry data is correctly formatted and sent to a mock OTLP collector.
+
+**Implementation notes:**
+
+- Uses asynchronous flushing to avoid blocking the main execution path.
+
+**Dependencies:**
+
+- SPEC-LANG-1101, SPEC-LANG-1102, SPEC-LANG-1103
 
 #### SPEC-LANG-1200: Interoperability System
 
@@ -14294,7 +14653,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-349 to REQ-352, SSOT Section 10.1
+**Source:** REQ-349, REQ-350, REQ-351, REQ-352, SSOT Section 10.1, 10.2
 
 **Status:** PLANNED
 
@@ -14306,9 +14665,19 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Create a web-based editor that runs the compiler and executes code in the browser.
 
+- Implement real-time, inline diagnostics (errors/warnings) as the user types (REQ-350).
+
+- Implement interactive ownership and borrowing visualizations for educational purposes (REQ-350).
+
+- Support "live links" from official documentation that pre-load code into the playground (REQ-351).
+
 **User-facing behavior:**
 
-- Try Pyrite in the browser without installation.
+- Zero-installation environment for learning and experimenting with Pyrite.
+
+- Immediate feedback on code correctness and ownership semantics.
+
+- Seamless transition from reading documentation to running examples.
 
 **Tests required:**
 
@@ -15433,7 +15802,7 @@ Total new P1 LEAFs: 34.
 
     - Goal: Design by Contract and advanced compiler passes.
 
-    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207, SPEC-FORGE-0208, SPEC-QUARRY-0031, SPEC-QUARRY-0032, SPEC-QUARRY-0306, SPEC-QUARRY-0307, SPEC-QUARRY-0308.
+    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-LANG-1101, SPEC-LANG-1102, SPEC-LANG-1103, SPEC-LANG-1104, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207, SPEC-FORGE-0208, SPEC-QUARRY-0031, SPEC-QUARRY-0032, SPEC-QUARRY-0306, SPEC-QUARRY-0307, SPEC-QUARRY-0308.
 
     - Dependency satisfaction note: Depends on M6 (Ownership).
 
@@ -15473,7 +15842,7 @@ Total new P1 LEAFs: 34.
   
     - Goal: Safe multi-threading and structured concurrency.
     
-    - Included: SPEC-LANG-1001, SPEC-LANG-1002, SPEC-LANG-1003, SPEC-LANG-1004, SPEC-LANG-1005, SPEC-LANG-0808, SPEC-LANG-0809, SPEC-LANG-0810.
+    - Included: SPEC-LANG-1001, SPEC-LANG-1002, SPEC-LANG-1003, SPEC-LANG-1004, SPEC-LANG-1005, SPEC-LANG-0701, SPEC-LANG-0702, SPEC-LANG-0703, SPEC-LANG-0808, SPEC-LANG-0809, SPEC-LANG-0810.
     
     - Dependency satisfaction note: Depends on M6 (Send/Sync) and M7 (Thread primitives).
     
@@ -15831,10 +16200,19 @@ Total new P1 LEAFs: 34.
 
 ### REQ-to-LEAF Mapping Verification (Batch 13)
 
-- **REQ Range:** REQ-301..REQ-325
+- **REQ Range:** REQ-301..REQ-326
 - **New LEAFs created:** 5 (SPEC-LANG-0808, SPEC-LANG-0809, SPEC-LANG-0810, SPEC-LANG-1301, SPEC-LANG-1302)
-- **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+- **Mapping Coverage Delta:** +26 REQs mapped to LEAFs
 - **Roadmap Placement:** Consistent (M12, M14)
+- **Status:** PASS
+
+### REQ-to-LEAF Mapping Verification (Batch 14)
+
+- **REQ Range:** REQ-327..REQ-351
+- **New LEAFs created:** 7 (SPEC-LANG-0701, SPEC-LANG-0702, SPEC-LANG-0703, SPEC-LANG-1101, SPEC-LANG-1102, SPEC-LANG-1103, SPEC-LANG-1104)
+- **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+- **Roadmap Placement:** Consistent (M11, M12, M13, M14)
+- **New Dependencies:** SPEC-LANG-0700 (for GPU), SPEC-LANG-1100 (for Observability)
 - **Status:** PASS
 
 ### Loop B (Scoped): Newly added LEAFs
