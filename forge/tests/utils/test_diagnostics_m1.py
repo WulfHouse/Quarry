@@ -4,8 +4,6 @@ from src.utils.diagnostics import Diagnostic, DiagnosticManager
 
 def test_i18n_support():
     """Test internationalization support (SPEC-FORGE-0106)"""
-    span = Span("test.pyrite", 1, 1, 1, 5)
-    
     # English
     manager_en = DiagnosticManager(language="en")
     msg_en = manager_en.get_message("P0234", var_name="x")

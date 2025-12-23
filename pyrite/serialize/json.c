@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 
 typedef struct {
     char* data;
@@ -12,6 +13,9 @@ typedef struct {
 
 extern String string_new(const char* cstr);
 extern String string_empty();
+
+/* Forward declarations */
+String json_serialize_str(const char* value);
 
 /* Helper function to escape a String for JSON (for Pyrite FFI) */
 String json_escape_string(String* s) {
@@ -33,8 +37,15 @@ String json_serialize_i64(int64_t value) {
 }
 
 String json_serialize_f64(double value) {
+    /* Check for special floating-point values (NaN, infinity) */
+    /* RFC 8259 does not allow "nan" or "inf" in JSON, so return "null" */
+    if (isnan(value) || isinf(value)) {
+        return string_new("null");
+    }
+    
+    /* Format finite value with compact precision (%.17g provides sufficient precision) */
     char buf[64];
-    sprintf(buf, "%f", value);
+    snprintf(buf, sizeof(buf), "%.17g", value);
     return string_new(buf);
 }
 

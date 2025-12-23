@@ -1745,22 +1745,68 @@ class LLVMCodeGen:
     
     def gen_as_expression(self, cast: ast.AsExpression) -> ir.Value:
         """Generate code for cast expression"""
+        # Guard: type_checker is required for type resolution
+        if not self.type_checker:
+            raise CodeGenError(
+                "Type checker required for 'as' expression type conversion",
+                cast.span
+            )
+        
         expr = self.gen_expression(cast.expression)
+        source_py_type = self.type_checker.check_expression(cast.expression)
         target_py_type = self.type_checker.resolve_type(cast.target_type)
         target_llvm_type = self.type_to_llvm(target_py_type)
+        
+        # If types already match, no conversion needed
+        if expr.type == target_llvm_type:
+            return expr
         
         # Handle String to *u8 cast (extract pointer)
         if isinstance(expr.type, ir.LiteralStructType) and len(expr.type.elements) == 2:
             # Extract data pointer (first field)
             ptr = self.builder.extract_value(expr, 0)
             if ptr.type != target_llvm_type:
-                return self.builder.bitcast(ptr, target_llvm_type)
+                # Validate: both must be pointers
+                if isinstance(ptr.type, ir.PointerType) and isinstance(target_llvm_type, ir.PointerType):
+                    return self.builder.bitcast(ptr, target_llvm_type)
+                else:
+                    raise CodeGenError(
+                        f"Invalid cast: cannot convert pointer type {ptr.type} to {target_llvm_type}",
+                        cast.span
+                    )
             return ptr
-            
-        # Default bitcast
-        if expr.type != target_llvm_type:
+        
+        # Handle integer size changes with proper signedness
+        if isinstance(expr.type, ir.IntType) and isinstance(target_llvm_type, ir.IntType):
+            if isinstance(source_py_type, IntType) and isinstance(target_py_type, IntType):
+                if expr.type.width < target_llvm_type.width:
+                    # Widening: use sext for signed, zext for unsigned
+                    if source_py_type.signed:
+                        return self.builder.sext(expr, target_llvm_type)
+                    else:
+                        return self.builder.zext(expr, target_llvm_type)
+                elif expr.type.width > target_llvm_type.width:
+                    # Truncation: always use trunc (signedness preserved in truncation)
+                    return self.builder.trunc(expr, target_llvm_type)
+                else:
+                    # Same width but different signedness - no-op in LLVM
+                    return expr
+            else:
+                # Can't determine signedness - use default sext for safety
+                if expr.type.width < target_llvm_type.width:
+                    return self.builder.sext(expr, target_llvm_type)
+                elif expr.type.width > target_llvm_type.width:
+                    return self.builder.trunc(expr, target_llvm_type)
+        
+        # Handle pointer↔pointer bitcast (only when both are pointers)
+        if isinstance(expr.type, ir.PointerType) and isinstance(target_llvm_type, ir.PointerType):
             return self.builder.bitcast(expr, target_llvm_type)
-        return expr
+        
+        # Unsupported conversion
+        raise CodeGenError(
+            f"Unsupported cast: cannot convert {expr.type} to {target_llvm_type}",
+            cast.span
+        )
     
     def gen_binop(self, binop: ast.BinOp) -> ir.Value:
         """Generate code for binary operation"""
@@ -2687,7 +2733,10 @@ class LLVMCodeGen:
                     elif method_name == "set" or method_name == "insert":
                         # map.set(key, value) or map.insert(key, value)
                         if len(call.arguments) < 2:
-                            raise CodeGenError(f"Map.{method_name}() requires two arguments (key, value)", call.span)
+                            raise CodeGenError(
+                                f"Map.{method_name}() requires two arguments (key, value)",
+                                call.span
+                            )
                         value_expr = call.arguments[1]
                         value_val = self.gen_expression(value_expr)
                         # Convert value to pointer
@@ -2736,8 +2785,17 @@ class LLVMCodeGen:
                     return self.builder.call(self.list_new, [elem_size_const])
                 else: # with_capacity
                     if len(call.arguments) < 1:
-                        raise CodeGenError("List.with_capacity() requires one argument", call.span)
+                        raise CodeGenError(
+                            "List.with_capacity() requires one argument",
+                            call.span
+                        )
                     cap_val = self.gen_expression(call.arguments[0])
+                    # Normalize to i64: FFI expects i64
+                    if isinstance(cap_val.type, ir.IntType):
+                        if cap_val.type.width < 64:
+                            cap_val = self.builder.sext(cap_val, ir.IntType(64))
+                        elif cap_val.type.width > 64:
+                            cap_val = self.builder.trunc(cap_val, ir.IntType(64))
                     return self.builder.call(self.list_with_capacity, [elem_size_const, cap_val])
             
             elif not is_static_call and obj:
@@ -2772,8 +2830,17 @@ class LLVMCodeGen:
                 
                 elif method_name == "get":
                     if len(call.arguments) < 1:
-                        raise CodeGenError("List.get() requires one argument", call.span)
+                        raise CodeGenError(
+                            "List.get() requires one argument",
+                            call.span
+                        )
                     index_val = self.gen_expression(call.arguments[0])
+                    # Normalize to i64: FFI expects i64
+                    if isinstance(index_val.type, ir.IntType):
+                        if index_val.type.width < 64:
+                            index_val = self.builder.sext(index_val, ir.IntType(64))
+                        elif index_val.type.width > 64:
+                            index_val = self.builder.trunc(index_val, ir.IntType(64))
                     # Call list_get
                     result_ptr = self.builder.call(self.list_get, [list_ptr, index_val, elem_size_const])
                     # Bitcast and load result

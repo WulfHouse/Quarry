@@ -1,5 +1,0 @@
----
-alwaysApply: true
----
-All AGENT COMMANDS MUST BE PREFIXED WITH:
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh"

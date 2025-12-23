@@ -195,7 +195,7 @@ def test_determinism_check():
     
     # Check if script exists
     if not script.exists():
-        pytest.skip("check_bootstrap_determinism.py script does not exist")
+        pytest.fail("check_bootstrap_determinism.py script does not exist")
     
     # Try to build missing stages
     if not stage1_exe.exists():
@@ -214,8 +214,8 @@ def test_determinism_check():
                 # Stage1 build may fail if src-pyrite/ doesn't exist or has no modules
                 error_msg = stage1_result.stderr or stage1_result.stdout or "Unknown error"
                 if "No Pyrite modules found" in error_msg or "src-pyrite" in error_msg:
-                    pytest.skip("No Pyrite modules available for Stage1 build (expected during migration)")
-                pytest.skip(f"Could not build Stage1: {error_msg}")
+                    pytest.fail("No Pyrite modules available for Stage1 build (expected during migration)")
+                pytest.fail(f"Could not build Stage1: {error_msg}")
     
     if not stage2_exe.exists():
         # Try to build Stage2
@@ -233,12 +233,17 @@ def test_determinism_check():
                 # Stage2 build may fail if Stage1 has issues or no Pyrite modules
                 error_msg = stage2_result.stderr or stage2_result.stdout or "Unknown error"
                 if "No Pyrite modules found" in error_msg or "src-pyrite" in error_msg:
-                    pytest.skip("No Pyrite modules available for Stage2 build (expected during migration)")
-                pytest.skip(f"Could not build Stage2: {error_msg}")
+                    pytest.fail("No Pyrite modules available for Stage2 build (expected during migration)")
+                pytest.fail(f"Could not build Stage2: {error_msg}")
     
     # Final check - both must exist
     if not stage1_exe.exists() or not stage2_exe.exists():
-        pytest.skip("Both Stage1 and Stage2 must exist for determinism check")
+        missing = []
+        if not stage1_exe.exists():
+            missing.append("Stage1")
+        if not stage2_exe.exists():
+            missing.append("Stage2")
+        pytest.fail(f"Both Stage1 and Stage2 must exist for determinism check. Missing: {', '.join(missing)}")
     
     # Run determinism check
     result = subprocess.run(
