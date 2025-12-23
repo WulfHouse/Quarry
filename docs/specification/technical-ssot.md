@@ -16868,136 +16868,207 @@ Total new P1 LEAFs: 34.
 ### REQ-to-LEAF Mapping Verification (Batch 1)
 
 - **REQ Range:** REQ-001..REQ-025
+
 - **New LEAFs created:** 0 (existing LEAFs used)
+
 - **Mapping Coverage Delta:** +25 REQs remapped to LEAFs
+
 - **New Dependencies introduced:** None
+
 - **Roadmap Consistency:** Verified (all LEAFs are children of previously mapped NODEs already in roadmap)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 2)
 
 - **REQ Range:** REQ-026..REQ-050
+
 - **New LEAFs created:** 11 (SPEC-FORGE-0110, SPEC-LANG-0016..0020, SPEC-QUARRY-0501..0505)
+
 - **Mapping Coverage Delta:** +25 REQs remapped to LEAFs
+
 - **New Dependencies introduced:** None
+
 - **Roadmap Consistency:** Verified (new LEAFs added to M0, M1, M12)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 3)
 
 - **REQ Range:** REQ-051..REQ-075
+
 - **New LEAFs expanded/created:** 23 (SPEC-LANG-0208..0210, 0213..0214, 0217..0228, 0311..0313, 0303, 0820..0822)
+
 - **Mapping Coverage Delta:** +25 REQs remapped to LEAFs
+
 - **New Dependencies introduced:** None
+
 - **Roadmap Consistency:** Verified (new LEAFs added to M3, M6, M9)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 4)
 
 - **REQ Range:** REQ-076..REQ-100
+
 - **New LEAFs created:** 7 (SPEC-LANG-0115, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0314, SPEC-LANG-0315, SPEC-LANG-0316, SPEC-FORGE-0204)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M2, M3, M6, M11)
+
 - **New Dependencies:** SPEC-LANG-0216 (for 0230), SPEC-LANG-0114 (for 0231)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 5)
 
 - **REQ Range:** REQ-101..REQ-125
+
 - **New LEAFs created:** 16 (SPEC-LANG-0108, SPEC-LANG-0116..0118, SPEC-LANG-0232..0238, SPEC-QUARRY-0110..0112, SPEC-FORGE-0205..0206)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M2, M3, M7, M13)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 6)
 
 - **REQ Range:** REQ-126..REQ-150
+
 - **New LEAFs created:** 15 (SPEC-LANG-0406..0408, SPEC-LANG-0604, SPEC-FORGE-0207, SPEC-FORGE-0305..0306, SPEC-LANG-0510..0511, SPEC-QUARRY-0113, SPEC-LANG-0240..0241, SPEC-LANG-0119, SPEC-FORGE-0029, SPEC-QUARRY-0021)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M2, M3, M4, M7, M11, M13)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 7)
 
 - **REQ Range:** REQ-151..REQ-175
+
 - **New LEAFs created:** 11 (SPEC-FORGE-0307, SPEC-LANG-0242..0243, SPEC-LANG-0120, SPEC-QUARRY-0026, SPEC-QUARRY-0015, SPEC-QUARRY-0022..0023, SPEC-QUARRY-0016, SPEC-QUARRY-0024..0025)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M2, M3, M4, M8, M12, M13)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 8)
 
 - **REQ Range:** REQ-176..REQ-200
+
 - **New LEAFs created:** 8 (SPEC-QUARRY-0030..0036, SPEC-FORGE-0208)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M11, M12, M13)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 9)
 
 - **REQ Range:** REQ-201..REQ-225
+
 - **New LEAFs created:** 5 (SPEC-LANG-0021, SPEC-FORGE-0030, SPEC-FORGE-0301..0302, SPEC-QUARRY-0037)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M0, M2, M3, M4, M7, M12, M13)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 10)
 
 - **REQ Range:** REQ-226..REQ-250
+
 - **New LEAFs created:** 5 (SPEC-QUARRY-0306..0308, SPEC-QUARRY-0114..0115)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M11, M13, M15)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 11)
 
 - **REQ Range:** REQ-251..REQ-275
+
 - **New LEAFs created:** 1 (SPEC-LANG-0815)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M11, M13, M15, M9)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 12)
 
 - **REQ Range:** REQ-276..REQ-300
+
 - **New LEAFs created:** 18 (SPEC-LANG-0823..0828, SPEC-LANG-0830..0831, SPEC-LANG-0835..0838, SPEC-LANG-0840..0841, SPEC-LANG-0850, SPEC-LANG-0870..0873)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M9, M10)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 13)
 
 - **REQ Range:** REQ-301..REQ-326
+
 - **New LEAFs created:** 5 (SPEC-LANG-0808, SPEC-LANG-0809, SPEC-LANG-0810, SPEC-LANG-1301, SPEC-LANG-1302)
+
 - **Mapping Coverage Delta:** +26 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M12, M14)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 14)
 
 - **REQ Range:** REQ-327..REQ-351
+
 - **New LEAFs created:** 7 (SPEC-LANG-0701, SPEC-LANG-0702, SPEC-LANG-0703, SPEC-LANG-1101, SPEC-LANG-1102, SPEC-LANG-1103, SPEC-LANG-1104)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M11, M12, M13, M14)
+
 - **New Dependencies:** SPEC-LANG-0700 (for GPU), SPEC-LANG-1100 (for Observability)
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 15)
 
 - **REQ Range:** REQ-352..REQ-376
+
 - **New LEAFs created/expanded:** 6 (SPEC-QUARRY-0204, SPEC-LANG-1201, SPEC-LANG-1202, SPEC-LANG-0701, SPEC-LANG-1004, SPEC-FORGE-0303)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M11, M12, M14)
+
 - **New Dependencies:** None
+
 - **Status:** PASS
 
 ### REQ-to-LEAF Mapping Verification (Batch 16)
 
 - **REQ Range:** REQ-377..REQ-401
+
 - **New LEAFs created/expanded:** 22 (SPEC-LANG-1301, SPEC-QUARRY-0108, SPEC-LANG-0409, SPEC-LANG-1202, SPEC-LANG-1501, SPEC-QUARRY-0205, SPEC-LANG-0704, SPEC-QUARRY-0007, SPEC-QUARRY-0404, SPEC-QUARRY-0305, SPEC-FORGE-0308, SPEC-LANG-0829, SPEC-LANG-0244, SPEC-LANG-0245, SPEC-LANG-1203, SPEC-QUARRY-0405, SPEC-QUARRY-0302, SPEC-QUARRY-0306, SPEC-LANG-0605, SPEC-QUARRY-0406, SPEC-LANG-0121, SPEC-LANG-0246)
+
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap Placement:** Consistent (M2, M3, M9, M11, M12, M13, M14, M15)
+
 - **New Dependencies:** SPEC-QUARRY-0031, SPEC-QUARRY-0303, SPEC-QUARRY-0304
+
 - **Status:** PASS
 
 ### Loop B (Scoped): Newly added LEAFs
@@ -17147,41 +17218,61 @@ Total new P1 LEAFs: 34.
 ### Verification (Scoped): REQ-076..REQ-100 Mapping (This Run)
 
 - **REQ Range:** REQ-076..REQ-100
+
 - **New LEAFs:** 7 (SPEC-LANG-0115, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0314, SPEC-LANG-0315, SPEC-LANG-0316, SPEC-FORGE-0204)
+
 - **Mapping coverage delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap placement:** Consistent (M2, M3, M6, M11)
+
 - **New dependencies:** SPEC-LANG-0216 (for 0230), SPEC-LANG-0114 (for 0231)
 
 ### Verification (Scoped): REQ-101..REQ-125 Mapping (This Run)
 
 - **REQ Range:** REQ-101..REQ-125
+
 - **New LEAFs:** 16 (SPEC-LANG-0108, SPEC-LANG-0116, SPEC-LANG-0117, SPEC-LANG-0118, SPEC-LANG-0232, SPEC-LANG-0233, SPEC-LANG-0234, SPEC-LANG-0235, SPEC-LANG-0236, SPEC-LANG-0237, SPEC-LANG-0238, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-FORGE-0205, SPEC-FORGE-0206)
+
 - **Mapping coverage delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap placement:** Consistent (M2, M3, M7, M13)
+
 - **New dependencies:** None (self-contained parser/type/tooling additions)
 
 ### Verification (Scoped): REQ-126..REQ-150 Mapping (This Run)
 
 - **REQ Range:** REQ-126..REQ-150
+
 - **New LEAFs:** 15 (SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0604, SPEC-FORGE-0207, SPEC-FORGE-0305, SPEC-FORGE-0306, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-QUARRY-0113, SPEC-LANG-0240, SPEC-LANG-0241, SPEC-LANG-0119, SPEC-FORGE-0029, SPEC-QUARRY-0021)
+
 - **Mapping coverage delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap placement:** Consistent (M2, M3, M4, M7, M11, M13)
+
 - **New dependencies:** None (expanding existing systems)
 
 ### Verification (Scoped): REQ-151..REQ-175 Mapping (This Run)
 
 - **REQ Range:** REQ-151..REQ-175
+
 - **New LEAFs:** 11 (SPEC-FORGE-0307, SPEC-LANG-0242, SPEC-LANG-0243, SPEC-LANG-0120, SPEC-QUARRY-0026, SPEC-QUARRY-0015, SPEC-QUARRY-0022, SPEC-QUARRY-0023, SPEC-QUARRY-0016, SPEC-QUARRY-0024, SPEC-QUARRY-0025)
+
 - **Mapping coverage delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap placement:** Consistent (M2, M3, M4, M8, M12, M13)
+
 - **New dependencies:** None
 
 ### Verification (Scoped): REQ-176..REQ-200 Mapping (This Run)
 
 - **REQ Range:** REQ-176..REQ-200
+
 - **New LEAFs:** 8 (SPEC-QUARRY-0030, SPEC-QUARRY-0031, SPEC-QUARRY-0032, SPEC-QUARRY-0033, SPEC-QUARRY-0034, SPEC-QUARRY-0035, SPEC-QUARRY-0036, SPEC-FORGE-0208)
+
 - **Mapping coverage delta:** +25 REQs mapped to LEAFs
+
 - **Roadmap placement:** Consistent (M11, M12, M13)
+
 - **New dependencies:** None
 
 ---
@@ -17580,22 +17671,39 @@ This section provides objective, checklist-driven criteria for determining relea
 ## 2.y Post-freeze SSOT.txt Coverage Addendum (2025-12-23)
 
 ### REQ-423: `quarry miri` Interpreter
+
 **Type:** Feature (Future)
+
 **Scope:** Tooling (Quarry)
+
 **Source:** SSOT.txt:L6459-L6475
+
 **Statement:** Quarry must provide an interpreter (quarry miri) capable of exhaustive undefined behavior detection, including memory safety violations, uninitialized reads, and unsafe invariant violations, even in code blocks marked as unsafe.
 
 #### SPEC-QUARRY-0109: Miri Interpreter
+
 **Kind:** LEAF
+
 **Source:** REQ-423, SSOT.txt:L6459-L6475, L15442
+
 **Status:** PLANNED
+
 **Goal:** Provide an exhaustive runtime verification tool for catching all classes of undefined behavior.
+
 **User-facing behavior:**
+
 - The `quarry miri` command runs the project or a specific function in an interpreted environment.
+
 - It detects and reports memory safety violations (UAF, overflows) even in `unsafe` blocks.
+
 - It identifies uninitialized memory reads and invalid pointer arithmetic.
+
 - It verifies that `unsafe` code maintains language invariants.
+
 **Implementation details:**
+
 - Uses an interpreter-based execution model (slower but exhaustive).
+
 - Tracks every memory allocation and access with metadata.
+
 - Validates each operation against formal semantics.
