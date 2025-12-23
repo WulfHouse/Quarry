@@ -79,6 +79,57 @@ except ImportError:
 # _compare_versions is now imported from version_bridge (or defined above as fallback)
 
 
+def cmd_init():
+    """Initialize a Pyrite project in current directory (SPEC-QUARRY-0013)"""
+    print(f"Initializing Pyrite project in current directory...")
+    
+    project_name = Path.cwd().name
+    
+    # Create src directory
+    Path("src").mkdir(exist_ok=True)
+    Path("tests").mkdir(exist_ok=True)
+    
+    # Create Quarry.toml
+    toml_path = Path("Quarry.toml")
+    if not toml_path.exists():
+        toml_content = f"""[package]
+name = "{project_name}"
+version = "0.1.0"
+edition = "2025"
+
+[dependencies]
+"""
+        toml_path.write_text(toml_content)
+        print("  Created Quarry.toml")
+    else:
+        print("  Quarry.toml already exists, skipping")
+    
+    # Create main.pyrite
+    main_path = Path("src/main.pyrite")
+    if not main_path.exists():
+        main_content = """fn main():
+    print("Hello, world!")
+"""
+        main_path.write_text(main_content)
+        print("  Created src/main.pyrite")
+    else:
+        print("  src/main.pyrite already exists, skipping")
+    
+    # Create .gitignore
+    gitignore_path = Path(".gitignore")
+    if not gitignore_path.exists():
+        gitignore_content = """target/
+*.ll
+*.o
+*.out
+"""
+        gitignore_path.write_text(gitignore_content)
+        print("  Created .gitignore")
+    
+    print("\nProject initialized successfully!")
+    return 0
+
+
 def cmd_new(project_name: str):
     """Create a new Pyrite project"""
     print(f"Creating binary project `{project_name}`...")
@@ -1250,7 +1301,10 @@ def main():
     
     command = sys.argv[1]
     
-    if command == "new":
+    if command == "init":
+        return cmd_init()
+    
+    elif command == "new":
         if len(sys.argv) < 3:
             print("Error: Project name required")
             print("Usage: quarry new <name>")
