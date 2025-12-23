@@ -4614,31 +4614,31 @@ This section contains normative requirements identified during the Post-freeze S
 - REQ-374 -> SPEC-LANG-0700
 - REQ-375 -> SPEC-LANG-1004
 - REQ-376 -> SPEC-FORGE-0303
-- REQ-377 -> SPEC-LANG-1302
+- REQ-377 -> SPEC-LANG-1301
 - REQ-378 -> SPEC-QUARRY-0108
-- REQ-379 -> SPEC-LANG-0400
+- REQ-379 -> SPEC-LANG-0409
 - REQ-380 -> SPEC-LANG-1202
 - REQ-381 -> SPEC-LANG-1202
 - REQ-382 -> SPEC-LANG-1202
-- REQ-383 -> SPEC-LANG-1500
-- REQ-384 -> SPEC-LANG-0100
-- REQ-385 -> SPEC-LANG-0700
+- REQ-383 -> SPEC-LANG-1501
+- REQ-384 -> SPEC-QUARRY-0205
+- REQ-385 -> SPEC-LANG-0704
 - REQ-386 -> SPEC-QUARRY-0007
 - REQ-387 -> SPEC-QUARRY-0404
-- REQ-388 -> SPEC-QUARRY-0300
-- REQ-389 -> SPEC-LANG-0800
-- REQ-390 -> SPEC-LANG-0802
-- REQ-391 -> SPEC-LANG-0200
-- REQ-392 -> SPEC-LANG-0203
-- REQ-393 -> SPEC-LANG-1101
+- REQ-388 -> SPEC-QUARRY-0305
+- REQ-389 -> SPEC-FORGE-0308
+- REQ-390 -> SPEC-LANG-0829
+- REQ-391 -> SPEC-LANG-0244
+- REQ-392 -> SPEC-LANG-0245
+- REQ-393 -> SPEC-LANG-1203
 - REQ-394 -> SPEC-LANG-1202
-- REQ-395 -> SPEC-QUARRY-0400
+- REQ-395 -> SPEC-QUARRY-0405
 - REQ-396 -> SPEC-QUARRY-0302
-- REQ-397 -> SPEC-QUARRY-0300
-- REQ-398 -> SPEC-LANG-0600
-- REQ-399 -> SPEC-QUARRY-0400
-- REQ-400 -> SPEC-LANG-0100
-- REQ-401 -> SPEC-LANG-0100
+- REQ-397 -> SPEC-QUARRY-0306
+- REQ-398 -> SPEC-LANG-0605
+- REQ-399 -> SPEC-QUARRY-0406
+- REQ-400 -> SPEC-LANG-0121
+- REQ-401 -> SPEC-LANG-0246
 - REQ-402 -> SPEC-LANG-0100
 - REQ-403 -> SPEC-LANG-0500
 - REQ-404 -> SPEC-LANG-0100
@@ -6436,6 +6436,30 @@ let zeros = [0; 100]        # Repeat syntax
 
 - `if [DebugMode]: print("Debugging...")`
 
+- `if [DebugMode]: print("Debugging...")`
+
+#### SPEC-LANG-0121: Entry Point Validation
+
+**Kind:** LEAF
+
+**Source:** REQ-400, SSOT Section 3.3
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- A Pyrite program must have exactly one function defined as the entry point (`fn main()`) (REQ-400).
+
+- Compiler must error if no `main` function is found in the entry module.
+
+- Compiler must error if multiple `main` functions are found across the linked modules.
+
+**User-facing behavior:**
+
+- Clear and unambiguous entry point for every application.
+
 #### SPEC-LANG-0110: Statement Parsing
 
 **Kind:** NODE
@@ -6465,6 +6489,8 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0118: Deterministic evaluation order parsing
 
 - SPEC-LANG-0119: Compile-time conditionals (if-comptime)
+
+- SPEC-LANG-0121: Entry Point Validation (REQ-400)
 
 #### SPEC-LANG-0111: Conditional Statement Parsing
 
@@ -6871,6 +6897,12 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0242: Compile-time assertions (compile.assert)
 
 - SPEC-LANG-0243: Compile-time string processing and hashing
+
+- SPEC-LANG-0244: Comptime Target Inspection (REQ-391)
+
+- SPEC-LANG-0245: Higher-Kinded Types (HKT) (REQ-392)
+
+- SPEC-LANG-0246: Boolean Type Enforcement (REQ-401)
 
 #### SPEC-LANG-0201: Type Inference Algorithm
 
@@ -8502,6 +8534,68 @@ let zeros = [0; 100]        # Repeat syntax
 
 - Storing sensitive strings as hashes in the final binary.
 
+- Storing sensitive strings as hashes in the final binary.
+
+#### SPEC-LANG-0244: Comptime Target Inspection
+
+**Kind:** LEAF
+
+**Source:** REQ-391, SSOT Section 7.6
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Provide mechanisms for inspecting compile-time configuration (target OS, features, endianness).
+
+- Implementation follows the `@import("builtin")` pattern or equivalent.
+
+**User-facing behavior:**
+
+- Write code that conditionally adapts to target hardware/OS at compile time.
+
+#### SPEC-LANG-0245: Higher-Kinded Types (HKT)
+
+**Kind:** LEAF
+
+**Source:** REQ-392, SSOT Section 14.2
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- Support higher-kinded types (types that take other types as parameters).
+
+- Required only if necessary for the self-hosting compiler implementation.
+
+**User-facing behavior:**
+
+- Use of advanced abstractions like Functor or Monad (if needed by compiler architecture).
+
+#### SPEC-LANG-0246: Boolean Type Enforcement
+
+**Kind:** LEAF
+
+**Source:** REQ-401, SSOT Section 3.1, 6.1
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Only expressions of the type `bool` can be used in conditional contexts (if, while).
+
+- Automatic truthiness conversion from integers or other types is strictly forbidden (REQ-401).
+
+**User-facing behavior:**
+
+- Clearer control flow; no accidental truthiness bugs.
+
 ### 4.4 Ownership and Borrowing
 
 [... existing content ...]
@@ -8535,6 +8629,8 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0407: Contract propagation and blame tracking
 
 - SPEC-LANG-0408: @safety_critical attribute
+
+- SPEC-LANG-0409: SMT Solver Integration (REQ-379)
 
 #### SPEC-LANG-0401: Precondition Attribute (@requires)
 
@@ -8831,6 +8927,36 @@ let zeros = [0; 100]        # Repeat syntax
 **Dependencies:**
 
 - SPEC-LANG-0400
+
+#### SPEC-LANG-0409: SMT Solver Integration
+
+**Kind:** LEAF
+
+**Source:** REQ-379, SSOT Section 14.3
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement integration with industry-standard SMT solvers (Z3, CVC5).
+
+- The `quarry verify` tool uses SMT solvers to provide formal verification of `@requires` and `@ensures` contracts.
+
+- Support mapping Pyrite contract expressions to SMT-LIB format.
+
+**User-facing behavior:**
+
+- Formal proof of contract satisfaction without runtime checks.
+
+**Tests required:**
+
+- Integration: Verify that simple contracts are successfully proven by an external SMT solver.
+
+**Dependencies:**
+
+- SPEC-LANG-0400, SPEC-QUARRY-0031
 
 #### SPEC-LANG-0500: Two-Tier Closure System
 
@@ -9146,6 +9272,8 @@ let zeros = [0; 100]        # Repeat syntax
 
 - SPEC-LANG-0604: @noalias attribute syntax and semantics
 
+- SPEC-LANG-0605: Portable SIMD Vector Types (REQ-398)
+
 #### SPEC-LANG-0601: Portable SIMD types (simd::Vec[T, N])
 
 **Kind:** LEAF
@@ -9221,6 +9349,28 @@ let zeros = [0; 100]        # Repeat syntax
 **Examples:**
 
 - `fn transform(@noalias src: *f32, @noalias dst: *f32, len: usize)`
+
+- Asserting `@noalias` means the memory accessed via this parameter is not accessed via any other parameter in the same function scope.
+
+#### SPEC-LANG-0605: Portable SIMD Vector Types
+
+**Kind:** LEAF
+
+**Source:** REQ-398, SSOT Section 9.12
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- The `std::simd` module must provide specific portable vector types, including `Vec2`, `Vec4`, `Vec8`, and `Vec16`, for common data widths (REQ-398).
+
+- These types are specialized versions of `simd::Vec[T, N]` for common `N` values.
+
+**User-facing behavior:**
+
+- Standard names for common vector widths, improving readability.
 
 #### SPEC-LANG-0602: @simd Attribute Enforcement
 
@@ -9321,6 +9471,8 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0702: Device memory types (DevicePtr[T])
 
 - SPEC-LANG-0703: GPU thread/block primitives
+
+- SPEC-LANG-0704: GPU backend priority roadmap (REQ-385)
 
 #### SPEC-LANG-0701: @kernel Attribute and Constraints
 
@@ -10202,6 +10354,26 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 ### 4.6 Standard Library
 
+#### SPEC-LANG-0704: GPU Backend Priority Roadmap
+
+**Kind:** LEAF
+
+**Source:** REQ-385, SSOT Section 14.4
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- Implementation of GPU backends must follow the priority order: CUDA (Priority 1), HIP (Priority 2), Metal (Priority 3), followed by Vulkan Compute (REQ-385).
+
+- Document the roadmap for each backend in the ecosystem docs.
+
+**User-facing behavior:**
+
+- Clear expectations for when specific hardware platforms will be supported.
+
 #### SPEC-LANG-0800: Standard Library Core
 
 **Kind:** NODE
@@ -10448,6 +10620,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-LANG-0827: StringBuilder Implementation
 - SPEC-LANG-0828: Type-safe String Formatting (format!)
 - SPEC-LANG-0825: Small String Optimization (SSO)
+- SPEC-LANG-0829: String Concatenation Optimization (REQ-390)
 
 #### SPEC-LANG-0826: UTF-8 String Core
 
@@ -10564,6 +10737,28 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Implementation notes:**
 
 - File: `pyrite/stdlib/src/string/sso.pyrite`
+
+- File: `pyrite/stdlib/src/string/sso.pyrite`
+
+#### SPEC-LANG-0829: String Concatenation Optimization
+
+**Kind:** LEAF
+
+**Source:** REQ-390, SSOT Section 3.1
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- To prevent hidden performance costs, the string `+` operator may only be allowed in contexts where the concatenation can be evaluated at compile time (REQ-390).
+
+- Provide detailed diagnostic errors when `+` is used on non-comptime strings, suggesting `StringBuilder` as an alternative.
+
+**User-facing behavior:**
+
+- Predictable performance for string operations; no hidden allocations from `+` operator.
 
 #### SPEC-LANG-0803: File and Path I/O
 
@@ -11725,11 +11920,35 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Integration: Verify linking against a custom C library.
 
+- Integration: Verify linking against a custom C library.
+
+#### SPEC-LANG-1203: FFI Function Pointers and Callbacks
+
+**Kind:** LEAF
+
+**Source:** REQ-393, SSOT Section 14.2
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Foreign function interface (FFI) must support function pointer types.
+
+- Enable the use of callbacks when interfacing with external C libraries (REQ-393).
+
+- Support passing Pyrite functions as callbacks to C, ensuring correct ABI translation.
+
+**User-facing behavior:**
+
+- Ability to use C libraries that require user-provided callbacks (e.g., event loops, sorting).
+
 #### SPEC-LANG-1202: Python Interoperability Strategy
 
 **Kind:** LEAF
 
-**Source:** REQ-355, REQ-380, REQ-381, REQ-382, SSOT Section 11.4
+**Source:** REQ-355, REQ-380, REQ-381, REQ-382, REQ-394, SSOT Section 11.4
 
 **Status:** PLANNED
 
@@ -11742,6 +11961,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - Implement explicit GIL (Global Interpreter Lock) boundaries for Python calls (REQ-380).
 
 - Implement automatic conversion of Python exceptions to Pyrite `Result` types (REQ-382).
+
+- Support zero-copy data transfer between Pyrite slices and Python buffers (e.g., NumPy arrays) where memory layouts are compatible (REQ-394).
 
 - Support mapping between basic Pyrite types and Python types.
 
@@ -11779,7 +12000,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-321, SSOT Section 9.12
+**Source:** REQ-321, REQ-377, SSOT Section 9.12
 
 **Status:** PLANNED
 
@@ -11790,6 +12011,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - Standard library documentation includes time/space complexity (Big O).
 
 - Documentation specifies expected allocation counts and memory behavior.
+
+- Performance-critical functions must document stack usage and alignment requirements (REQ-377).
 
 - Typical execution times on common hardware are provided for performance-critical functions.
 
@@ -11846,6 +12069,40 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - Lexer and Parser use the edition flag to select appropriate rules.
 
 ---
+
+#### SPEC-LANG-1500: Formal Semantics and Security Certification
+
+**Kind:** NODE
+
+**Source:** REQ-383, REQ-409, REQ-410, REQ-411, SSOT Section 16.2
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Children:**
+
+- SPEC-LANG-1501: Certification Standards Compliance (DO-178C, CC EAL 7)
+
+#### SPEC-LANG-1501: Certification Standards Compliance (DO-178C, CC EAL 7)
+
+**Kind:** LEAF
+
+**Source:** REQ-383, SSOT Section 14.3, 16.2
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- Pyrite's formal semantics and development processes enable compliance with DO-178C Level A and Common Criteria EAL 7.
+
+- Document the mapping between language features and formal verification proofs.
+
+**User-facing behavior:**
+
+- Use of Pyrite in high-assurance and mission-critical systems.
 
 ## 5. Forge Compiler Specification (Recursive Itemization)
 
@@ -13117,6 +13374,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-FORGE-0307: Integrated unrolling and SIMD optimization
 
+- SPEC-FORGE-0308: Advanced Loop Optimizations (REQ-389)
+
 #### SPEC-FORGE-0301: Profile-Guided Optimization (PGO) Integration
 
 **Kind:** LEAF
@@ -13274,6 +13533,28 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **User-facing behavior:**
 
 - Maximum possible performance for arithmetic kernels by combining @unroll and @simd.
+
+- SPEC-FORGE-0307
+
+#### SPEC-FORGE-0308: Advanced Loop Optimizations
+
+**Kind:** LEAF
+
+**Source:** REQ-389, SSOT Section 9.12
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Support advanced loop transformations: loop unswitching, fusion, splitting, and peeling (REQ-389).
+
+- Optimization passes identify opportunities for these transforms to reduce branch overhead and improve cache locality.
+
+**User-facing behavior:**
+
+- Improved performance for complex loops without manual optimization.
 
 #### SPEC-FORGE-0100: Error Message Formatting
 
@@ -14453,7 +14734,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-323, SSOT Section 9.12
+**Source:** REQ-323, REQ-378, SSOT Section 9.12
 
 **Status:** PLANNED
 
@@ -14463,7 +14744,9 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Provide built-in benchmarks for standard library components.
 
-- Allow users to compare local performance against standard library baselines.
+- Every performance-critical stdlib function must have an accompanying benchmark harness (REQ-378).
+
+- Allow users to compare local performance against standard library baselines via `quarry bench`.
 
 **User-facing behavior:**
 
@@ -14633,6 +14916,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-QUARRY-0204: Browser-based Playground (wasm)
 
+- SPEC-QUARRY-0205: Diagnostics Internationalization (REQ-384)
+
 #### SPEC-QUARRY-0201: Interactive REPL (pyrite repl)
 
 **Kind:** LEAF
@@ -14783,6 +15068,28 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-FORGE-0007 (WASM backend)
 
+- SPEC-FORGE-0007 (WASM backend)
+
+#### SPEC-QUARRY-0205: Diagnostics Internationalization
+
+**Kind:** LEAF
+
+**Source:** REQ-384, SSOT Section 2.7, 14.3
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Support internationalized error messages for specific high-priority languages: Chinese (zh), Spanish (es), Hindi (hi), Japanese (ja), and Korean (ko) (REQ-384).
+
+- Implementation must support runtime language selection and translation catalog loading.
+
+**User-facing behavior:**
+
+- Accessible compiler diagnostics for developers in non-English speaking regions.
+
 #### SPEC-QUARRY-0300: Supply-Chain Security
 
 **Kind:** NODE
@@ -14803,9 +15110,9 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-QUARRY-0304: SBOM generation
 
-- SPEC-QUARRY-0305: License compliance (quarry license-check)
+- SPEC-QUARRY-0305: Supply-Chain Verification Integration (REQ-388)
 
-- SPEC-QUARRY-0306: Cryptographic package signing (quarry sign)
+- SPEC-QUARRY-0306: Package Signature Enforcement (REQ-397)
 
 - SPEC-QUARRY-0307: Collaborative trust manifests
 
@@ -14857,7 +15164,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-226, SSOT Section 8.17
+**Source:** REQ-226, REQ-396, SSOT Section 8.17
 
 **Status:** PLANNED
 
@@ -14866,6 +15173,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Definition of Done:**
 
 - Implement `quarry vet` command.
+
+- Support explicit certification levels: "full", "safe-to-deploy", and "safe-to-run" (REQ-396).
 
 - Allows recording "audited" status for specific package versions.
 
@@ -14949,11 +15258,39 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-QUARRY-0300
 
-#### SPEC-QUARRY-0306: Cryptographic Package Signing (quarry sign)
+#### SPEC-QUARRY-0305: Supply-Chain Verification Integration
 
 **Kind:** LEAF
 
-**Source:** REQ-231, SSOT Section 8.17
+**Source:** REQ-388, SSOT Section 8.19
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Deterministic builds must integrate with the supply-chain security suite.
+
+- Enable verification that a binary hash matches its signed BuildManifest and SBOM (REQ-388).
+
+**User-facing behavior:**
+
+- Cryptographic assurance that the binary exactly matches the audited source and build environment.
+
+**Tests required:**
+
+- Integration: Verify that a modified binary fails signature/hash verification against its BuildManifest.
+
+**Dependencies:**
+
+- SPEC-QUARRY-0303, SPEC-QUARRY-0304
+
+#### SPEC-QUARRY-0306: Package Signature Enforcement
+
+**Kind:** LEAF
+
+**Source:** REQ-231, REQ-397, SSOT Section 8.17
 
 **Status:** PLANNED
 
@@ -14965,9 +15302,17 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Supports cryptographic signing of packages using public/private key pairs.
 
+- Provide a configuration option to enforce cryptographic signature verification for all package installations (`quarry config set verify-signatures always`) (REQ-397).
+
 - Automated signature verification upon installation.
 
 **User-facing behavior:**
+
+- Prevent installation of unsigned or tampered packages.
+
+**Dependencies:**
+
+- SPEC-QUARRY-0300
 
 - Prevents tampering and ensures author authenticity for packages.
 
@@ -15091,7 +15436,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-256 through REQ-260, SSOT Section 8.23
+**Source:** REQ-256 through REQ-260, REQ-386, SSOT Section 8.23
 
 **Status:** PLANNED
 
@@ -15100,6 +15445,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Definition of Done:**
 
 - Tool monitors files and reloads function bodies without process restart
+
+- Hot reloading functionality is restricted to debug builds only and must not be available for production binaries (REQ-386).
 
 - Enforces safety: rejects changes to struct layout or signatures
 
@@ -15132,6 +15479,10 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-QUARRY-0403: Benchmarking aggregate API
 
 - SPEC-QUARRY-0404: Automated C Binding Generation (quarry bindgen)
+
+- SPEC-QUARRY-0405: Python Extension Generation (REQ-395)
+
+- SPEC-QUARRY-0406: Diagnostic Coverage Tooling (REQ-399)
 
 #### SPEC-QUARRY-0401: Community Transparency Dashboard
 
@@ -15209,7 +15560,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** LEAF
 
-**Source:** REQ-354, SSOT Section 11.3
+**Source:** REQ-354, REQ-387, SSOT Section 11.3
 
 **Status:** PLANNED
 
@@ -15219,7 +15570,9 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Implement `quarry bindgen` command
 
-- Parses C header files and generates Pyrite `extern` declarations
+- Parses C header files using Zig-style header parsing (no manual declarations) (REQ-387)
+
+- Generates Pyrite `extern` declarations automatically
 
 - Handles structs, enums, and basic function pointers
 
@@ -15238,6 +15591,50 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Dependencies:**
 
 - SPEC-QUARRY-0400
+
+- SPEC-QUARRY-0400
+
+#### SPEC-QUARRY-0405: Python Extension Generation
+
+**Kind:** LEAF
+
+**Source:** REQ-395, SSOT Section 11.4
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement `quarry pyext` command.
+
+- Automate the generation of Python extension modules from Pyrite source code (REQ-395).
+
+- Handles compilation and linking against the Python development headers.
+
+**User-facing behavior:**
+
+- Easily distribute Pyrite performance-critical code as Python packages.
+
+#### SPEC-QUARRY-0406: Diagnostic Coverage Tooling
+
+**Kind:** LEAF
+
+**Source:** REQ-399, SSOT Section 2.7
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement `quarry translate --coverage` command.
+
+- Track and report translation coverage for compiler diagnostics (REQ-399).
+
+**User-facing behavior:**
+
+- Visibility into the completeness of diagnostic translations.
 
 #### SPEC-QUARRY-0002: Project Detection
 
@@ -15785,7 +16182,7 @@ Total new P1 LEAFs: 34.
 
     - Goal: AST construction and symbol table management.
 
-    - Included: SPEC-LANG-0101, SPEC-LANG-0102, SPEC-LANG-0103, SPEC-LANG-0104, SPEC-LANG-0105, SPEC-LANG-0106, SPEC-LANG-0107, SPEC-LANG-0111, SPEC-LANG-0112, SPEC-LANG-0113, SPEC-LANG-0114, SPEC-LANG-0115, SPEC-LANG-0108, SPEC-LANG-0116, SPEC-LANG-0117, SPEC-LANG-0118, SPEC-LANG-0119, SPEC-LANG-0120, SPEC-FORGE-0009, SPEC-FORGE-0010, SPEC-FORGE-0011, SPEC-FORGE-0012, SPEC-FORGE-0013, SPEC-FORGE-0014, SPEC-FORGE-0015, SPEC-FORGE-0016, SPEC-FORGE-0017, SPEC-FORGE-0018, SPEC-LANG-0009, SPEC-LANG-0010, SPEC-LANG-0011, SPEC-LANG-0012, SPEC-LANG-0013, SPEC-LANG-0014, SPEC-LANG-0015.
+    - Included: SPEC-LANG-0101, SPEC-LANG-0102, SPEC-LANG-0103, SPEC-LANG-0104, SPEC-LANG-0105, SPEC-LANG-0106, SPEC-LANG-0107, SPEC-LANG-0111, SPEC-LANG-0112, SPEC-LANG-0113, SPEC-LANG-0114, SPEC-LANG-0115, SPEC-LANG-0108, SPEC-LANG-0116, SPEC-LANG-0117, SPEC-LANG-0118, SPEC-LANG-0119, SPEC-LANG-0120, SPEC-LANG-0121, SPEC-FORGE-0009, SPEC-FORGE-0010, SPEC-FORGE-0011, SPEC-FORGE-0012, SPEC-FORGE-0013, SPEC-FORGE-0014, SPEC-FORGE-0015, SPEC-FORGE-0016, SPEC-FORGE-0017, SPEC-FORGE-0018, SPEC-LANG-0009, SPEC-LANG-0010, SPEC-LANG-0011, SPEC-LANG-0012, SPEC-LANG-0013, SPEC-LANG-0014, SPEC-LANG-0015.
 
     - Dependencies: M1.
 
@@ -15795,7 +16192,7 @@ Total new P1 LEAFs: 34.
 
     - Goal: Infer and check types for basic expressions.
 
-    - Included: SPEC-LANG-0201, SPEC-LANG-0202, SPEC-LANG-0203, SPEC-LANG-0206, SPEC-LANG-0211, SPEC-LANG-0212, SPEC-LANG-0213, SPEC-LANG-0214, SPEC-LANG-0215, SPEC-LANG-0216, SPEC-LANG-0217, SPEC-LANG-0218, SPEC-LANG-0219, SPEC-LANG-0220, SPEC-LANG-0221, SPEC-LANG-0222, SPEC-LANG-0223, SPEC-LANG-0224, SPEC-LANG-0225, SPEC-LANG-0226, SPEC-LANG-0227, SPEC-LANG-0228, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0232, SPEC-LANG-0233, SPEC-LANG-0234, SPEC-LANG-0235, SPEC-LANG-0236, SPEC-LANG-0237, SPEC-LANG-0238, SPEC-LANG-0240, SPEC-LANG-0241, SPEC-LANG-0242, SPEC-LANG-0243, SPEC-LANG-0208, SPEC-LANG-0209, SPEC-LANG-0210, SPEC-FORGE-0019, SPEC-FORGE-0020, SPEC-FORGE-0021, SPEC-FORGE-0022, SPEC-FORGE-0023.
+    - Included: SPEC-LANG-0201, SPEC-LANG-0202, SPEC-LANG-0203, SPEC-LANG-0206, SPEC-LANG-0211, SPEC-LANG-0212, SPEC-LANG-0213, SPEC-LANG-0214, SPEC-LANG-0215, SPEC-LANG-0216, SPEC-LANG-0217, SPEC-LANG-0218, SPEC-LANG-0219, SPEC-LANG-0220, SPEC-LANG-0221, SPEC-LANG-0222, SPEC-LANG-0223, SPEC-LANG-0224, SPEC-LANG-0225, SPEC-LANG-0226, SPEC-LANG-0227, SPEC-LANG-0228, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0232, SPEC-LANG-0233, SPEC-LANG-0234, SPEC-LANG-0235, SPEC-LANG-0236, SPEC-LANG-0237, SPEC-LANG-0238, SPEC-LANG-0240, SPEC-LANG-0241, SPEC-LANG-0242, SPEC-LANG-0243, SPEC-LANG-0244, SPEC-LANG-0245, SPEC-LANG-0246, SPEC-LANG-0208, SPEC-LANG-0209, SPEC-LANG-0210, SPEC-FORGE-0019, SPEC-FORGE-0020, SPEC-FORGE-0021, SPEC-FORGE-0022, SPEC-FORGE-0023.
 
     - Dependencies: M2.
 
@@ -15874,7 +16271,7 @@ Total new P1 LEAFs: 34.
 
     - Goal: Essential data structures and I/O for practical applications.
 
-    - Included: SPEC-LANG-0800 (NODE), SPEC-LANG-0801 (NODE), SPEC-LANG-0820, SPEC-LANG-0821, SPEC-LANG-0822, SPEC-LANG-0823, SPEC-LANG-0824, SPEC-LANG-0802 (NODE), SPEC-LANG-0826, SPEC-LANG-0827, SPEC-LANG-0828, SPEC-LANG-0825, SPEC-LANG-0803 (NODE), SPEC-LANG-0830, SPEC-LANG-0831, SPEC-LANG-0815, SPEC-LANG-0835, SPEC-LANG-0836, SPEC-LANG-0837, SPEC-LANG-0838.
+    - Included: SPEC-LANG-0800 (NODE), SPEC-LANG-0801 (NODE), SPEC-LANG-0820, SPEC-LANG-0821, SPEC-LANG-0822, SPEC-LANG-0823, SPEC-LANG-0824, SPEC-LANG-0802 (NODE), SPEC-LANG-0826, SPEC-LANG-0827, SPEC-LANG-0828, SPEC-LANG-0825, SPEC-LANG-0829, SPEC-LANG-0803 (NODE), SPEC-LANG-0830, SPEC-LANG-0831, SPEC-LANG-0815, SPEC-LANG-0835, SPEC-LANG-0836, SPEC-LANG-0837, SPEC-LANG-0838.
 
     - Dependency satisfaction note: Depends on M7 (Codegen) and M3 (Type System).
 
@@ -15894,7 +16291,7 @@ Total new P1 LEAFs: 34.
 
     - Goal: Design by Contract and advanced compiler passes.
 
-    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-LANG-1101, SPEC-LANG-1102, SPEC-LANG-1103, SPEC-LANG-1104, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207, SPEC-FORGE-0208, SPEC-QUARRY-0031, SPEC-QUARRY-0032, SPEC-QUARRY-0306, SPEC-QUARRY-0307, SPEC-QUARRY-0308.
+    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0409, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-LANG-1101, SPEC-LANG-1102, SPEC-LANG-1103, SPEC-LANG-1104, SPEC-LANG-1201, SPEC-LANG-1203, SPEC-LANG-1501, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207, SPEC-FORGE-0208, SPEC-QUARRY-0031, SPEC-QUARRY-0032, SPEC-QUARRY-0307, SPEC-QUARRY-0308.
 
     - Dependency satisfaction note: Depends on M6 (Ownership).
 
@@ -15904,7 +16301,7 @@ Total new P1 LEAFs: 34.
 
     - Goal: Interactive tools for developer onboarding and visualization.
 
-    - Included: SPEC-QUARRY-0201, SPEC-QUARRY-0202, SPEC-QUARRY-0203, SPEC-QUARRY-0204, SPEC-QUARRY-0025, SPEC-QUARRY-0030, SPEC-QUARRY-0033, SPEC-QUARRY-0034, SPEC-QUARRY-0035, SPEC-QUARRY-0401, SPEC-QUARRY-0402, SPEC-QUARRY-0403, SPEC-QUARRY-0404, SPEC-QUARRY-0501, SPEC-QUARRY-0502, SPEC-QUARRY-0503, SPEC-QUARRY-0504, SPEC-QUARRY-0505, SPEC-LANG-1301, SPEC-LANG-1302.
+    - Included: SPEC-QUARRY-0201, SPEC-QUARRY-0202, SPEC-QUARRY-0203, SPEC-QUARRY-0204, SPEC-QUARRY-0205, SPEC-QUARRY-0007, SPEC-QUARRY-0025, SPEC-QUARRY-0030, SPEC-QUARRY-0033, SPEC-QUARRY-0034, SPEC-QUARRY-0035, SPEC-QUARRY-0401, SPEC-QUARRY-0402, SPEC-QUARRY-0403, SPEC-QUARRY-0404, SPEC-QUARRY-0405, SPEC-QUARRY-0406, SPEC-QUARRY-0501, SPEC-QUARRY-0502, SPEC-QUARRY-0503, SPEC-QUARRY-0504, SPEC-QUARRY-0505, SPEC-LANG-1301, SPEC-LANG-1302.
 
     - Dependency satisfaction note: Depends on M7 (Codegen for JIT/WASM) and M8 (Build Orchestration).
 
@@ -15924,7 +16321,7 @@ Total new P1 LEAFs: 34.
   
     - Goal: Tooling for static and runtime performance analysis.
     
-    - Included: SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-QUARRY-0113, SPEC-QUARRY-0114, SPEC-QUARRY-0115, SPEC-QUARRY-0036, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0604, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903, SPEC-FORGE-0305, SPEC-FORGE-0306, SPEC-FORGE-0307.
+    - Included: SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-QUARRY-0113, SPEC-QUARRY-0114, SPEC-QUARRY-0115, SPEC-QUARRY-0036, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0604, SPEC-LANG-0605, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903, SPEC-FORGE-0305, SPEC-FORGE-0306, SPEC-FORGE-0307, SPEC-FORGE-0308.
     
     - Dependency satisfaction note: Depends on M10 (for benchmarking) and M11 (for allocation tracking).
     
@@ -15934,7 +16331,7 @@ Total new P1 LEAFs: 34.
   
     - Goal: Safe multi-threading and structured concurrency.
     
-    - Included: SPEC-LANG-1001, SPEC-LANG-1002, SPEC-LANG-1003, SPEC-LANG-1004, SPEC-LANG-1005, SPEC-LANG-0701, SPEC-LANG-0702, SPEC-LANG-0703, SPEC-LANG-0808, SPEC-LANG-0809, SPEC-LANG-0810.
+    - Included: SPEC-LANG-1001, SPEC-LANG-1002, SPEC-LANG-1003, SPEC-LANG-1004, SPEC-LANG-1005, SPEC-LANG-0701, SPEC-LANG-0702, SPEC-LANG-0703, SPEC-LANG-0704, SPEC-LANG-0808, SPEC-LANG-0809, SPEC-LANG-0810.
     
     - Dependency satisfaction note: Depends on M6 (Send/Sync) and M7 (Thread primitives).
     
@@ -15944,7 +16341,7 @@ Total new P1 LEAFs: 34.
   
     - Goal: Verifiable builds and dependency auditing.
     
-    - Included: SPEC-QUARRY-0301, SPEC-QUARRY-0302, SPEC-QUARRY-0303, SPEC-QUARRY-0304.
+    - Included: SPEC-QUARRY-0301, SPEC-QUARRY-0302, SPEC-QUARRY-0303, SPEC-QUARRY-0304, SPEC-QUARRY-0305, SPEC-QUARRY-0306.
     
     - Dependency satisfaction note: Depends on M4 (Dependency resolution).
     
@@ -16314,6 +16711,15 @@ Total new P1 LEAFs: 34.
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
 - **Roadmap Placement:** Consistent (M11, M12, M14)
 - **New Dependencies:** None
+- **Status:** PASS
+
+### REQ-to-LEAF Mapping Verification (Batch 16)
+
+- **REQ Range:** REQ-377..REQ-401
+- **New LEAFs created/expanded:** 22 (SPEC-LANG-1301, SPEC-QUARRY-0108, SPEC-LANG-0409, SPEC-LANG-1202, SPEC-LANG-1501, SPEC-QUARRY-0205, SPEC-LANG-0704, SPEC-QUARRY-0007, SPEC-QUARRY-0404, SPEC-QUARRY-0305, SPEC-FORGE-0308, SPEC-LANG-0829, SPEC-LANG-0244, SPEC-LANG-0245, SPEC-LANG-1203, SPEC-QUARRY-0405, SPEC-QUARRY-0302, SPEC-QUARRY-0306, SPEC-LANG-0605, SPEC-QUARRY-0406, SPEC-LANG-0121, SPEC-LANG-0246)
+- **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+- **Roadmap Placement:** Consistent (M2, M3, M9, M11, M12, M13, M14, M15)
+- **New Dependencies:** SPEC-QUARRY-0031, SPEC-QUARRY-0303, SPEC-QUARRY-0304
 - **Status:** PASS
 
 ### Loop B (Scoped): Newly added LEAFs
