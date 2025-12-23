@@ -2,7 +2,7 @@
 # Forge - Pyrite Compiler
 # Pyrite Programming Language
 # Created by Alexander Rose Wulf
-# Copyright (c) 2025 Alexander Rose Wulf
+# Copyright © 2025 Alexander Rose Wulf
 
 [tool.coverage.run]
 source = ["forge/src"]

@@ -17423,7 +17423,7 @@ As implementation progresses:
 | ID | Status | Notes |
 |---|---|---|
 | BETA-CHK-001 | PASS | `List`, `Map`, `File` exist in `pyrite/`. |
-| BETA-CHK-002 | PARTIAL | `TOML` exists; `TCP/UDP` networking missing. |
+| BETA-CHK-002 | PASS | JSON, TCP Networking, and Tensor support implemented in v1.1. |
 | BETA-CHK-003 | TODO | DbC (`@requires`) and Perf Governance not observed. |
 | BETA-CHK-004 | PARTIAL | `quarry cost` exists; REPL/Visualizations missing. |
 | BETA-CHK-005 | PASS | `quarry perf` and `Perf.lock` functional. |
@@ -17441,17 +17441,17 @@ As implementation progresses:
 
 4. SPEC-QUARRY-0201 (REPL implementation)
 
-5. SPEC-LANG-0805 (TCP/Networking)
+5. SPEC-FORGE-0106 (i18n full coverage)
 
-6. SPEC-FORGE-0106 (i18n full coverage)
+6. SPEC-QUARRY-0304 (SBOM Generation)
 
-7. SPEC-QUARRY-0304 (SBOM Generation)
+7. SPEC-LANG-0601 (SIMD Types)
 
-8. SPEC-LANG-0601 (SIMD Types)
+8. SPEC-QUARRY-0404 (Bindgen)
 
-9. SPEC-QUARRY-0404 (Bindgen)
+9. SPEC-LANG-1202 (Python Interop)
 
-10. SPEC-LANG-1202 (Python Interop)
+10. [RESERVED]
 
 ---
 

@@ -1,8 +1,8 @@
 # Forge Bootstrap Guide
 
-> **⚠️ ALPHA v1.0 STATUS**
+> **⚠️ ALPHA v1.1 STATUS**
 > 
-> This project is currently in **Alpha v1.0**. All repository content, including code, documentation, APIs, and specifications, is subject to change and may contain inconsistencies as development progresses toward Beta v1.0.
+> This project is currently in **Alpha v1.1**. All repository content, including code, documentation, APIs, and specifications, is subject to change and may contain inconsistencies as development progresses toward Beta v1.0.
 
 This guide explains how to bootstrap **Forge** (the Pyrite compiler) from a clean checkout.
 
