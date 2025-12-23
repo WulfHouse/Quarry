@@ -372,8 +372,15 @@ class LLVMCodeGen:
         self.fail_func = ir.Function(self.module, fail_ty, name="pyrite_fail")
         
         # Map FFI functions
-        # map_new(key_size: i64, value_size: i64) -> Map (returns struct with void*)
-        map_struct_ty = ir.LiteralStructType([ir.IntType(8).as_pointer()])
+        # Map struct type: { buckets: *void, len: i64, cap: i64, key_size: i64, value_size: i64 }
+        map_struct_ty = ir.LiteralStructType([
+            ir.IntType(8).as_pointer(),  # buckets
+            ir.IntType(64),              # len
+            ir.IntType(64),              # cap
+            ir.IntType(64),              # key_size
+            ir.IntType(64)               # value_size
+        ])
+        # map_new(key_size: i64, value_size: i64) -> Map
         map_new_ty = ir.FunctionType(
             map_struct_ty,
             [ir.IntType(64), ir.IntType(64)]
@@ -413,6 +420,11 @@ class LLVMCodeGen:
         # Declare runtime functions
         self.declare_runtime_functions()
         
+        # Declare imported module symbols as extern
+        if hasattr(self, 'imported_modules') and self.imported_modules:
+            for module in self.imported_modules:
+                self.declare_module_symbols(module.ast)
+        
         # Sort items for deterministic order if enabled
         items = program.items
         if self.deterministic:
@@ -449,6 +461,14 @@ class LLVMCodeGen:
         
         return self.module
     
+    def declare_module_symbols(self, module_ast: ast.Program):
+        """Declare functions and methods from an imported module as extern"""
+        for item in module_ast.items:
+            if isinstance(item, ast.FunctionDef):
+                self.declare_function(item)
+            elif isinstance(item, ast.ImplBlock):
+                self.declare_impl_methods(item)
+
     def declare_struct(self, struct_def: ast.StructDef):
         """Declare a struct type"""
         # For now, just register it (will be created on first use)
@@ -574,6 +594,15 @@ class LLVMCodeGen:
     
     def declare_function(self, func_def: ast.FunctionDef):
         """Declare a function (signature only)"""
+        if func_def.name in self.functions:
+            return
+        
+        # Check if already declared in module (e.g. by declare_runtime_functions)
+        if func_def.name in self.module.globals:
+            # Reuse existing declaration
+            self.functions[func_def.name] = self.module.globals[func_def.name]
+            return
+        
         # Store function def for later (we'll need type info)
         self.function_defs = getattr(self, 'function_defs', {})
         self.function_defs[func_def.name] = func_def
@@ -611,6 +640,10 @@ class LLVMCodeGen:
     
     def gen_function(self, func_def: ast.FunctionDef):
         """Generate code for a function"""
+        # Skip extern declarations (functions without a body)
+        if func_def.is_extern and (func_def.body is None or not func_def.body.statements):
+            return
+        
         func = self.functions[func_def.name]
         
         # Create entry block
@@ -1834,6 +1867,31 @@ class LLVMCodeGen:
         
         return enum_val
 
+    def gen_call_arguments(self, func: ir.Function, arguments: List[ast.Expression], offset: int = 0) -> List[ir.Value]:
+        """Generate and cast arguments for a function call"""
+        args = []
+        for i, arg_expr in enumerate(arguments):
+            arg_val = self.gen_expression(arg_expr)
+            if i + offset < len(func.args):
+                llvm_param = func.args[i + offset]
+                param_type = llvm_param.type
+                
+                # Handle type mismatch
+                if arg_val.type != param_type:
+                    # 1. Integer widening/truncation
+                    if isinstance(arg_val.type, ir.IntType) and isinstance(param_type, ir.IntType):
+                        if arg_val.type.width < param_type.width:
+                            arg_val = self.builder.sext(arg_val, param_type)
+                        elif arg_val.type.width > param_type.width:
+                            arg_val = self.builder.trunc(arg_val, param_type)
+                    
+                    # 2. Pointer bitcasts (e.g., *mut T to *const T or *u8 to *T)
+                    elif isinstance(arg_val.type, ir.PointerType) and isinstance(param_type, ir.PointerType):
+                        arg_val = self.builder.bitcast(arg_val, param_type)
+            
+            args.append(arg_val)
+        return args
+
     def gen_function_call(self, call: ast.FunctionCall) -> ir.Value:
         """Generate code for function call"""
         # Special handling for enum constructors
@@ -1970,8 +2028,12 @@ class LLVMCodeGen:
             else:
                 raise CodeGenError("Complex function calls not yet supported", call.span)
         
-        # Generate arguments
-        args = [self.gen_expression(arg) for arg in call.arguments]
+        # Generate arguments with proper casting
+        if isinstance(func, ir.Function):
+            args = self.gen_call_arguments(func, call.arguments)
+        else:
+            # For closure pointers, etc.
+            args = [self.gen_expression(arg) for arg in call.arguments]
         
         # Check if this is an FFI function call and convert references to pointers
         if isinstance(call.function, ast.Identifier):
@@ -2062,6 +2124,12 @@ class LLVMCodeGen:
                 fmt_struct = self.create_string_constant("%s\n")
                 fmt = self.builder.extract_value(fmt_struct, 0)  # Extract i8* from {i8*, i64}
                 self.builder.call(self.printf, [fmt, arg])
+            elif isinstance(arg.type, ir.LiteralStructType) and len(arg.type.elements) == 2 and isinstance(arg.type.elements[0], ir.PointerType):
+                # Pyrite String struct { i8*, i64 }
+                ptr = self.builder.extract_value(arg, 0)
+                fmt_struct = self.create_string_constant("%s\n")
+                fmt = self.builder.extract_value(fmt_struct, 0)
+                self.builder.call(self.printf, [fmt, ptr])
             else:
                 # For other types, use printf with placeholder
                 fmt_struct = self.create_string_constant("<value>\n")
@@ -2463,11 +2531,22 @@ class LLVMCodeGen:
             inherent_method_name = f"{type_name}_{method_name}"
             if inherent_method_name in self.functions:
                 func = self.functions[inherent_method_name]
-                args = [self.gen_expression(arg) for arg in call.arguments]
-                # For static methods (no self), don't prepend object
+                
                 # For instance methods, prepend self (object) as first argument
                 if not is_static_call:
-                    args.insert(0, obj)
+                    # Ensure obj is a pointer if the method expects one
+                    if func.ftype.args and isinstance(func.ftype.args[0], ir.PointerType):
+                        if not isinstance(obj.type, ir.PointerType):
+                            # Allocate space for struct and store it
+                            alloca = self.builder.alloca(obj.type, name="self_ptr")
+                            self.builder.store(obj, alloca)
+                            obj = alloca
+                    
+                    args = [obj] + self.gen_call_arguments(func, call.arguments, offset=1)
+                else:
+                    # Static method
+                    args = self.gen_call_arguments(func, call.arguments)
+                
                 return self.builder.call(func, args)
         
         # Try trait method dispatch
@@ -2499,8 +2578,7 @@ class LLVMCodeGen:
                         
                         if trait_method_name in self.functions:
                             func = self.functions[trait_method_name]
-                            args = [self.gen_expression(arg) for arg in call.arguments]
-                            # Prepend self (object) as first argument
+                            # Handle self (object) as first argument
                             # If method expects a pointer, create one
                             if func.function_type.args and isinstance(func.function_type.args[0], ir.PointerType):
                                 # Need to allocate and store the struct, then pass pointer
@@ -2508,18 +2586,19 @@ class LLVMCodeGen:
                                     # Allocate space for struct
                                     alloca = self.builder.alloca(obj.type, name="self_ptr")
                                     self.builder.store(obj, alloca)
-                                    args.insert(0, alloca)
+                                    self_arg = alloca
                                 else:
-                                    args.insert(0, obj)
+                                    self_arg = obj
                             else:
-                                args.insert(0, obj)
+                                self_arg = obj
+                            
+                            args = [self_arg] + self.gen_call_arguments(func, call.arguments, offset=1)
                             return self.builder.call(func, args)
         
         # Fallback: try direct method name (for builtin methods)
         if method_name in self.functions:
             func = self.functions[method_name]
-            args = [self.gen_expression(arg) for arg in call.arguments]
-            args.insert(0, obj)
+            args = [obj] + self.gen_call_arguments(func, call.arguments, offset=1)
             return self.builder.call(func, args)
         
         # Error: method not found

@@ -14,7 +14,7 @@ extern "C" fn list_new(elem_size: i64) -> List
 extern "C" fn list_with_capacity(elem_size: i64, capacity: i64) -> List
 extern "C" fn list_push(list: *mut List, elem: *const u8, elem_size: i64)
 extern "C" fn list_get(list: *const List, index: i64, elem_size: i64) -> *const u8
-extern "C" fn list_length(list: *const List) -> i64
+extern "C" fn list_length(list: *const List) -> int
 extern "C" fn list_is_empty(list: *const List) -> int
 extern "C" fn list_drop(list: *mut List)
 
@@ -88,7 +88,7 @@ impl List:
     fn get(&self, index: i64, elem_size: i64) -> *const u8:
         return list_get(self, index, elem_size)
     
-    fn length(&self) -> i64:
+    fn length(&self) -> int:
         return list_length(self)
     
     fn is_empty(&self) -> bool:

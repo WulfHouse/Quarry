@@ -1,0 +1,24 @@
+# Numerics and Tensors
+
+struct Tensor:
+    data: *mut f64
+    rows: i64
+    cols: i64
+
+extern "C" fn tensor_new(rows: i64, cols: i64) -> Tensor
+extern "C" fn tensor_get(t: *const Tensor, r: i64, c: i64) -> f64
+extern "C" fn tensor_set(t: *mut Tensor, r: i64, c: i64, val: f64)
+extern "C" fn tensor_drop(t: *mut Tensor)
+
+impl Tensor:
+    fn new(rows: i64, cols: i64) -> Tensor:
+        return tensor_new(rows, cols)
+    
+    fn get(&self, r: i64, c: i64) -> f64:
+        return tensor_get(self, r, c)
+    
+    fn set(&mut self, r: i64, c: i64, val: f64):
+        tensor_set(self, r, c, val)
+    
+    fn drop(&mut self):
+        tensor_drop(self)

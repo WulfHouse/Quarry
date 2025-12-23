@@ -78,14 +78,7 @@ class TypeChecker:
         fail_type = FunctionType([STRING], VOID)
         self.resolver.define_function("fail", fail_type)
         
-        # Register builtin generic types (List, Map, Set, Result, Box)
-        # These are registered as placeholder types - they'll be instantiated as GenericType
-        # when used with type arguments like List[int]
-        # Use UNKNOWN as a placeholder - the actual type will be GenericType when instantiated
-        # This allows lookup_type("List") to succeed, then we create GenericType("List", None, type_args)
-        self.resolver.define_type("List", UNKNOWN)
-        self.resolver.define_type("Map", UNKNOWN)
-        self.resolver.define_type("Set", UNKNOWN)
+        # Register builtin generic types (Result, Box)
         self.resolver.define_type("Result", UNKNOWN)
         self.resolver.define_type("Box", UNKNOWN)  # Box type for heap allocation
         self.resolver.define_type("String", STRING)  # String is a builtin type (not generic)
@@ -195,24 +188,9 @@ class TypeChecker:
                 # Register enum - need to process it to create EnumType
                 self.register_enum(item)
             elif isinstance(item, ast.FunctionDef):
-                # Register function signature
-                # For MVP, we'll register the function but full type checking happens later
-                # This allows the function to be callable
-                param_types = []
-                for param in item.params:
-                    # Resolve parameter types if possible
-                    if param.type_annotation:
-                        param_type = self.resolve_type(param.type_annotation)
-                        param_types.append(param_type)
-                    else:
-                        param_types.append(UNKNOWN)
-                
-                return_type = None
-                if item.return_type:
-                    return_type = self.resolve_type(item.return_type)
-                
-                func_type = FunctionType(param_types, return_type)
-                self.resolver.define_function(item.name, func_type, span=item.span, is_extern=item.is_extern)
+                # Register function signature properly using register_function
+                # This ensures the function is callable and handles FFI detection
+                self.register_function(item)
             elif isinstance(item, ast.ImplBlock):
                 # Register impl blocks so methods can be resolved
                 self.register_impl(item)

@@ -1,0 +1,9 @@
+# M9 Map Builtin Test
+
+fn main():
+    # Use built-in Map support
+    var my_map = Map[int, int].new()
+    # my_map.insert(1, 2)
+    # my_map.drop()
+    print("Success")
+

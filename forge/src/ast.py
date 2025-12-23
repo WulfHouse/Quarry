@@ -167,6 +167,8 @@ class TraitMethod(ASTNode):
     params: List['Param']
     return_type: Optional['Type']
     default_body: Optional['Block']  # None if no default implementation
+    generic_params: List['GenericParam'] = None
+    compile_time_params: List[Any] = None
 
 
 @dataclass

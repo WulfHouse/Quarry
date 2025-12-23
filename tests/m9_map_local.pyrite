@@ -1,0 +1,24 @@
+# M9 Map Local Test
+
+struct HashMapLocal:
+    buckets: *u8
+    len: i64
+    cap: i64
+    key_size: i64
+    value_size: i64
+
+extern "C" fn map_new(key_size: i64, value_size: i64) -> HashMapLocal
+extern "C" fn map_drop(map: *mut HashMapLocal)
+
+impl HashMapLocal:
+    fn new(key_size: i64, value_size: i64) -> HashMapLocal:
+        return map_new(key_size, value_size)
+    
+    fn drop(&mut self):
+        map_drop(self)
+
+fn main():
+    var my_map = HashMapLocal.new(8, 8)
+    my_map.drop()
+    print("Success")
+

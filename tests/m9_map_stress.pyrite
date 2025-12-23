@@ -1,0 +1,46 @@
+# M9 Map Stress Test
+
+import std.collections.map
+
+fn main():
+    let key_size = 8
+    let value_size = 8
+    var my_map = map.Map.new(key_size, value_size)
+    let iterations = 100
+    
+    print("Starting Map stress test...")
+    
+    # Insert values
+    for i in 0..iterations:
+        let key = i
+        let val = i * 2
+        my_map.insert(&key, &val)
+    
+    print("Inserted", iterations, "items.")
+    
+    # Verify values
+    var success = true
+    for i in 0..iterations:
+        let key = i
+        let expected = i * 2
+        let result_ptr = my_map.get(&key)
+        
+        if result_ptr == 0:
+            print("Error: Key not found:", i)
+            success = false
+        else:
+            let val = *(result_ptr as *const i64)
+            if val != expected:
+                print("Error: Value mismatch for key", i, ": expected", expected, "got", val)
+                success = false
+    
+    if success:
+        print("Map stress test passed!")
+    else:
+        print("Map stress test failed.")
+    
+    my_map.drop()
+    
+    if not success:
+        exit(1)
+

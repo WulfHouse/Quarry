@@ -1,65 +1,37 @@
 # Set[T] - Hash set
 #
 # This is a wrapper for the C implementation in set.c
-# For MVP, this documents the API. Full FFI integration coming in Phase 2.
 
-# API Documentation:
-#
-# Set[T] - Generic hash set (unique elements)
-#
-# Methods:
-#   new() -> Set[T]
-#     Create empty set. O(1)
-#
-#   with_capacity(n: int) -> Set[T]
-#     Create set with pre-allocated capacity. O(n)
-#
-#   insert(&mut self, item: T) -> bool
-#     Add item to set. Returns true if item was new. O(1) amortized
-#
-#   contains(&self, item: &T) -> bool
-#     Check if item exists. O(1) average
-#
-#   remove(&mut self, item: &T) -> bool
-#     Remove item. Returns true if item existed. O(1) average
-#
-#   length(&self) -> int
-#     Get number of items. O(1)
-#
-#   is_empty(&self) -> bool
-#     Check if set is empty. O(1)
-#
-#   clear(&mut self)
-#     Remove all items. O(n)
-#
-#   clone(&self) -> Set[T]
-#     Create deep copy. O(n)
+# Set struct (matches C implementation)
+struct Set:
+    buckets: *u8  # void** in C
+    len: i64
+    cap: i64
+    elem_size: i64
 
-# Example usage (when FFI is implemented):
-#
-# fn main():
-#     var seen = Set[String].new()
-#     
-#     if seen.insert("foo"):
-#         print("Added foo")
-#     
-#     if seen.insert("foo"):
-#         print("Added foo again")  # Won't print - already exists
-#     else:
-#         print("foo already in set")
-#     
-#     print("Contains foo:", seen.contains("foo"))
-#     print("Set size:", seen.length())
+# FFI declarations for C functions
+extern "C" fn set_new(elem_size: i64) -> Set
+extern "C" fn set_insert(set: *mut Set, elem: *const u8)
+extern "C" fn set_contains(set: *const Set, elem: *const u8) -> i32
+extern "C" fn set_length(set: *const Set) -> i64
+extern "C" fn set_drop(set: *mut Set)
 
-# Memory layout:
-# struct Set {
-#     buckets: *Bucket,  // Hash table buckets
-#     len: int,          // Number of items
-#     cap: int           // Number of buckets
-# }
-
-# Ownership:
-# - Set owns its heap allocation
-# - Dropping a Set frees all items
-# - Move-only (not Copy)
-
+# Set implementation
+# Note: For MVP, methods require explicit elem_size parameter
+# Full generic support with size_of::<T>() will come later
+impl Set:
+    fn new(elem_size: i64) -> Set:
+        return set_new(elem_size)
+    
+    fn insert(&mut self, elem_ptr: *const u8):
+        set_insert(self, elem_ptr)
+    
+    fn contains(&self, elem_ptr: *const u8) -> bool:
+        let result = set_contains(self, elem_ptr)
+        return result != 0
+    
+    fn length(&self) -> i64:
+        return set_length(self)
+    
+    fn drop(&mut self):
+        set_drop(self)

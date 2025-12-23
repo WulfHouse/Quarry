@@ -675,6 +675,12 @@ class Parser:
         self.expect(TokenType.FN)
         name = self.expect(TokenType.IDENTIFIER).value
         
+        # Generic and compile-time parameters
+        generic_params = []
+        compile_time_params = []
+        if self.match_token(TokenType.LBRACKET):
+            generic_params, compile_time_params = self.parse_generic_params()
+        
         # Parameters
         self.expect(TokenType.LPAREN)
         params = self.parse_param_list()
@@ -698,6 +704,8 @@ class Parser:
         
         return ast.TraitMethod(
             name=name,
+            generic_params=generic_params,
+            compile_time_params=compile_time_params,
             params=params,
             return_type=return_type,
             default_body=default_body,

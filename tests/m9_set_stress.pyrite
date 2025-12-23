@@ -1,0 +1,50 @@
+# M9 Set Stress Test (Self-contained)
+
+struct Set:
+    buckets: *u8
+    len: i64
+    cap: i64
+    elem_size: i64
+
+extern "C" fn set_new(elem_size: i64) -> Set
+extern "C" fn set_insert(set: *mut Set, elem: *const int)
+extern "C" fn set_contains(set: *const Set, elem: *const int) -> i32
+extern "C" fn set_length(set: *const Set) -> int
+extern "C" fn set_drop(set: *mut Set)
+
+fn run_set_test() -> bool:
+    var s = set_new(8)
+    let iterations = 100
+    
+    var i = 0
+    while i < iterations:
+        let k = i
+        set_insert(&mut s, &k)
+        i = i + 1
+    
+    var success = true
+    if set_length(&s) != iterations:
+        print("Error: Length mismatch")
+        success = false
+    
+    var j = 0
+    while j < iterations:
+        let k = j
+        if set_contains(&s, &k) == 0:
+            print("Error: Element not found")
+            success = false
+        j = j + 1
+    
+    unsafe:
+        set_drop(&mut s)
+    return success
+
+fn main() -> int:
+    print("Starting Set stress test...")
+    if run_set_test():
+        print("Set stress test passed!")
+        return 0
+    else:
+        print("Set stress test failed.")
+        return 1
+

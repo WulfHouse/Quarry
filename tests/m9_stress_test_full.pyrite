@@ -1,0 +1,49 @@
+# M9 Map Stress Test (Self-contained)
+
+struct Map:
+    buckets: *u8
+    len: i64
+    cap: i64
+    key_size: i64
+    value_size: i64
+
+extern "C" fn map_new(key_size: i64, value_size: i64) -> Map
+extern "C" fn map_insert(map: *mut Map, key: *const int, value: *const int)
+extern "C" fn map_contains(map: *const Map, key: *const int) -> i32
+extern "C" fn map_length(map: *const Map) -> int
+extern "C" fn map_drop(map: *mut Map)
+
+fn run_map_test() -> bool:
+    var m = map_new(8, 8)
+    let iterations = 100
+    
+    var i = 0
+    while i < iterations:
+        let k = i
+        let v = i * 2
+        map_insert(&mut m, &k, &v)
+        i = i + 1
+    
+    var success = true
+    if map_length(&m) != iterations:
+        success = false
+    
+    var j = 0
+    while j < iterations:
+        let k = j
+        if map_contains(&m, &k) == 0:
+            success = false
+        j = j + 1
+    
+    unsafe:
+        map_drop(&mut m)
+    return success
+
+fn main() -> int:
+    print("Starting Map stress test...")
+    if run_map_test():
+        print("Map stress test passed!")
+        return 0
+    else:
+        print("Map stress test failed.")
+        return 1

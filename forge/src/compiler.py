@@ -221,6 +221,7 @@ def compile_source(source: str, filename: str = "<input>", output_path: Optional
         # Create codegen with type checker reference
         codegen = LLVMCodeGen(deterministic=deterministic)
         codegen.type_checker = type_checker
+        codegen.imported_modules = imported_modules_list
         codegen.warn_costs = warn_cost  # Enable cost warnings if requested
         module = codegen.compile_program(program_ast)
         llvm_ir = str(module)
