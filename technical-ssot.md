@@ -14,9 +14,9 @@
 
 **Document Purpose:** This document is the technical, itemized version of the SSOT (Single Source of Truth). It provides a ZERO-TO-FINAL map of every feature implied or stated by the SSOT, decomposed recursively until each item is implementable in a single PR-sized chunk with objective Definition of Done and tests.
 
-**Status:** This specification is derived from `docs/SSOT.txt` (December 20, 2025) and represents the complete technical roadmap for implementing Pyrite language, Forge compiler, and Quarry SDK.
+**Status:** This specification is derived from `docs/specification/SSOT.txt` (December 23, 2025) and represents the complete technical roadmap for implementing Pyrite language, Forge compiler, and Quarry SDK.
 
-**Last Updated:** December 22, 2025
+**Last Updated:** December 23, 2025
 
 ---
 
@@ -4000,30 +4000,30 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-073 -> SPEC-LANG-0303
 - REQ-074 -> SPEC-LANG-0210
 - REQ-075 -> SPEC-LANG-0313
-- REQ-076 -> SPEC-LANG-0300
-- REQ-077 -> SPEC-LANG-0001
+- REQ-076 -> SPEC-LANG-0314
+- REQ-077 -> SPEC-LANG-0230
 - REQ-078 -> SPEC-LANG-0301
-- REQ-079 -> SPEC-LANG-0301
-- REQ-080 -> SPEC-LANG-0301
-- REQ-081 -> SPEC-FORGE-0200
-- REQ-082 -> SPEC-FORGE-0200
-- REQ-083 -> SPEC-FORGE-0200
-- REQ-084 -> SPEC-FORGE-0200
-- REQ-085 -> SPEC-LANG-0300
-- REQ-086 -> SPEC-LANG-0301
+- REQ-079 -> SPEC-LANG-0304
+- REQ-080 -> SPEC-LANG-0315
+- REQ-081 -> SPEC-FORGE-0201
+- REQ-082 -> SPEC-FORGE-0204
+- REQ-083 -> SPEC-FORGE-0203
+- REQ-084 -> SPEC-FORGE-0202
+- REQ-085 -> SPEC-LANG-0301
+- REQ-086 -> SPEC-LANG-0315
 - REQ-087 -> SPEC-LANG-0301
-- REQ-088 -> SPEC-LANG-0302
-- REQ-089 -> SPEC-LANG-0302
-- REQ-090 -> SPEC-LANG-0302
-- REQ-091 -> SPEC-LANG-0300
-- REQ-092 -> SPEC-LANG-0300
-- REQ-093 -> SPEC-LANG-0300
+- REQ-088 -> SPEC-LANG-0312
+- REQ-089 -> SPEC-LANG-0307
+- REQ-090 -> SPEC-LANG-0303
+- REQ-091 -> SPEC-LANG-0301, SPEC-LANG-0302, SPEC-LANG-0303
+- REQ-092 -> SPEC-LANG-0301, SPEC-LANG-0302, SPEC-LANG-0303
+- REQ-093 -> SPEC-LANG-0316
 - REQ-094 -> SPEC-LANG-0111
-- REQ-095 -> SPEC-LANG-0100
+- REQ-095 -> SPEC-LANG-0115
 - REQ-096 -> SPEC-LANG-0112
 - REQ-097 -> SPEC-LANG-0112
 - REQ-098 -> SPEC-LANG-0114
-- REQ-099 -> SPEC-LANG-0114
+- REQ-099 -> SPEC-LANG-0231
 - REQ-100 -> SPEC-LANG-0114
 - REQ-101 -> SPEC-LANG-0104
 - REQ-102 -> SPEC-LANG-0100
@@ -5815,6 +5815,8 @@ string"""
 
 - SPEC-LANG-0107: Field access parsing
 
+- SPEC-LANG-0115: Ternary expression parsing
+
 #### SPEC-LANG-0101: Primary Expression Parsing
 
 **Kind:** LEAF  
@@ -6234,6 +6236,54 @@ let zeros = [0; 100]        # Repeat syntax
 
 - Unit: Simple and nested field access.
 
+#### SPEC-LANG-0115: Ternary Expression Parsing
+
+**Kind:** LEAF
+
+**Source:** SPEC-LANG-0100, REQ-095, SSOT Section 6.1
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Parser handles `expression if condition else expression` syntax.
+
+- Ensures correct operator precedence relative to other expressions.
+
+**User-facing behavior:**
+
+- Compact inline conditional logic.
+
+**Semantics:**
+
+- Evaluates `condition`; if true, result is first `expression`, else second `expression`.
+
+- Short-circuiting: only the resulting branch is evaluated.
+
+**Edge cases:**
+
+- Nested ternary expressions: `a if b else c if d else e`.
+
+**Failure modes + diagnostics:**
+
+- `ERR-PARSE-015`: Missing `else` in ternary expression.
+
+**Examples:**
+
+- Positive: `x = 1 if y > 0 else 0`
+
+- Negative: `x = 1 if y > 0`
+
+**Implementation notes:**
+
+- File: `forge/src/frontend/parser.py`
+
+**Dependencies:**
+
+- SPEC-LANG-0101
+
 #### SPEC-LANG-0110: Statement Parsing
 
 **Kind:** NODE
@@ -6573,6 +6623,10 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0227: Optional type and safety
 
 - SPEC-LANG-0228: Untagged union semantics
+
+- SPEC-LANG-0230: Constant declaration and inlining
+
+- SPEC-LANG-0231: Match exhaustiveness checking
 
 #### SPEC-LANG-0201: Type Inference Algorithm
 
@@ -8638,6 +8692,12 @@ let zeros = [0; 100]        # Repeat syntax
 
 - SPEC-LANG-0313: Raw pointer semantics
 
+- SPEC-LANG-0314: Variable immutability by default
+
+- SPEC-LANG-0315: RAII and deterministic destruction
+
+- SPEC-LANG-0316: Explicit unsafe contexts
+
 #### SPEC-LANG-0301: Move Semantics Analysis
 
 **Kind:** LEAF  
@@ -9007,6 +9067,122 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Dependencies:**
 
 - None
+
+#### SPEC-LANG-0314: Variable Immutability by Default
+
+**Kind:** LEAF
+
+**Source:** SPEC-LANG-0300, REQ-076, SSOT Section 4.0
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Variables declared with `let` are immutable by default.
+
+- Variables declared with `mut` are mutable.
+
+- Re-assignment to an immutable variable is a compile-time error.
+
+**User-facing behavior:**
+
+- Enforces safety and intent by making immutability the default.
+
+**Semantics:**
+
+- `let x = 5` creates an immutable binding.
+
+- `let mut x = 5; x = 6` is valid.
+
+**Failure modes + diagnostics:**
+
+- `ERR-MUT-001`: Re-assignment to immutable variable.
+
+**Examples:**
+
+- `let x = 5; x = 6` (Error)
+
+- `let mut y = 5; y = 6` (OK)
+
+#### SPEC-LANG-0315: RAII and Deterministic Destruction
+
+**Kind:** LEAF
+
+**Source:** SPEC-LANG-0300, REQ-080, REQ-086, SSOT Section 5.1
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Compiler inserts destructor calls (`drop` method) when an owning variable goes out of scope.
+
+- Handles deterministic cleanup for memory, files, and other resources.
+
+- Support for custom `drop` implementation on structs.
+
+**User-facing behavior:**
+
+- Automatic and reliable resource management.
+
+**Semantics:**
+
+- Values are destroyed exactly once when their last owner goes out of scope.
+
+- Moved values are not destroyed (destructor already called or ownership transferred).
+
+**Edge cases:**
+
+- Panics during destruction (should abort or handle carefully).
+
+- Circular dependencies (not possible with strict ownership).
+
+**Failure modes + diagnostics:**
+
+- `ERR-DROP-001`: Custom drop implementation cannot be Copy.
+
+**Examples:**
+
+- `struct File { ... } impl File { fn drop(self) { self.close() } }`
+
+#### SPEC-LANG-0316: Explicit Unsafe Contexts
+
+**Kind:** LEAF
+
+**Source:** SPEC-LANG-0300, REQ-093, SSOT Section 1.3, 1.6
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Compiler supports `unsafe { ... }` blocks and `unsafe fn`.
+
+- Certain operations (raw pointer dereference, calling unsafe fns) are only allowed in unsafe contexts.
+
+- Unsafe code is clearly demarcated for audit.
+
+**User-facing behavior:**
+
+- Opt-in to low-level, potentially unsafe operations.
+
+**Semantics:**
+
+- `unsafe` does not disable safety checks, but enables additional capabilities.
+
+- Programmer is responsible for maintaining invariants in unsafe blocks.
+
+**Failure modes + diagnostics:**
+
+- `ERR-UNSAFE-003`: Unsafe operation outside of unsafe block.
+
+**Examples:**
+
+- `unsafe { *ptr = 5 }`
 
 #### SPEC-LANG-0303: Lifetime Analysis
 
@@ -10970,6 +11146,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-FORGE-0203: Cost budget verification
 
+- SPEC-FORGE-0204: Bounds checking control attributes
+
 #### SPEC-FORGE-0201: Allocation Tracking Pass
 
 **Kind:** LEAF
@@ -11077,6 +11255,42 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Dependencies:**
 
 - SPEC-FORGE-0200
+
+#### SPEC-FORGE-0204: Bounds Checking Control Attributes
+
+**Kind:** LEAF
+
+**Source:** SPEC-FORGE-0200, REQ-082, SSOT Section 1.2, 4.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Support `@bounds_check(on|off)` attribute for functions and scopes.
+
+- When `off`, compiler omits safety checks for array/slice indexing in that scope.
+
+- Global default is `on`.
+
+**User-facing behavior:**
+
+- Selective performance optimization for hot loops where safety is manually verified.
+
+**Semantics:**
+
+- Disabling bounds checks is an unsafe operation (requires `unsafe` context or implies it).
+
+- High-performance systems programming utility.
+
+**Failure modes + diagnostics:**
+
+- Warn if `@bounds_check(off)` is used without `unsafe` context.
+
+**Examples:**
+
+- `@bounds_check(off) fn fast_sum(data: []f32) -> f32: ...`
 
 #### SPEC-FORGE-0300: Advanced Optimization Suite
 
@@ -13078,7 +13292,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: AST construction and symbol table management.
 
-    - Included: SPEC-LANG-0101, SPEC-LANG-0102, SPEC-LANG-0103, SPEC-LANG-0104, SPEC-LANG-0105, SPEC-LANG-0106, SPEC-LANG-0107, SPEC-LANG-0111, SPEC-LANG-0112, SPEC-LANG-0113, SPEC-LANG-0114, SPEC-FORGE-0009, SPEC-FORGE-0010, SPEC-FORGE-0011, SPEC-FORGE-0012, SPEC-FORGE-0013, SPEC-FORGE-0014, SPEC-FORGE-0015, SPEC-FORGE-0016, SPEC-FORGE-0017, SPEC-FORGE-0018, SPEC-LANG-0009, SPEC-LANG-0010, SPEC-LANG-0011, SPEC-LANG-0012, SPEC-LANG-0013, SPEC-LANG-0014, SPEC-LANG-0015.
+    - Included: SPEC-LANG-0101, SPEC-LANG-0102, SPEC-LANG-0103, SPEC-LANG-0104, SPEC-LANG-0105, SPEC-LANG-0106, SPEC-LANG-0107, SPEC-LANG-0111, SPEC-LANG-0112, SPEC-LANG-0113, SPEC-LANG-0114, SPEC-LANG-0115, SPEC-FORGE-0009, SPEC-FORGE-0010, SPEC-FORGE-0011, SPEC-FORGE-0012, SPEC-FORGE-0013, SPEC-FORGE-0014, SPEC-FORGE-0015, SPEC-FORGE-0016, SPEC-FORGE-0017, SPEC-FORGE-0018, SPEC-LANG-0009, SPEC-LANG-0010, SPEC-LANG-0011, SPEC-LANG-0012, SPEC-LANG-0013, SPEC-LANG-0014, SPEC-LANG-0015.
 
     - Dependencies: M1.
 
@@ -13088,7 +13302,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Infer and check types for basic expressions.
 
-    - Included: SPEC-LANG-0201, SPEC-LANG-0202, SPEC-LANG-0203, SPEC-LANG-0206, SPEC-LANG-0211, SPEC-LANG-0212, SPEC-LANG-0213, SPEC-LANG-0214, SPEC-LANG-0215, SPEC-LANG-0216, SPEC-LANG-0217, SPEC-LANG-0218, SPEC-LANG-0219, SPEC-LANG-0220, SPEC-LANG-0221, SPEC-LANG-0222, SPEC-LANG-0223, SPEC-LANG-0224, SPEC-LANG-0225, SPEC-LANG-0226, SPEC-LANG-0227, SPEC-LANG-0228, SPEC-LANG-0208, SPEC-LANG-0209, SPEC-LANG-0210, SPEC-FORGE-0019, SPEC-FORGE-0020, SPEC-FORGE-0021, SPEC-FORGE-0022, SPEC-FORGE-0023.
+    - Included: SPEC-LANG-0201, SPEC-LANG-0202, SPEC-LANG-0203, SPEC-LANG-0206, SPEC-LANG-0211, SPEC-LANG-0212, SPEC-LANG-0213, SPEC-LANG-0214, SPEC-LANG-0215, SPEC-LANG-0216, SPEC-LANG-0217, SPEC-LANG-0218, SPEC-LANG-0219, SPEC-LANG-0220, SPEC-LANG-0221, SPEC-LANG-0222, SPEC-LANG-0223, SPEC-LANG-0224, SPEC-LANG-0225, SPEC-LANG-0226, SPEC-LANG-0227, SPEC-LANG-0228, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0208, SPEC-LANG-0209, SPEC-LANG-0210, SPEC-FORGE-0019, SPEC-FORGE-0020, SPEC-FORGE-0021, SPEC-FORGE-0022, SPEC-FORGE-0023.
 
     - Dependencies: M2.
 
@@ -13127,7 +13341,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Memory safety enforcement.
 
-    - Included: SPEC-LANG-0300 (NODE), SPEC-LANG-0301, SPEC-LANG-0302 (NODE), SPEC-LANG-0303, SPEC-LANG-0304, SPEC-LANG-0305, SPEC-LANG-0306, SPEC-LANG-0307, SPEC-LANG-0308, SPEC-LANG-0309, SPEC-LANG-0310, SPEC-LANG-0311, SPEC-LANG-0312, SPEC-LANG-0313, SPEC-FORGE-0006.
+    - Included: SPEC-LANG-0300 (NODE), SPEC-LANG-0301, SPEC-LANG-0302 (NODE), SPEC-LANG-0303, SPEC-LANG-0304, SPEC-LANG-0305, SPEC-LANG-0306, SPEC-LANG-0307, SPEC-LANG-0308, SPEC-LANG-0309, SPEC-LANG-0310, SPEC-LANG-0311, SPEC-LANG-0312, SPEC-LANG-0313, SPEC-LANG-0314, SPEC-LANG-0315, SPEC-LANG-0316, SPEC-FORGE-0006.
 
     - Dependencies: M5.
 
@@ -13187,7 +13401,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Design by Contract and advanced compiler passes.
 
-    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203.
+    - Included: SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204.
 
     - Dependency satisfaction note: Depends on M6 (Ownership).
 
@@ -13653,6 +13867,14 @@ Total new P1 LEAFs: 25.
   - Milestone ordering respects Dependencies.
 
   - Section 7 P1 Gate Mapping exists and references each new milestone and its SPEC-IDs.
+
+### Verification (Scoped): REQ-076..REQ-100 Mapping (This Run)
+
+- **REQ Range:** REQ-076..REQ-100
+- **New LEAFs:** 7 (SPEC-LANG-0115, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0314, SPEC-LANG-0315, SPEC-LANG-0316, SPEC-FORGE-0204)
+- **Mapping coverage delta:** +25 REQs mapped to LEAFs
+- **Roadmap placement:** Consistent (M2, M3, M6, M11)
+- **New dependencies:** SPEC-LANG-0216 (for 0230), SPEC-LANG-0114 (for 0231)
 
 ---
 
