@@ -14,7 +14,7 @@ See Also:
     type_checker: Type checks the parsed AST
 """
 
-from typing import List, Optional
+from typing import Any, List, Optional
 from .tokens import Token, TokenType, Span
 from .. import ast
 
