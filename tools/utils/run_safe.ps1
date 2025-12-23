@@ -21,7 +21,11 @@ param(
     [int]$TimeoutSec = 0,
 
     [Parameter(Mandatory=$false)]
-    [string]$LogDir = ""
+    [string]$LogDir = "",
+
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("full", "minimal", "none")]
+    [string]$LogMode = "full"
 )
 
 # Bound preview lines to reasonable value to prevent agent crashes
@@ -52,6 +56,21 @@ if ([string]::IsNullOrEmpty($LogDir)) {
     $LogDir = Join-Path $env:LOCALAPPDATA "pyrite\logs"
 }
 
+# Create log directory if it doesn't exist
+if (-not (Test-Path $LogDir)) {
+    New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+}
+
+# Determine log file paths
+if ([string]::IsNullOrEmpty($Log)) {
+    $StdoutLog = Join-Path $LogDir "stdout.log"
+    $StderrLog = Join-Path $LogDir "stderr.log"
+} else {
+    $LogBase = if ($Log -like "*.log") { $Log -replace "\.log$", "" } else { $Log }
+    $StdoutLog = "$LogBase-stdout.log"
+    $StderrLog = "$LogBase-stderr.log"
+}
+
 # Build wrapper command
 $wrapperArgs = @(
     '-NoProfile',
@@ -61,12 +80,10 @@ $wrapperArgs = @(
     '-Cmd',
     $Cmd,
     '-Head', $PreviewLines.ToString(),
-    '-Tail', $PreviewLines.ToString()
+    '-Tail', $PreviewLines.ToString(),
+    '-StdoutLog', $StdoutLog,
+    '-StderrLog', $StderrLog
 )
-
-if ($Log) {
-    $wrapperArgs += @('-Log', $Log)
-}
 
 if ($NoPreview) {
     $wrapperArgs += @('-NoPreview')
@@ -78,6 +95,10 @@ if ($TimeoutSec -gt 0) {
 
 if ($LogDir) {
     $wrapperArgs += @('-LogDir', $LogDir)
+}
+
+if ($LogMode) {
+    $wrapperArgs += @('-LogMode', $LogMode)
 }
 
 # Execute wrapper

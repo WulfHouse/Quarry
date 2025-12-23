@@ -1411,9 +1411,9 @@ class LLVMCodeGen:
                 val = self.variables[expr.name]
                 # If it's a pointer (alloca), load it (unless it's a reference type)
                 if isinstance(val.type, ir.PointerType):
-                    # Check Pyrite type to see if it's a reference
+                    # Check Pyrite type to see if it's a reference or pointer
                     py_type = self.variable_types.get(expr.name)
-                    if not isinstance(py_type, ReferenceType):
+                    if not isinstance(py_type, ReferenceType) and not isinstance(py_type, PointerType):
                         return self.builder.load(val)
                 return val
             else:

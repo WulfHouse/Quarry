@@ -1,0 +1,12 @@
+extern "C" fn strcmp(s1: *const u8, s2: *const u8) -> i32
+
+fn main(argc: i32, argv: *const *const u8) -> i32:
+    print("argc")
+    print(argc)
+    if argc > 1:
+        unsafe:
+            let arg = argv[1]
+            if arg != 0 as *u8:
+                print("argv[1] is not null")
+    return 0
+

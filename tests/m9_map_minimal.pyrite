@@ -1,0 +1,14 @@
+import std.collections.map
+
+fn main():
+    print("m9_map_stress: scale=1")
+    var my_map: Map[int, int] = Map.new()
+    print("[MARKER 1] STARTING INSERTS")
+    my_map.insert(1, 2)
+    print("[MARKER 2] STARTING VERIFY")
+    let val = my_map.get(1)
+    print("Value:", val)
+    print("[MARKER 3] CLEANUP")
+    my_map.drop()
+    print("Success")
+

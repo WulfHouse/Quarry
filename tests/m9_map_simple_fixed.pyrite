@@ -1,0 +1,10 @@
+# M9 Map Simple Test
+
+import std.collections.map
+
+fn main():
+    # Use Map methods from stdlib
+    var my_map: Map[int, int] = Map.new()
+    my_map.drop()
+    print("Success")
+
