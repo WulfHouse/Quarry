@@ -6,8 +6,6 @@ order: 8
 
 # Tooling: Quarry Build System
 
-================================================================================
-
 Pyrite's official build system and package manager is Quarry. The design 
 philosophy mirrors Cargo (Rust's beloved build tool): provide one obvious 
 workflow that handles everything, eliminate configuration complexity, and make 
@@ -17,8 +15,7 @@ Developer surveys consistently show that great tooling is essential for language
 adoption. Quarry is designed as a first-class component of Pyrite, not an 
 afterthought.
 
-8.1 Core Quarry Workflow
---------------------------------------------------------------------------------
+## 8.1 Core Quarry Workflow
 
 Single Command Philosophy
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -178,8 +175,7 @@ Quarry.toml example:
     [dev-dependencies]
     test-utils = "0.5"
 
-8.2 Dependency Management
---------------------------------------------------------------------------------
+## 8.2 Dependency Management
 
 Declarative Dependencies
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -215,8 +211,7 @@ Quarry.lock ensures every developer/CI system builds identical binaries:
 Lockfile committed to version control guarantees reproducibility across 
 environments and time.
 
-8.3 Official Package Registry
---------------------------------------------------------------------------------
+## 8.3 Official Package Registry
 
 Pyrite packages are published to the official Quarry Registry (aspirational: quarry.dev):
 
@@ -241,8 +236,7 @@ Registry provides:
   • Dependency graphs
   • Version compatibility matrices
 
-8.4 Testing Framework
---------------------------------------------------------------------------------
+## 8.4 Testing Framework
 
 Built-in Test Support
 ~~~~~~~~~~~~~~~~~~~~~
@@ -290,8 +284,7 @@ Run benchmarks:
     quarry bench                   # Run all benchmarks
     quarry bench --save baseline   # Save baseline for comparison
 
-8.5 Code Formatting
---------------------------------------------------------------------------------
+## 8.5 Code Formatting
 
 Official Formatter
 ~~~~~~~~~~~~~~~~~~
@@ -320,8 +313,7 @@ Example transformation:
     fn foo(x: int, y: int) -> int:
         return x + y
 
-8.6 Learning Profile Mode
---------------------------------------------------------------------------------
+## 8.6 Learning Profile Mode
 
 To support Pyrite's goal of being approachable to beginners, Quarry provides a 
 "Learning Profile" that packages beginner-friendly defaults into a one-command 
@@ -370,8 +362,7 @@ Python developers exploring systems programming.
 
 Implementation: Beta Release (after core compiler and lints are stable)
 
-8.7 Interactive REPL (Beta Release)
---------------------------------------------------------------------------------
+## 8.7 Interactive REPL (Beta Release)
 
 To deliver on Pyrite's promise of Python-like approachability, the language 
 provides an interactive Read-Eval-Print Loop (REPL) with ownership visualization 
@@ -647,8 +638,7 @@ Implementation: Beta Release (high priority, high impact)
 Complexity: Moderate (JIT compilation, incremental state management)
 Impact: Critical (without REPL, Python developers feel the gap immediately)
 
-8.8 Automatic Code Fixes
---------------------------------------------------------------------------------
+## 8.8 Automatic Code Fixes
 
 quarry fix - Apply Compiler Suggestions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -795,8 +785,7 @@ Safety guarantees:
 This is the natural evolution of Pyrite's teaching compiler: diagnose, explain, 
 AND fix. It's what makes Elm, rust-analyzer, and go fmt feel magical.
 
-8.9 Fuzzing and Sanitizers
---------------------------------------------------------------------------------
+## 8.9 Fuzzing and Sanitizers
 
 To make Pyrite a production-ready systems language and achieve widespread developer 
 adoption, 
@@ -1079,8 +1068,7 @@ Cost:
 Implementation: Beta Release (fuzzing + ASan/TSan/UBSan via LLVM)
              Stable Release (Miri-equivalent interpreter)
 
-8.10 Linting
---------------------------------------------------------------------------------
+## 8.10 Linting
 
 Multi-Level Linter
 ~~~~~~~~~~~~~~~~~~
@@ -1223,8 +1211,7 @@ This makes abstract transformations concrete, accelerating learning.
 
 Implementation: Beta Release (after parameter closures and sugar constructs are stable)
 
-8.11 Documentation Generation
---------------------------------------------------------------------------------
+## 8.11 Documentation Generation
 
 Auto-Generated Docs
 ~~~~~~~~~~~~~~~~~~~
@@ -1261,8 +1248,7 @@ Generated docs include:
   • Search functionality
   • Source code links
 
-8.12 Cross-Compilation
---------------------------------------------------------------------------------
+## 8.12 Cross-Compilation
 
 First-Class Cross-Compilation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1365,7 +1351,7 @@ Use cases:
 This makes Pyrite credible for the most constrained embedded environments. 
 Beta Release feature.
 
-8.13 Cost Analysis and Performance Profiling
+## 8.13 Cost Analysis and Performance Profiling
 --------------------------------------------------------------------------------
 
 Static Cost Analysis: quarry cost
@@ -2369,7 +2355,7 @@ Threshold configuration:
 This provides the highest-leverage addition to Pyrite's existing performance 
 tooling.
 
-8.14 Interactive Learning: quarry learn
+## 8.14 Interactive Learning: quarry learn
 --------------------------------------------------------------------------------
 
 Pyrite includes a built-in interactive learning system inspired by Rustlings. 
@@ -2590,7 +2576,7 @@ compiler and error messages are stable. It depends on:
 Once available, it becomes the recommended path for all newcomers: "Install 
 Pyrite, run quarry learn, build real projects with confidence."
 
-8.15 Integration and CI/CD
+## 8.15 Integration and CI/CD
 --------------------------------------------------------------------------------
 
 CI-Friendly Commands
@@ -2619,7 +2605,7 @@ Example GitHub Actions workflow:
           - run: quarry test
           - run: quarry build --release
 
-8.16 Edition System and Stability
+## 8.16 Edition System and Stability
 --------------------------------------------------------------------------------
 
 Pyrite uses an Edition system to enable language evolution without breaking 
@@ -2795,7 +2781,7 @@ This commitment differentiates Pyrite from languages that break compatibility
 frequently (Python 2→3) or stagnate to avoid breaking changes. Pyrite evolves 
 without breaking.
 
-8.17 Supply-Chain Security and Trust
+## 8.17 Supply-Chain Security and Trust
 --------------------------------------------------------------------------------
 
 For production systems and security-critical applications, supply-chain security 
@@ -3209,7 +3195,7 @@ Cost: Implementation time only (no language complexity)
 Impact: Trust and adoption multiplier for security-critical domains
 ROI: High (required for aerospace/medical/government adoption)
 
-8.18 Binary Size Profiling (Beta Release)
+## 8.18 Binary Size Profiling (Beta Release)
 --------------------------------------------------------------------------------
 
 For embedded systems where flash memory is constrained (32KB-512KB typical), 
@@ -3477,7 +3463,7 @@ Priority: Critical for embedded-first strategy
 Complexity: Low (parse ELF/PE/Mach-O symbols, sum sizes)
 Impact: High (required for embedded credibility)
 
-8.19 Deterministic and Reproducible Builds (Beta Release)
+## 8.19 Deterministic and Reproducible Builds (Beta Release)
 --------------------------------------------------------------------------------
 
 To complete Pyrite's supply-chain security story and enable verifiable builds, 
@@ -3663,7 +3649,7 @@ Implementation: Beta Release (high priority for supply-chain security)
 Complexity: Moderate (requires compiler determinism work)
 Impact: Critical (required for security certification and trust)
 
-8.20 Energy Profiling (Stable Release)
+## 8.20 Energy Profiling (Stable Release)
 --------------------------------------------------------------------------------
 
 To address sustainability concerns and optimize for battery-powered devices, 
@@ -3842,7 +3828,7 @@ Priority: Medium (unique differentiator, growing importance)
 Complexity: Moderate (platform-specific integrations)
 Impact: High (unique positioning, sustainability appeal)
 
-8.21 Dead Code Analysis and Elimination (Beta Release)
+## 8.21 Dead Code Analysis and Elimination (Beta Release)
 --------------------------------------------------------------------------------
 
 To optimize binary size and maintainability, Quarry provides comprehensive dead 
@@ -3950,7 +3936,7 @@ Priority: Medium-High (valuable for embedded + maintainability)
 Complexity: Low (static analysis + symbol table inspection)
 Impact: Medium-High (binary size + code quality)
 
-8.22 Dependency License Compliance (Stable Release)
+## 8.22 Dependency License Compliance (Stable Release)
 --------------------------------------------------------------------------------
 
 For organizations with legal requirements, Quarry provides license compatibility 
@@ -4087,7 +4073,7 @@ Priority: Medium (enterprise adoption enabler)
 Complexity: Low (parse license metadata, check compatibility)
 Impact: Medium (removes adoption barrier for regulated industries)
 
-8.23 Hot Reloading for Rapid Iteration (Stable Release)
+## 8.23 Hot Reloading for Rapid Iteration (Stable Release)
 --------------------------------------------------------------------------------
 
 For long-running processes during development, Quarry provides hot reloading that 
@@ -4235,7 +4221,7 @@ Priority: Medium (developer experience enhancement)
 Complexity: High (dynamic loading, state management)
 Impact: Medium-High (productivity boost for certain workflows)
 
-8.24 Incremental Compilation (Beta Release)
+## 8.24 Incremental Compilation (Beta Release)
 --------------------------------------------------------------------------------
 
 Fast rebuilds are essential for developer productivity. Quarry implements 
@@ -4351,7 +4337,7 @@ Priority: Critical (expected feature, high impact on satisfaction)
 Complexity: Moderate (requires module dependency tracking)
 Impact: High (productivity multiplier for all developers)
 
-8.25 Community Transparency Dashboard (Stable Release)
+## 8.25 Community Transparency Dashboard (Stable Release)
 --------------------------------------------------------------------------------
 
 To make Pyrite's goal of widespread developer adoption measurable rather than purely 
@@ -4556,7 +4542,7 @@ Priority: High (trust multiplier, advocacy enabler)
 Complexity: Moderate (web dashboard, data aggregation, privacy)
 Impact: High (makes success measurable, enables evidence-based marketing)
 
-8.26 Why Quarry Matters
+## 8.26 Why Quarry Matters
 --------------------------------------------------------------------------------
 
 Developer Experience = Language Adoption

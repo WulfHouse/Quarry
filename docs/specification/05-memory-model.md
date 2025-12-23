@@ -12,8 +12,7 @@ all achieved without a garbage collector or runtime penalty. This section detail
 Pyrite's ownership model, how allocation and deallocation work, and how we 
 achieve safety without runtime overhead.
 
-5.1 Ownership Model and RAII
---------------------------------------------------------------------------------
+## 5.1 Ownership Model and RAII
 
 Pyrite uses a system of ownership and lifetimes reminiscent of Rust's borrow 
 checker to ensure memory safety at compile time. However, the aim is to present 
@@ -188,8 +187,7 @@ decide exactly when something is freed by controlling its scope or explicitly
 freeing in unsafe code), while eliminating the most common errors through 
 compile-time enforcement.
 
-5.2 Manual Memory Management (Unsafe)
---------------------------------------------------------------------------------
+## 5.2 Manual Memory Management (Unsafe)
 
 While the default ownership model covers most needs safely, Pyrite recognizes 
 that systems programming sometimes requires manual control over memory 

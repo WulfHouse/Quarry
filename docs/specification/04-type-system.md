@@ -6,8 +6,6 @@ order: 4
 
 # Types and Type System
 
-================================================================================
-
 Pyrite has a static, strong type system that enforces type safety at compile 
 time (preventing type errors and many classes of runtime errors). However, the 
 type system is designed to be as unobtrusive as possible for the programmer. 
@@ -17,11 +15,9 @@ need to explicitly write types - the compiler can deduce them.
 This section describes Pyrite's types, including primitives, composite types, and 
 how mutability and ownership affect types.
 
-4.1 Primitive Types
---------------------------------------------------------------------------------
+## 4.1 Primitive Types
 
-Integers
-~~~~~~~~
+### Integers
 
 Pyrite supports a range of integer types for low-level control, similar to C and 
 Rust. This includes fixed-width signed and unsigned integers of various bit 
@@ -44,8 +40,7 @@ unless explicit checked arithmetic is requested. This strategy ensures safety
 during development without penalizing release performance, following Rust and 
 Zig's lead on integer overflow handling.
 
-Floating-Point
-~~~~~~~~~~~~~~
+### Floating-Point
 
 Pyrite provides standard IEEE-754 floating point types: f32 (32-bit single 
 precision) and f64 (64-bit double precision). By default, a float literal like 
@@ -58,8 +53,7 @@ conversion must be done with an explicit cast function or operator to avoid
 unintended truncation or rounding. If necessary, a generic `float` keyword may be 
 an alias for the default float type (like Python's `float` meaning 64-bit).
 
-Boolean
-~~~~~~~
+### Boolean
 
 The bool type represents a boolean value (true or false). Booleans in Pyrite are 
 not implicitly convertible to or from numeric types. This means conditional 
@@ -71,8 +65,7 @@ Boolean operations use the English words and, or, not as mentioned, and they
 short-circuit. There is no separate boolean and bitwise type - & and | are 
 available as bitwise operators for integers, while and/or are logical for bools.
 
-Character and String
-~~~~~~~~~~~~~~~~~~~~
+### Character and String
 
 Pyrite's char type is a Unicode code point (32-bit). It can represent any 
 Unicode character by code point value. Strings in Pyrite are of type String 
@@ -93,8 +86,7 @@ explicit means (e.g. using a builder or formatting library) rather than relying
 on + repeatedly. In some cases, constant string concatenation can be evaluated at 
 compile time (if the operands are known at compile time).
 
-Beginner-Friendly Type Aliases
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Beginner-Friendly Type Aliases
 
 To ease the learning curve for absolute beginners, Pyrite's standard library 
 provides optional type aliases for common borrowed views:
@@ -118,8 +110,7 @@ Note: These are type aliases, not new types - no runtime cost, no type system
 complexity. They exist solely to make "borrowed view of text" more intuitive 
 for Python/JavaScript developers transitioning to systems programming.
 
-Generic Reference Aliases
-~~~~~~~~~~~~~~~~~~~~~~~~~
+### Generic Reference Aliases
 
 Beyond Text and Bytes, the standard library provides generic aliases for common 
 reference patterns:
@@ -147,8 +138,7 @@ code to use familiar terms before introducing the underlying syntax:
     
     # Both are identical (Ref[T] is literally &T)
 
-Teaching Path
-~~~~~~~~~~~~~
+### Teaching Path
 
 The suggested learning progression for references:
 
@@ -193,8 +183,7 @@ Alternatives considered and rejected:
 These aliases are opt-in for documentation authors. Core Pyrite docs use the 
 real syntax; community tutorials can choose their approach.
 
-Unit (Void)
-~~~~~~~~~~~
+### Unit (Void)
 
 For functions that do not return a meaningful value (procedures), Pyrite has a 
 unit type, analogous to void in C or NoneType in Python. The unit type is 
@@ -230,11 +219,9 @@ Rust's convention and is consistent with tuple syntax. For C familiarity, `void`
 available as a type alias: `type void = ()`. Functions that don't return a value 
 should use `() -> ()` as the primary syntax.
 
-4.2 Composite Types
---------------------------------------------------------------------------------
+## 4.2 Composite Types
 
-Arrays
-~~~~~~
+### Arrays
 
 Pyrite supports two kinds of arrays with explicit syntax to differentiate them:
 
@@ -302,8 +289,7 @@ Pyrite supports two kinds of arrays with explicit syntax to differentiate them:
     • Vector[T]  - Growable vector (heap, runtime size)
     • List[T]    - Alias for Vector[T] (for Python familiarity)
 
-Structs (Records)
-~~~~~~~~~~~~~~~~~
+### Structs (Records)
 
 A struct in Pyrite is a composite type that groups multiple named fields 
 (possibly of different types) into one record, similar to a struct in C or a 
@@ -336,8 +322,7 @@ same as C layout for compatibility, with perhaps some padding rules for
 alignment). Pyrite aims to support repr(C) or similar annotations to guarantee 
 binary layouts for FFI when needed.
 
-Enumerations (Enums)
-~~~~~~~~~~~~~~~~~~~~
+### Enumerations (Enums)
 
 Pyrite supports enumerated types and algebraic data types via the enum keyword. 
 An enum in Pyrite can be a simple enumeration of named constants or a tagged 
@@ -398,8 +383,7 @@ sentinel values). For instance, Pyrite encourages use of an `Option[T]`
 may not be present, rather than using null pointers. This way, the compiler 
 forces you to handle the "none" case explicitly.
 
-Optionals
-~~~~~~~~~
+### Optionals
 
 Defined as an enum under the hood, `Option[T]` is the type for "maybe a T". 
 You can declare `var x: Option[int] = None` to represent an integer that might 
@@ -425,8 +409,7 @@ Examples:
         None:
             print("No value")
 
-Unions
-~~~~~~
+### Unions
 
 Pyrite also allows a form of union type (an untagged union, similar to C's union) 
 for low-level programming where you need to interpret the same memory in 
@@ -443,14 +426,12 @@ function. The presence of union types ensures that any trick possible in C (for
 bit-level manipulation, etc.) is possible in Pyrite when absolutely needed, but 
 safe code would prefer enums (tagged unions) for variant data.
 
-4.3 References and Pointers
---------------------------------------------------------------------------------
+## 4.3 References and Pointers
 
 Because Pyrite is a systems programming language, it provides pointer types - but 
 in a way that separates safe references from raw, unsafe pointers.
 
-References (Borrowed Pointers)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### References (Borrowed Pointers)
 
 A reference is a pointer type that is managed by the compiler's borrow checker 
 for safety. Syntax: &T denotes an immutable reference to a value of type T, and 
@@ -473,8 +454,7 @@ unsafe conversions), you won't have null-dereferences or use-after-free issues.
 References are the primary way to pass data around without copying in Pyrite's 
 safe code.
 
-Optional Argument Convention Aliases
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Optional Argument Convention Aliases
 
 For educators and teaching materials, Pyrite provides optional argument convention 
 keywords that desugar to standard reference syntax. These aliases make intent 
@@ -596,8 +576,7 @@ Implementation: Beta Release (low complexity, high teaching value)
 Adoption: Optional (individual projects/educators decide)
 Ecosystem impact: Zero (stdlib and community standardize on &T)
 
-Raw Pointers
-~~~~~~~~~~~~
+### Raw Pointers
 
 For interoperability with C and for the cases where you truly need pointer 
 arithmetic or want to opt out of the borrow rules, Pyrite has raw pointer types. 
@@ -617,8 +596,7 @@ from C), or implementing data structures where you need more control than the
 safe abstractions allow. In safe Pyrite code, you will rarely use raw pointers 
 directly - they'll be encapsulated in libraries.
 
-Pointer Conversions
-~~~~~~~~~~~~~~~~~~~
+### Pointer Conversions
 
 You can obtain a raw pointer from a reference (for example, by casting &T to *T 
 or using some standard library function) which essentially tells the compiler "I 
@@ -634,8 +612,7 @@ most of your code can be checked for memory errors at compile time. Only in the
 rare parts that truly need unchecked behavior do you have to drop down to raw 
 pointers.
 
-4.4 Mutability and Assignment
---------------------------------------------------------------------------------
+## 4.4 Mutability and Assignment
 
 Pyrite distinguishes between immutable and mutable variables at the language 
 syntax level, taking inspiration from Rust's approach of making immutability the 
@@ -656,8 +633,7 @@ Immutability by default aligns with the idea that most data does not need to
 change after creation, and it helps catch unintended changes. Of course, you can 
 opt into mutability with a clear var annotation.
 
-Constants
-~~~~~~~~~
+### Constants
 
 For values that are known at compile time and never change, Pyrite provides a 
 `const` declaration. 
@@ -694,8 +670,7 @@ and is useful for configuration values, array lengths, etc.
 - Constants can be used in type contexts (e.g., array sizes)
 - Constants are inlined at compile time (no runtime memory)
 
-Assignment Semantics (Move vs Copy)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Assignment Semantics (Move vs Copy)
 
 In Pyrite, assignment and passing variables to functions will either copy or move 
 the value depending on its type. Types like primitive integers, floats, and other 
@@ -726,8 +701,7 @@ noticing that some values can be reused after assignment and others cannot. The
 compiler's error messages (e.g. "value moved here and cannot be used again") will 
 guide the programmer, effectively teaching them about ownership as they go.
 
-Destruction and RAII
-~~~~~~~~~~~~~~~~~~~~
+### Destruction and RAII
 
 When a variable goes out of scope (for example, at the end of a function or the 
 end of a block in which it's defined), Pyrite will automatically destroy (clean 
@@ -757,15 +731,13 @@ rules about moves vs copies and lifetimes work mostly behind the scenes to
 prevent errors, with the programmer learning them gradually through clear 
 compiler feedback.
 
-4.5 Cost Transparency Attributes
---------------------------------------------------------------------------------
+## 4.5 Cost Transparency Attributes
 
 Pyrite provides compiler-enforced attributes to make performance guarantees 
 explicit and verifiable. These attributes transform the language philosophy of 
 "no hidden costs" from documentation into hard contracts.
 
-@noalloc - No Heap Allocations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### @noalloc - No Heap Allocations
 
 The @noalloc attribute guarantees a function (or block) performs zero heap 
 allocations:
@@ -797,8 +769,7 @@ Use cases:
   - Cryptographic functions (constant-time requirements)
   - Kernel code (allocation restrictions)
 
-@nocopy - No Implicit Copies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### @nocopy - No Implicit Copies
 
 The @nocopy attribute prevents large value copies:
 
@@ -817,8 +788,7 @@ The @nocopy attribute prevents large value copies:
        |
        = help: Use a reference instead: let backup = img
 
-@nosyscall - No System Calls
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### @nosyscall - No System Calls
 
 The @nosyscall attribute forbids operations that invoke system calls:
 
@@ -832,8 +802,7 @@ Useful for:
   - Performance-critical paths (no kernel transitions)
   - Sandboxed execution
 
-@bounds_checked / @no_bounds_check
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### @bounds_checked / @no_bounds_check
 
 Explicit control over array bounds checking:
 
@@ -847,8 +816,7 @@ Explicit control over array bounds checking:
     unsafe fn unchecked_access(arr: &[int], idx: int) -> int:
         return arr[idx]  # Caller guarantees idx is valid
 
-@cost_budget - Performance Contracts
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### @cost_budget - Performance Contracts
 
 For real-time and safety-critical systems, Pyrite allows specifying performance 
 budgets as compile-time contracts:
@@ -911,8 +879,7 @@ Example: Constant-time cryptography
 This transforms "performance requirements" from documentation into compiler-
 verified contracts. Beta Release feature.
 
-Call-Graph Blame Tracking
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Call-Graph Blame Tracking
 
 Performance contracts compose across function boundaries with blame tracking. When 
 a contract violation occurs, the compiler shows the complete call chain and 
@@ -994,8 +961,7 @@ external dependencies.
 
 Beta Release flagship feature.
 
-Cost Transparency Warnings
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Cost Transparency Warnings
 
 Even without explicit attributes, the compiler warns about potentially expensive 
 operations (configurable via lint levels). Note the distinction between compiler 
@@ -1025,8 +991,7 @@ attributes (`@attribute`) and linter attributes (`[attribute]`):
 - `@attribute` = compiler-enforced (affects compilation, e.g., `@noalloc`, `@cost_budget`)
 - `[attribute]` = linter hint (affects warnings only, e.g., `#[allow(...)]`, `#[warn(...)]`)
 
-Integration with Linter
-~~~~~~~~~~~~~~~~~~~~~~~~
+### Integration with Linter
 
 Cost transparency is also enforced through quarry lint levels:
 
@@ -1056,8 +1021,7 @@ Output format:
       |
       = help: Pass by reference: process_buffer(&buffer)
 
-Summary
-~~~~~~~
+### Summary
 
 Cost transparency attributes make Pyrite's "no hidden costs" philosophy 
 enforceable:

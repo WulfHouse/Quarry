@@ -6,13 +6,10 @@ order: 15
 
 # High-ROI Features Summary
 
-================================================================================
-
 Based on analysis of what makes languages successful and widely adopted, Pyrite incorporates
 these highest-impact features that differentiate it from competitors:
 
-15.1 Predictability: Fully-Defined Evaluation Order
---------------------------------------------------------------------------------
+## 15.1 Predictability: Fully-Defined Evaluation Order
 
 Unlike C/C++, Pyrite guarantees left-to-right evaluation order for all 
 expressions and function arguments. This eliminates undefined behavior, makes 
@@ -20,8 +17,7 @@ debugging predictable, and removes cognitive load - at zero performance cost.
 
 Impact: Reduces "mystery" and friction immediately for all developers.
 
-15.2 Teaching Compiler: Interactive quarry fix
---------------------------------------------------------------------------------
+## 15.2 Teaching Compiler: Interactive quarry fix
 
 The compiler doesn't just diagnose problems-it presents numbered, selectable 
 fixes with quarry fix --interactive. Each option explains when to use it, what 
@@ -33,8 +29,7 @@ selection teaches patterns organically - after fixing 20 borrow errors with opti
 1 ("use a reference"), the pattern clicks. This is what makes tools feel 
 "magical" (like rust-analyzer, Elm, go fmt).
 
-15.3 Cost Transparency: Multi-Level quarry cost
---------------------------------------------------------------------------------
+## 15.3 Cost Transparency: Multi-Level quarry cost
 
 Progressive cost reporting (--level=beginner/intermediate/advanced) teaches 
 performance intuition gradually. Beginner mode shows only "this allocates" and 
@@ -46,8 +41,7 @@ Impact: Completes the transparency story - from gentle hints for beginners to de
 analysis for experts. The progressive disclosure prevents overwhelm while 
 enabling mastery. IDE integration makes costs visible inline ("💰 1KB allocation").
 
-15.4 Guaranteed Cleanup: defer Statement
---------------------------------------------------------------------------------
+## 15.4 Guaranteed Cleanup: defer Statement
 
 First-class defer statement ensures cleanup code runs at scope exit, regardless 
 of error paths. Complements RAII for procedural code, C FFI resources, and 
@@ -56,8 +50,7 @@ explicit cleanup sequences.
 Impact: Beginners love "cleanup always runs" guarantee. Fills gap where RAII is 
 awkward without adding complexity.
 
-15.5 Visual Learning: Enhanced Ownership Flow Diagrams
---------------------------------------------------------------------------------
+## 15.5 Visual Learning: Enhanced Ownership Flow Diagrams
 
 Compiler errors for ownership/borrowing include ASCII art flow diagrams showing 
 exactly when values move, when borrows start/end, and where conflicts occur. 
@@ -66,8 +59,7 @@ Enhanced --visual mode provides interactive diagrams.
 Impact: Transforms the hardest concept (ownership) from abstract to concrete. 
 "See the flow" beats "imagine the flow."
 
-15.6 Ecosystem Acceleration: quarry bindgen (Stable Release)
---------------------------------------------------------------------------------
+## 15.6 Ecosystem Acceleration: quarry bindgen (Stable Release)
 
 Automatic Pyrite binding generation from C headers (Zig-style). Parse headers 
 and generate safe wrappers without manual FFI declarations.
@@ -75,8 +67,7 @@ and generate safe wrappers without manual FFI declarations.
 Impact: Critical for ecosystem bootstrapping. Instant access to existing C 
 libraries removes the "no libraries yet" adoption barrier.
 
-15.7 Type Introspection: quarry explain-type
---------------------------------------------------------------------------------
+## 15.7 Type Introspection: quarry explain-type
 
 The quarry explain-type command displays standardized "type badges" ([Stack], 
 [Heap], [Copy], [Move], [MayAlloc], etc.) and memory characteristics in plain 
@@ -87,8 +78,7 @@ Every type becomes self-documenting. Beginners understand WHERE data lives, HOW
 it behaves, and WHAT it costs through concrete examples rather than abstract 
 theory.
 
-15.8 Beginner-Friendly Aliases: Text and Bytes
---------------------------------------------------------------------------------
+## 15.8 Beginner-Friendly Aliases: Text and Bytes
 
 Optional type aliases (type Text = &str, type Bytes = &[u8]) make borrowed 
 views more intuitive for newcomers without fragmenting the type system.
@@ -96,8 +86,7 @@ views more intuitive for newcomers without fragmenting the type system.
 Impact: Lowers barrier for Python/JavaScript developers. Zero cost, purely 
 pedagogical.
 
-15.9 Compile-Time Parameterization
---------------------------------------------------------------------------------
+## 15.9 Compile-Time Parameterization
 
 Functions and types can accept compile-time parameters in square brackets 
 ([N: int]), enabling specialization for specific constant values. The compiler 
@@ -109,8 +98,7 @@ Impact: Enables C++-level performance optimizations with clear, teachable syntax
 Critical for high-performance libraries (math, graphics, crypto) without 
 sacrificing readability. Beta Release feature.
 
-15.10 Runtime Profiling Suite
---------------------------------------------------------------------------------
+## 15.10 Runtime Profiling Suite
 
 Comprehensive profiling commands that complement static cost analysis:
 
@@ -125,8 +113,7 @@ specific fixes with estimated improvements. This transforms performance
 optimization from art to science-mechanical, measurable, teachable. Beta Release 
 feature.
 
-15.11 Two-Tier Closure Model: Parameter vs Runtime
---------------------------------------------------------------------------------
+## 15.11 Two-Tier Closure Model: Parameter vs Runtime
 
 Explicit distinction between compile-time and runtime closures:
 
@@ -155,8 +142,7 @@ verification complete (no hidden allocation through closures). Inspired by Mojo'
 parameter closures but with Pyrite's explicit syntax philosophy. Beta Release flagship 
 feature (foundation for verifiable performance).
 
-15.12 Algorithmic SIMD Helpers
---------------------------------------------------------------------------------
+## 15.12 Algorithmic SIMD Helpers
 
 Mojo-inspired ergonomic helpers for SIMD and parallelism, powered by parameter 
 closures:
@@ -173,8 +159,7 @@ zero-cost abstractions-not "usually optimized," but "provably zero-cost." The
 "pit of success" for performance: write clear scalar logic, get SIMD speed. 
 Beta Release feature (after parameter closures are stable).
 
-15.13 Performance Cookbook: Stdlib as Learning Resource
---------------------------------------------------------------------------------
+## 15.13 Performance Cookbook: Stdlib as Learning Resource
 
 Standard library serves as interactive performance education with canonical 
 implementations, benchmarks, and "why it's fast" explanations:
@@ -202,8 +187,7 @@ runnable examples and verifiable benchmarks. Makes intermediate developers
 productive in high-performance domains without deep expertise. Stable Release 
 implementation (core examples initially, expand over time).
 
-15.14 Inline Storage Containers
---------------------------------------------------------------------------------
+## 15.14 Inline Storage Containers
 
 Stdlib containers that avoid heap allocation for common small cases:
 
@@ -217,7 +201,7 @@ API changes. Integrated with quarry tune for automatic suggestions ("median
 size=3 → use SmallVec[T, 6]"). Proven pattern from Rust (smallvec crate) and 
 C++ (llvm::SmallVector). Stable Release feature.
 
-15.15 Interactive Learning System
+## 15.15 Interactive Learning System
 --------------------------------------------------------------------------------
 
 Built-in Rustlings-style interactive exercises via quarry learn:
@@ -234,7 +218,7 @@ reading for systems concepts. Rustlings is consistently praised as
 Rust's best learning resource - Pyrite adopts this proven approach as first-class 
 feature. Critical adoption accelerator. Stable Release feature.
 
-15.16 With Statement - Python Familiarity
+## 15.16 With Statement - Python Familiarity
 --------------------------------------------------------------------------------
 
 Resource management syntax sugar that desugars to try + defer:
@@ -251,7 +235,7 @@ Impact: Removes friction for 80%+ of beginners who know Python's with statement.
 Zero new semantics (pure sugar over existing defer), but massive ergonomic win. 
 Alpha Release feature.
 
-15.17 Views-by-Default API Convention
+## 15.17 Views-by-Default API Convention
 --------------------------------------------------------------------------------
 
 Hard stdlib rule: APIs take borrowed views (&T, &str, &[T]) by default; 
@@ -269,7 +253,7 @@ Impact: Prevents the #1 beginner frustration ("why did this move?"). Makes
 borrowing the default, ownership transfer the exception. Single convention 
 eliminates entire class of confusion. Alpha Release stdlib design principle.
 
-15.18 Zero-Allocation Mode
+## 15.18 Zero-Allocation Mode
 --------------------------------------------------------------------------------
 
 Build flag that makes heap allocation a compile error:
@@ -289,7 +273,7 @@ Differentiates from Rust (which has no similar mode). Required for safety
 certification in many industries. Two-tier closure model makes --no-alloc 
 verification complete (no hidden allocation through closures). Beta Release feature.
 
-15.19 Performance Budget Contracts
+## 15.19 Performance Budget Contracts
 --------------------------------------------------------------------------------
 
 @cost_budget attribute enforces compile-time performance limits:
@@ -305,7 +289,7 @@ Impact: Critical for real-time systems, safety-critical software, and
 high-frequency trading. Performance becomes correctness. Enables certification. 
 Beta Release feature.
 
-15.20 Cache-Aware Tiling
+## 15.20 Cache-Aware Tiling
 --------------------------------------------------------------------------------
 
 algorithm.tile helper for cache-friendly blocking using parameter closures:
@@ -322,7 +306,7 @@ Impact: Closes the "scalar loops → production performance" gap for numeric cod
 Teaches cache hierarchy naturally through use. Composable with vectorize + 
 parallelize. Stable Release feature.
 
-15.21 CPU Multi-Versioning
+## 15.21 CPU Multi-Versioning
 --------------------------------------------------------------------------------
 
 @multi_version attribute generates multiple SIMD variants with automatic runtime 
@@ -339,7 +323,7 @@ Impact: "Fast everywhere" without user configuration. Critical deployment
 advantage. No other systems language makes this so easy. Stable Release flagship 
 feature.
 
-15.22 Structured Concurrency for Async
+## 15.22 Structured Concurrency for Async
 --------------------------------------------------------------------------------
 
 async with blocks ensure all spawned tasks complete before scope exit:
@@ -356,7 +340,7 @@ Impact: Addresses Rust's main async criticism (easy to leak tasks). Swift and
 Kotlin prove this pattern works. Makes Pyrite async: "Zero-cost like Rust, but 
 safe by default." Stable Release feature.
 
-15.23 Call-Graph Blame Tracking
+## 15.23 Call-Graph Blame Tracking
 --------------------------------------------------------------------------------
 
 Performance contract violations show complete call chain and identify which 
@@ -378,7 +362,7 @@ why and fix at the source." Makes @noalloc/@cost_budget practical for large
 codebases. The killer feature that makes performance contracts composable. Beta Release 
 flagship feature.
 
-15.24 IDE Hover Integration
+## 15.24 IDE Hover Integration
 --------------------------------------------------------------------------------
 
 Rich tooltips in IDE show ownership state, memory layout, and performance costs 
@@ -398,7 +382,7 @@ coding. Research suggests that visual feedback can accelerate learning (specific
 improvements in the 40-60% range, though results vary by study methodology). The missing 
 piece in teaching systems programming. Beta Release high-impact feature.
 
-15.25 Explicit Loop Unrolling
+## 15.25 Explicit Loop Unrolling
 --------------------------------------------------------------------------------
 
 @unroll attribute provides explicit control over loop unrolling with compiler--
@@ -416,7 +400,7 @@ Impact: Fills gap between compiler auto-optimization and manual assembly. Provid
 explicit control for performance-critical kernels while maintaining safety. Beta Release 
 performance feature.
 
-15.26 LTO and Peak Performance Mode
+## 15.26 LTO and Peak Performance Mode
 --------------------------------------------------------------------------------
 
 First-class Link-Time Optimization with simple flags:
@@ -431,7 +415,7 @@ Impact: Makes "absolute best performance" a one-command operation. LTO adds 15-2
 improvement, combined with PGO yields 30-50% total improvement vs plain release. 
 Eliminates tedium while delivering maximum performance. Beta Release high-impact feature.
 
-15.27 Extended CPU Multi-Versioning
+## 15.27 Extended CPU Multi-Versioning
 --------------------------------------------------------------------------------
 
 @multi_version supports arbitrary CPU features beyond SIMD:
@@ -450,7 +434,7 @@ Impact: Extends "fast everywhere" beyond SIMD to general CPU features. Single
 binary optimized for baseline and modern CPUs. No other systems language makes 
 this so comprehensive. Stable Release flagship enhancement.
 
-15.28 Safe Accessors with Optimizer Elision
+## 15.28 Safe Accessors with Optimizer Elision
 --------------------------------------------------------------------------------
 
 Collection APIs provide bounds-checked accessors that optimize to zero cost when 
@@ -469,7 +453,7 @@ safe and fast aren't opposed-compiler makes safe code fast when it can prove
 correctness. Teaches performance intuition organically. Alpha/Beta stdlib design 
 principle.
 
-15.29 Learning Profile Mode
+## 15.29 Learning Profile Mode
 --------------------------------------------------------------------------------
 
 One-command beginner-friendly setup:
@@ -488,7 +472,7 @@ Impact: "Pyrite has a beginner mode" is a powerful marketing message for Python
 developers. Zero new language complexity (just configuration). One command removes 
 onboarding friction. Stable Release feature (after core compiler is stable).
 
-15.30 Tensor Type for Numerical Computing
+## 15.30 Tensor Type for Numerical Computing
 --------------------------------------------------------------------------------
 
 First-class tensor type with compile-time shape checking:
@@ -509,7 +493,7 @@ ML inference without becoming "yet another ML framework." Provides the foundatio
 and "use heavyweight framework." Stable Release feature (after SIMD and algorithmic 
 helpers).
 
-15.31 Noalias/Restrict Semantics
+## 15.31 Noalias/Restrict Semantics
 --------------------------------------------------------------------------------
 
 Expert-level optimization for asserting non-aliasing:
@@ -530,7 +514,7 @@ Impact: Fills niche gap for cases where ownership can't prove disjointness
 quarry cost shows when @noalias would help. Stable Release feature (expert-only, after 
 ownership is solid).
 
-15.32 GPU Computing Support
+## 15.32 GPU Computing Support
 --------------------------------------------------------------------------------
 
 Extend Pyrite's contract system to GPU kernels:
@@ -560,7 +544,7 @@ Differentiates Pyrite as "embedded to GPU, same safety everywhere." Positions as
 Mojo competitor but with better teachability (blame tracking explains GPU 
 restrictions). Future Release feature (after CPU-side language is rock-solid).
 
-15.33 Performance Lockfile - Enforced "Fast Forever"
+## 15.33 Performance Lockfile - Enforced "Fast Forever"
 --------------------------------------------------------------------------------
 
 Performance regression prevention through baseline tracking and CI enforcement:
@@ -592,7 +576,7 @@ Pyrite makes it one command instead of custom infrastructure.
 
 Beta Release flagship feature (after quarry perf is stable).
 
-15.34 Enhanced Layout and Aliasing Introspection
+## 15.34 Enhanced Layout and Aliasing Introspection
 --------------------------------------------------------------------------------
 
 Deep visibility into memory layout and compiler optimization assumptions:
@@ -621,7 +605,7 @@ Pairs perfectly with existing quarry explain-type. Together they answer:
 
 Stable Release enhancement (extends existing type introspection).
 
-15.35 Fuzzing and Sanitizers - Runtime Verification
+## 15.35 Fuzzing and Sanitizers - Runtime Verification
 --------------------------------------------------------------------------------
 
 Industry-standard runtime verification catches bugs that static analysis misses:
@@ -662,7 +646,7 @@ Zero runtime cost (test builds only), high confidence multiplier. Required for:
 Beta Release feature (fuzzing + ASan/TSan/UBSan integration).
 Stable Release feature (Miri-equivalent interpreter).
 
-15.36 Autotuning as Codegen Tool
+## 15.36 Autotuning as Codegen Tool
 --------------------------------------------------------------------------------
 
 Machine-specific parameter optimization without runtime cost:
@@ -813,7 +797,7 @@ but **comprehensive excellence** - safety, performance, learning, productivity,
 transparency, security, production, global reach, quality, and joy. Pyrite 
 delivers on all of them.
 
-15.37 Supply-Chain Security and Trust
+## 15.37 Supply-Chain Security and Trust
 --------------------------------------------------------------------------------
 
 Comprehensive supply-chain security as first-class features:
@@ -864,7 +848,7 @@ Real-world validation:
 
 Stable Release implementation (after core package registry is stable).
 
-15.38 Argument Convention Aliases
+## 15.38 Argument Convention Aliases
 --------------------------------------------------------------------------------
 
 Optional teaching keywords that desugar to standard reference syntax:
@@ -914,7 +898,7 @@ Pyrite's approach: Provide the tool, let educators decide when to use it.
 
 Beta Release implementation (parser-level sugar, trivial to add).
 
-15.39 Enhanced PGO Workflow
+## 15.39 Enhanced PGO Workflow
 --------------------------------------------------------------------------------
 
 Manual profile-guided optimization with full control:
@@ -959,7 +943,7 @@ Typical improvement: 10-30% performance gain for real-world workloads.
 
 Beta Release implementation (extends existing PGO support).
 
-15.40 Interactive REPL with Ownership Visualization
+## 15.40 Interactive REPL with Ownership Visualization
 --------------------------------------------------------------------------------
 
 Interactive Read-Eval-Print Loop that makes ownership tangible and enables 
@@ -994,7 +978,7 @@ gratification.
 
 Beta Release implementation (high priority).
 
-15.41 Binary Size Profiling
+## 15.41 Binary Size Profiling
 --------------------------------------------------------------------------------
 
 Embedded-critical tooling for flash memory optimization:
@@ -1024,7 +1008,7 @@ Must match Rust's cargo bloat for competitive parity.
 
 Beta Release implementation (critical for embedded credibility).
 
-15.42 Deterministic and Reproducible Builds
+## 15.42 Deterministic and Reproducible Builds
 --------------------------------------------------------------------------------
 
 Bit-for-bit identical binaries from identical sources:
@@ -1053,7 +1037,7 @@ Table-stakes for security-critical deployments.
 
 Beta Release implementation (critical for supply-chain security).
 
-15.43 Incremental Compilation
+## 15.43 Incremental Compilation
 --------------------------------------------------------------------------------
 
 Fast rebuilds through module-level caching:
@@ -1076,7 +1060,7 @@ this, even fast compiler feels slow on large projects.
 
 Beta Release implementation (critical for productivity).
 
-15.44 Internationalized Error Messages
+## 15.44 Internationalized Error Messages
 --------------------------------------------------------------------------------
 
 Native language compiler diagnostics for global adoption:
@@ -1102,7 +1086,7 @@ differentiator.
 
 Stable Release implementation (high impact, moderate complexity).
 
-15.45 Built-In Observability
+## 15.45 Built-In Observability
 --------------------------------------------------------------------------------
 
 Production observability with zero-cost elimination:
@@ -1128,7 +1112,7 @@ Required for server/cloud use cases.
 
 Stable Release implementation (required for production deployments).
 
-15.46 Energy Profiling
+## 15.46 Energy Profiling
 --------------------------------------------------------------------------------
 
 Power consumption visibility and battery-life optimization:
@@ -1158,7 +1142,7 @@ Forward-thinking differentiation with practical value.
 
 Stable Release implementation (unique positioning).
 
-15.47 Hot Reloading for Development
+## 15.47 Hot Reloading for Development
 --------------------------------------------------------------------------------
 
 Live code updates without restart:
@@ -1184,7 +1168,7 @@ Productivity enhancement for certain workflows.
 
 Stable Release implementation (developer experience).
 
-15.48 Community Transparency Dashboard
+## 15.48 Community Transparency Dashboard
 --------------------------------------------------------------------------------
 
 Public metrics that make developer adoption measurable:
@@ -1213,7 +1197,7 @@ No competitor has comprehensive public dashboard - unique transparency.
 
 Stable Release implementation (advocacy multiplier).
 
-15.49 Design by Contract
+## 15.49 Design by Contract
 --------------------------------------------------------------------------------
 
 Logical correctness verification through contracts:
@@ -1240,7 +1224,7 @@ Bridges gap: "memory-safe but logically incorrect" is still wrong.
 
 Stable Release implementation (certification requirement).
 
-15.50 Formal Semantics Specification
+## 15.50 Formal Semantics Specification
 --------------------------------------------------------------------------------
 
 Mathematical specification of language behavior:
@@ -1267,7 +1251,7 @@ Differentiates Pyrite as "verifiable, not just safe."
 
 Stable Release implementation (certification, research).
 
-15.51 Dead Code Analysis and Elimination
+## 15.51 Dead Code Analysis and Elimination
 --------------------------------------------------------------------------------
 
 Comprehensive unused code detection for binary size optimization:
@@ -1297,7 +1281,7 @@ with quarry bloat completes size optimization story.
 
 Beta Release implementation (valuable for embedded + maintainability).
 
-15.52 Dependency License Compliance
+## 15.52 Dependency License Compliance
 --------------------------------------------------------------------------------
 
 Automated legal compatibility checking for enterprise adoption:
@@ -1323,7 +1307,7 @@ Trust signal: Pyrite understands legal requirements, not just technical.
 
 Stable Release implementation (extends SBOM work).
 
-15.53 Configuration Attributes and Feature Flags
+## 15.53 Configuration Attributes and Feature Flags
 --------------------------------------------------------------------------------
 
 Structured conditional compilation without textual preprocessing:
@@ -1355,7 +1339,7 @@ mentioned in specification but fully detailed now.
 
 Alpha Release implementation (essential for portability).
 
-15.54 Python Interop Roadmap
+## 15.54 Python Interop Roadmap
 --------------------------------------------------------------------------------
 
 Strategic expansion for numerical/data science markets (Future Release):

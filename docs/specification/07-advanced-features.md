@@ -6,23 +6,19 @@ order: 7
 
 # Advanced Features (Traits, Generics, and More)
 
-================================================================================
-
 While Pyrite's core is procedural and data-oriented (like C), it offers 
 higher-level abstraction mechanisms inspired by Rust's traits and Python's 
 duck-typing, aiming to achieve flexibility without sacrificing performance. These 
 features are optional - a beginner can ignore them initially - but they enable 
 writing expressive and reusable code as one's proficiency grows.
 
-7.0 Type Introspection: quarry explain-type
---------------------------------------------------------------------------------
+## 7.0 Type Introspection: quarry explain-type
 
 To support Pyrite's "Intuitive Memory Model for Learners" (section 1.5), the 
 tooling provides a first-class type introspection command that makes memory 
 layouts and properties visible:
 
-Command Usage
-~~~~~~~~~~~~~
+### Command Usage
 
     quarry explain-type TypeName
     quarry explain-type TypeName --verbose
@@ -30,8 +26,7 @@ Command Usage
 This command displays standardized "type badges" and memory characteristics in 
 plain language, making low-level concepts tangible for beginners.
 
-Example Output: Primitive Type
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Example Output: Primitive Type
 
     $ quarry explain-type int
     
@@ -54,8 +49,7 @@ Example Output: Primitive Type
       • Copy cost: O(1) - single register copy
       • Pass by value: Efficient (fits in register)
 
-Example Output: Collection Type
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Example Output: Collection Type
 
     $ quarry explain-type List[int]
     
@@ -95,8 +89,7 @@ Example Output: Collection Type
       • Borrow for reading: fn process(items: &List[int])
       • Take ownership: fn consume(items: List[int])
 
-Example Output: Custom Type
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Example Output: Custom Type
 
     $ quarry explain-type ImageBuffer
     
@@ -132,8 +125,7 @@ Example Output: Custom Type
       ✓  Use Box<ImageBuffer> to move to heap
       ✓  Consider redesign: separate data buffer from metadata
 
-Type Badge Reference
-~~~~~~~~~~~~~~~~~~~~
+### Type Badge Reference
 
 The type introspection system uses standardized badges:
 
@@ -160,8 +152,7 @@ Views:
   [BorrowedView] - Refers to data owned elsewhere (e.g., &str, &[T])
   [OwnedData]    - Owns its data
 
-Integration with Learning
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Integration with Learning
 
 Type introspection serves multiple purposes:
 
@@ -186,8 +177,7 @@ Type introspection serves multiple purposes:
    - Quick-info shows size and properties
    - Inline hints for expensive types (>1KB)
 
-Verbose Mode
-~~~~~~~~~~~~
+### Verbose Mode
 
     $ quarry explain-type List[int] --verbose
 
@@ -212,8 +202,7 @@ Every type becomes self-documenting. The explicit, beginner-friendly presentatio
 teaches systems programming concepts through concrete examples rather than 
 abstract theory.
 
-Enhanced Layout and Aliasing Introspection
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Enhanced Layout and Aliasing Introspection
 
 Building on the core quarry explain-type functionality, additional commands 
 provide deep visibility into memory layout and aliasing guarantees for 
@@ -430,8 +419,7 @@ This trio makes performance optimization systematic:
 
 Implementation: Stable Release (after core quarry explain-type is stable)
 
-7.1 Traits and Generics (Parametric Polymorphism)
---------------------------------------------------------------------------------
+## 7.1 Traits and Generics (Parametric Polymorphism)
 
 Traits (Interfaces)
 ~~~~~~~~~~~~~~~~~~~
@@ -536,8 +524,7 @@ efficiency. For a beginner, traits might feel like an advanced topic, but they
 mirror patterns they might know in dynamic languages (like "if it quacks like a 
 duck, treat it as a duck"). Pyrite just formalizes the "quack" into a trait.
 
-7.2 Methods and Associated Functions
---------------------------------------------------------------------------------
+## 7.2 Methods and Associated Functions
 
 Pyrite allows you to associate functions with types, which provides a sort of 
 lightweight object-oriented feel without actual classes. These are methods 
@@ -631,8 +618,7 @@ inheritance. It's a pragmatic middle ground: you can encapsulate behavior with
 data and invoke it in a nice way, and the language remains oriented around 
 structs and functions under the hood.
 
-7.3 Contract Programming: Design by Contract (Stable Release)
---------------------------------------------------------------------------------
+## 7.3 Contract Programming: Design by Contract (Stable Release)
 
 Beyond memory safety (ownership) and performance guarantees (@cost_budget), 
 Pyrite provides Design by Contract for logical correctness verification. 
@@ -948,7 +934,7 @@ Priority: High (correctness + certification + differentiation)
 Complexity: High (SMT integration for verification, runtime checking)
 Impact: High (enables safety certification, prevents logic bugs)
 
-7.4 Noalias and Restrict Semantics (Stable Release, Expert Feature)
+## 7.4 Noalias and Restrict Semantics (Stable Release, Expert Feature)
 --------------------------------------------------------------------------------
 
 For advanced performance optimization, Pyrite provides explicit non-aliasing 
@@ -1101,8 +1087,7 @@ performance gains for the right use cases.
 
 Implementation: Stable Release (after core ownership and performance tooling are stable)
 
-7.5 Two-Tier Closure Model: Parameter vs Runtime (Beta Release)
---------------------------------------------------------------------------------
+## 7.5 Two-Tier Closure Model: Parameter vs Runtime (Beta Release)
 
 Pyrite distinguishes between two fundamentally different kinds of closures, making 
 the performance characteristics explicit and enabling zero-cost abstractions for 
@@ -1633,8 +1618,7 @@ Implementation: Beta Release (after core ownership and algorithmic helpers exist
 Complexity: Moderate (new closure type, parameter tracking, inline verification)
 Impact: High (unlocks verifiable zero-cost abstractions)
 
-7.6 Compile-Time Code Execution and Metaprogramming
---------------------------------------------------------------------------------
+## 7.6 Compile-Time Code Execution and Metaprogramming
 
 Pyrite incorporates capabilities for executing code at compile time, inspired by 
 Zig's comptime functions, Rust's const fn, Mojo's parameterization, and C++'s 

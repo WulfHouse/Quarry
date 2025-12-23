@@ -6,8 +6,6 @@ order: 17
 
 # Conclusion
 
-================================================================================
-
 Pyrite is the amalgamation of the best ideas from decades of programming language 
 development. From Python, it inherits approachability and readability - the 
 philosophy that code should be intuitive and clear. A beginner can read Pyrite 

@@ -12,8 +12,7 @@ matching, etc.) with a syntax leaning towards Python's readability. There are
 also some additions inspired by modern languages to handle errors and pattern 
 matching in a safer way.
 
-6.1 Conditionals
---------------------------------------------------------------------------------
+## 6.1 Conditionals
 
 The if statement in Pyrite is similar to Python's. For example:
 
@@ -41,8 +40,7 @@ if a > b else b will set max_val to the greater of a or b. This is purely an
 expression and does not use a question-mark like C; it uses the Python-style 
 syntax for familiarity.
 
-6.2 Loops
---------------------------------------------------------------------------------
+## 6.2 Loops
 
 Pyrite provides both while loops and for loops.
 
@@ -101,8 +99,7 @@ This would print each number in the vector. If nums was empty, the loop would
 simply not execute at all (0 iterations). The loop construct abstracts away the 
 indexing and bounds-checking (the iterator will handle that safely).
 
-6.3 Pattern Matching
---------------------------------------------------------------------------------
+## 6.3 Pattern Matching
 
 Borrowing a powerful feature from Rust (and many functional languages), Pyrite 
 includes a match construct for pattern matching on values, particularly on enums 
@@ -218,8 +215,7 @@ You can use `_` (wildcard) to handle all remaining cases:
         _:
             print("other")
 
-6.4 Function Calls and Operators
---------------------------------------------------------------------------------
+## 6.4 Function Calls and Operators
 
 ### Function Calls
 
@@ -287,8 +283,7 @@ While it's still good practice to avoid complex expressions with multiple side
 effects, Pyrite ensures that when they occur, behavior is consistent and 
 understandable.
 
-6.5 Error Handling
---------------------------------------------------------------------------------
+## 6.5 Error Handling
 
 Rather than using exceptions for error handling, Pyrite opts for a more explicit, 
 type-based approach that avoids hidden control flow and runtime overhead. There 

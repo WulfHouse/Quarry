@@ -6,12 +6,7 @@ order: 11
 
 # Foreign Function Interface (FFI) and Interoperability
 
-================================================================================
-11. FOREIGN FUNCTION INTERFACE (FFI) AND INTEROPERABILITY
---------------------------------------------------------------------------------
-
-11.1 C Foreign Function Interface
---------------------------------------------------------------------------------
+## 11.1 C Foreign Function Interface
 
 Pyrite is engineered to integrate seamlessly with existing C/C++ codebases. The 
 FFI (foreign function interface) allows calling external C functions directly and 
@@ -53,8 +48,7 @@ All these ecosystem features make Pyrite not just a bare language, but a
 practical tool for real projects. Part of being "most loved" is having a smooth 
 development experience, not just the language syntax and features.
 
-11.2 Build System Integration
---------------------------------------------------------------------------------
+## 11.2 Build System Integration
 
 The build tooling for Pyrite (Quarry) includes:
 
@@ -67,8 +61,7 @@ The build tooling for Pyrite (Quarry) includes:
 
 See section 8 (Tooling: Quarry Build System) for comprehensive details.
 
-11.3 Future: Automatic Binding Generation
---------------------------------------------------------------------------------
+## 11.3 Future: Automatic Binding Generation
 
 While the initial release focuses on manual FFI declarations, future versions 
 will include quarry bindgen to automatically generate Pyrite bindings from C 
@@ -79,8 +72,7 @@ header files:
 This eliminates tedious manual translation of large C APIs, similar to Rust's 
 bindgen tool.
 
-11.4 Python Interoperability (Future Release)
---------------------------------------------------------------------------------
+## 11.4 Python Interoperability (Future Release)
 
 After establishing Pyrite in embedded and server domains (Phases 1-3), Python 
 interoperability becomes a strategic adoption wedge for numerical computing and 

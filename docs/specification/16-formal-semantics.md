@@ -6,15 +6,12 @@ order: 16
 
 # Formal Semantics and Verification
 
-================================================================================
-
 For safety-critical applications requiring formal verification and certification, 
 Pyrite provides a mathematically rigorous specification of its semantics. This 
 enables external verification tools, academic research, and certification 
 processes that require formal methods.
 
-16.1 Formal Memory Model
---------------------------------------------------------------------------------
+## 16.1 Formal Memory Model
 
 The memory model defines when memory operations are valid and what constitutes 
 undefined behavior. This is specified using operational semantics and happens--
@@ -186,8 +183,7 @@ For verification, each operation has axiomatic specification:
 Verification tools can reason about list operations using these axioms without 
 analyzing implementation.
 
-16.2 Certification Support
---------------------------------------------------------------------------------
+## 16.2 Certification Support
 
 The formal semantics document enables Pyrite's use in safety-critical systems 
 requiring certification:
@@ -237,8 +233,7 @@ Pyrite support:
   • No undefined behavior in safe code
   • Formal semantics for verification tools
 
-16.3 Academic and Research Applications
---------------------------------------------------------------------------------
+## 16.3 Academic and Research Applications
 
 The formal semantics enables academic research:
 

@@ -4,8 +4,6 @@ section: 1
 order: 1
 ---
 
-> **⚠️ Note:** This is part of the aspirational SSOT specification. It represents the intended design and vision for Pyrite, not necessarily the current implementation state. See [SSOT_DISCLAIMER.md](../SSOT_DISCLAIMER.md) for important information.
-
 # Design Goals and Philosophy
 
 Pyrite is a compiled systems programming language designed to combine the 

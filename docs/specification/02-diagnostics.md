@@ -15,8 +15,7 @@ among the top factors in language satisfaction. Rust's success is strongly tied
 to rustc's famous diagnostics, which teach ownership and borrowing through clear, 
 actionable error messages.
 
-2.1 Error Message Design Principles
---------------------------------------------------------------------------------
+## 2.1 Error Message Design Principles
 
 Every Pyrite compiler error follows a structured format:
 
@@ -48,8 +47,7 @@ Example error format:
                3. Have 'process' return ownership after using it
        = explain: Run 'forge --explain P0234' for detailed explanation
 
-2.2 Ownership and Borrowing Diagnostics
---------------------------------------------------------------------------------
+## 2.2 Ownership and Borrowing Diagnostics
 
 Because ownership and borrowing are novel concepts for many programmers, Pyrite 
 provides specialized diagnostics with timeline visualizations:
@@ -100,8 +98,7 @@ Borrow conflict example:
        = explain: Run 'forge --explain P0502' for borrowing rules
        = visual: Run 'forge --explain P0502 --visual' for interactive diagram
 
-2.3 Memory and Performance Diagnostics
---------------------------------------------------------------------------------
+## 2.3 Memory and Performance Diagnostics
 
 Pyrite's cost-transparency philosophy extends to compiler warnings about 
 expensive operations:
@@ -150,8 +147,7 @@ Copy warning example:
                
                fn process(img: &mut ImageBuffer):
 
-2.4 Explain System
---------------------------------------------------------------------------------
+## 2.4 Explain System
 
 Every compiler error and warning has a unique error code (e.g., P0234, P1050) 
 that maps to detailed explanations accessible via:
@@ -291,8 +287,7 @@ This visual enhancement transforms the hardest part of Pyrite (ownership) from
 "read text and imagine" to "see the flow directly." It's the difference between 
 reading about chess moves vs. seeing the board.
 
-2.5 IDE Hover: Ownership and Performance Metadata
---------------------------------------------------------------------------------
+## 2.5 IDE Hover: Ownership and Performance Metadata
 
 To make memory management and performance characteristics immediately visible, 
 Pyrite's Language Server Protocol (LSP) implementation provides rich hover 
@@ -520,8 +515,7 @@ programming.
 Implementation: Beta Release, integrated with pyrite-lsp server. Requires coordination 
 with static analyzer and quarry cost system to provide accurate information.
 
-2.6 Diagnostic Quality Standards
---------------------------------------------------------------------------------
+## 2.6 Diagnostic Quality Standards
 
 All compiler messages must meet these standards:
 
