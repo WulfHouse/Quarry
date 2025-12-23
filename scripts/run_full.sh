@@ -1,7 +1,12 @@
 #!/bin/bash
 
 # FULL gate runner
-# Usage: ./scripts/run_full.sh
+# Usage: ./scripts/run_gates.sh -- ./scripts/run_full.sh
+
+if [[ -z "$PYRITE_WRAPPED" ]]; then
+    echo "ERROR: run_full.sh must be executed via ./scripts/run_gates.sh"
+    exit 1
+fi
 
 echo "Running FULL gate..."
 

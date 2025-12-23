@@ -3,6 +3,11 @@
 # Fail-fast guard against reintroducing PowerShell or non-sh wrappers
 # Usage: ./scripts/run_gates.sh -- ./scripts/check_no_powershell.sh
 
+if [[ -z "$PYRITE_WRAPPED" ]]; then
+    echo "ERROR: check_no_powershell.sh must be executed via ./scripts/run_gates.sh"
+    exit 1
+fi
+
 echo "Checking for prohibited PowerShell/CMD artifacts..."
 
 PROHIBITED_EXTENSIONS=("*.ps1" "*.bat" "*.cmd")
@@ -33,6 +38,7 @@ for PATTERN in "${PROHIBITED_PATTERNS[@]}"; do
         --exclude-dir=.pyrite \
         --exclude=check_no_powershell.sh \
         --exclude=run_fast.sh \
+        --exclude=install-hooks.sh \
         --exclude=README_COMMAND_POLICY.md \
         --exclude=*.log \
         --exclude=*.o \

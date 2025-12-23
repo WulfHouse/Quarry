@@ -34,6 +34,8 @@ if [[ -z "$LOCALAPPDATA" ]]; then
     LOCALAPPDATA="/c/Users/$(whoami)/AppData/Local"
 fi
 
+export PYRITE_WRAPPED=1
+
 LOG_DIR="${LOCALAPPDATA}/pyrite/logs"
 mkdir -p "$LOG_DIR"
 
