@@ -2,13 +2,13 @@
 
 - Last updated: December 23, 2025
 - Mode: REQ_TO_LEAF
-- Baseline totals: REQ=423 SPEC=300 NODE=40 LEAF=260
-- Progress: mapped_to_leaf=300/423
+- Baseline totals: REQ=423 SPEC=305 NODE=40 LEAF=265
+- Progress: mapped_to_leaf=326/423
 - Cursor:
-  - next_unmapped_req: REQ-301
+  - next_unmapped_req: REQ-327
   - batch_size: 25
-  - last_completed_req: REQ-300
-- This run targets: REQ -> LEAF Mapping (Batch 12)
+  - last_completed_req: REQ-326
+- This run targets: REQ -> LEAF Mapping (Batch 13)
 
 # Pyrite + Quarry Technical Specification (SSOT Implementation Guide)
 
@@ -4225,10 +4225,10 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-298 -> SPEC-LANG-0872
 - REQ-299 -> SPEC-LANG-0873
 - REQ-300 -> SPEC-LANG-0601
-- REQ-301 -> SPEC-LANG-0600
-- REQ-302 -> SPEC-LANG-0600
-- REQ-303 -> SPEC-LANG-0807
-- REQ-304 -> SPEC-LANG-0600
+- REQ-301 -> SPEC-LANG-0601, SPEC-LANG-0603
+- REQ-302 -> SPEC-LANG-0602
+- REQ-303 -> SPEC-LANG-0808
+- REQ-304 -> SPEC-LANG-0602
 - REQ-305 -> SPEC-FORGE-0303
 - REQ-306 -> SPEC-FORGE-0303
 - REQ-307 -> SPEC-FORGE-0303
@@ -4236,7 +4236,7 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-309 -> SPEC-LANG-0808
 - REQ-310 -> SPEC-LANG-0809
 - REQ-311 -> SPEC-LANG-0809
-- REQ-312 -> SPEC-LANG-0807
+- REQ-312 -> SPEC-LANG-0808, SPEC-LANG-0809
 - REQ-313 -> SPEC-LANG-0810
 - REQ-314 -> SPEC-LANG-0810
 - REQ-315 -> SPEC-QUARRY-0107
@@ -10688,6 +10688,102 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-LANG-0810: Cache-aware tiling (tile)
 
+#### SPEC-LANG-0808: Automated Vectorization (vectorize)
+
+**Kind:** LEAF
+
+**Source:** REQ-303, REQ-309, REQ-312, SSOT Section 9.12
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `algorithm.vectorize` in the standard library.
+
+- Use zero-cost parameter closures to generate SIMD loops from scalar operations.
+
+- Correct handling of loop remainders and alignment constraints.
+
+**User-facing behavior:**
+
+- `algorithm.vectorize(data, |x| x * 2.0)` automatically uses SIMD instructions.
+
+**Semantics:**
+
+- Elements are processed in chunks matching the target's preferred vector width.
+
+**Tests required:**
+
+- Unit: Compare output of vectorized vs. scalar loops for various data sizes.
+
+- Integration: Verify LLVM IR contains vector instructions.
+
+**Dependencies:**
+
+- SPEC-LANG-0601
+
+#### SPEC-LANG-0809: Structured Parallelism (parallelize)
+
+**Kind:** LEAF
+
+**Source:** REQ-310, REQ-311, REQ-312, SSOT Section 9.12
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `algorithm.parallelize` in the standard library.
+
+- Automatic work distribution across available CPU cores.
+
+- Guaranteed join of all worker threads before returning.
+
+- Propagation of errors or panics from worker threads to the caller.
+
+**User-facing behavior:**
+
+- `algorithm.parallelize(data, |slice| process(slice))` for safe multi-core execution.
+
+**Semantics:**
+
+- Uses a global task pool with work-stealing for efficiency.
+
+**Tests required:**
+
+- Unit: Verify all elements are processed correctly in parallel.
+
+- Unit: Verify error propagation from a worker thread.
+
+#### SPEC-LANG-0810: Cache-aware Tiling (tile)
+
+**Kind:** LEAF
+
+**Source:** REQ-313, REQ-314, SSOT Section 9.12
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement `algorithm.tile` in the standard library.
+
+- Process data in blocks (tiles) optimized for cache hierarchy.
+
+**User-facing behavior:**
+
+- `algorithm.tile(data, size=64, |block| ...)` for cache-friendly access.
+
+**Tests required:**
+
+- Unit: Verify correct block-wise processing.
+
+- Integration: Measure cache misses compared to non-tiled versions for large datasets.
+
 #### SPEC-LANG-0815: Stdlib Design Conventions (Borrowing, Costs, Builders)
 
 **Kind:** LEAF
@@ -11235,6 +11331,48 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-LANG-1301: Performance-documented standard library
 
 - SPEC-LANG-1302: Educational performance cookbook
+
+#### SPEC-LANG-1301: Performance-documented Standard Library
+
+**Kind:** LEAF
+
+**Source:** REQ-321, SSOT Section 9.12
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- Standard library documentation includes time/space complexity (Big O).
+
+- Documentation specifies expected allocation counts and memory behavior.
+
+- Typical execution times on common hardware are provided for performance-critical functions.
+
+**User-facing behavior:**
+
+- Developers can make informed choices based on documented performance characteristics.
+
+#### SPEC-LANG-1302: Educational Performance Cookbook
+
+**Kind:** LEAF
+
+**Source:** REQ-322, REQ-325, REQ-326, SSOT Section 9.12
+
+**Status:** PLANNED
+
+**Priority:** P3
+
+**Definition of Done:**
+
+- Create an official "Performance Cookbook" repository with self-contained, runnable examples.
+
+- Inline notes in standard library source code explain architectural optimizations (branch prediction, cache locality).
+
+**User-facing behavior:**
+
+- High-quality learning resources for writing hardware-efficient Pyrite code.
 
 #### SPEC-LANG-0021: Language Edition System
 
@@ -15305,7 +15443,7 @@ Total new P1 LEAFs: 34.
 
     - Goal: Interactive tools for developer onboarding and visualization.
 
-    - Included: SPEC-QUARRY-0201, SPEC-QUARRY-0202, SPEC-QUARRY-0203, SPEC-QUARRY-0204, SPEC-QUARRY-0025, SPEC-QUARRY-0030, SPEC-QUARRY-0033, SPEC-QUARRY-0034, SPEC-QUARRY-0035, SPEC-QUARRY-0401, SPEC-QUARRY-0402, SPEC-QUARRY-0403, SPEC-QUARRY-0404, SPEC-QUARRY-0501, SPEC-QUARRY-0502, SPEC-QUARRY-0503, SPEC-QUARRY-0504, SPEC-QUARRY-0505.
+    - Included: SPEC-QUARRY-0201, SPEC-QUARRY-0202, SPEC-QUARRY-0203, SPEC-QUARRY-0204, SPEC-QUARRY-0025, SPEC-QUARRY-0030, SPEC-QUARRY-0033, SPEC-QUARRY-0034, SPEC-QUARRY-0035, SPEC-QUARRY-0401, SPEC-QUARRY-0402, SPEC-QUARRY-0403, SPEC-QUARRY-0404, SPEC-QUARRY-0501, SPEC-QUARRY-0502, SPEC-QUARRY-0503, SPEC-QUARRY-0504, SPEC-QUARRY-0505, SPEC-LANG-1301, SPEC-LANG-1302.
 
     - Dependency satisfaction note: Depends on M7 (Codegen for JIT/WASM) and M8 (Build Orchestration).
 
@@ -15335,7 +15473,7 @@ Total new P1 LEAFs: 34.
   
     - Goal: Safe multi-threading and structured concurrency.
     
-    - Included: SPEC-LANG-1001, SPEC-LANG-1002, SPEC-LANG-1003, SPEC-LANG-1004, SPEC-LANG-1005.
+    - Included: SPEC-LANG-1001, SPEC-LANG-1002, SPEC-LANG-1003, SPEC-LANG-1004, SPEC-LANG-1005, SPEC-LANG-0808, SPEC-LANG-0809, SPEC-LANG-0810.
     
     - Dependency satisfaction note: Depends on M6 (Send/Sync) and M7 (Thread primitives).
     
@@ -15689,6 +15827,14 @@ Total new P1 LEAFs: 34.
 - **New LEAFs created:** 18 (SPEC-LANG-0823..0828, SPEC-LANG-0830..0831, SPEC-LANG-0835..0838, SPEC-LANG-0840..0841, SPEC-LANG-0850, SPEC-LANG-0870..0873)
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
 - **Roadmap Placement:** Consistent (M9, M10)
+- **Status:** PASS
+
+### REQ-to-LEAF Mapping Verification (Batch 13)
+
+- **REQ Range:** REQ-301..REQ-325
+- **New LEAFs created:** 5 (SPEC-LANG-0808, SPEC-LANG-0809, SPEC-LANG-0810, SPEC-LANG-1301, SPEC-LANG-1302)
+- **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+- **Roadmap Placement:** Consistent (M12, M14)
 - **Status:** PASS
 
 ### Loop B (Scoped): Newly added LEAFs
