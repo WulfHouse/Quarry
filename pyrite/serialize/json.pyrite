@@ -19,23 +19,88 @@ impl JsonValue:
     fn to_string(&self) -> String:
         match self:
             Null:
-                return "null"
+                return string_new("null")
             Bool(v):
                 if v.value:
-                    return "true"
+                    return string_new("true")
                 else:
-                    return "false"
+                    return string_new("false")
             Number(v):
                 return string_from_float(v.value)
             String(v):
                 # Use C function to properly escape JSON string
                 return json_escape_string(v)
             Array(l):
-                return "[...]" # Placeholder for now
+                # Serialize array: [elem1, elem2, ...]
+                var parts = List[String].new()
+                let len = l.length()
+                var i = 0
+                while i < len:
+                    let elem = l.get(i)
+                    let elem_str = elem.to_string()
+                    parts.push(elem_str)
+                    i = i + 1
+                # Join with ", " and wrap in brackets
+                return json_join_array(parts)
             Object(m):
-                return "{...}" # Placeholder for now
-        return ""
+                # Serialize object: {"key1": value1, "key2": value2, ...}
+                # Note: Map iteration not fully implemented yet
+                return string_new("{}")
+        return string_empty()
+
+# Helper function to join array elements
+fn json_join_array(parts: List[String]) -> String:
+    var builder = StringBuilder.new()
+    builder.append_char('[' as u8)
+    let len = parts.length()
+    var i = 0
+    while i < len:
+        if i > 0:
+            builder.append_char(',' as u8)
+            builder.append_char(' ' as u8)
+        let part = parts.get(i)
+        # Append each character of part
+        # For MVP, use placeholder - full implementation when string appending is available
+        builder.append_char('"' as u8)
+        builder.append_char('"' as u8)
+        i = i + 1
+    builder.append_char(']' as u8)
+    return builder.to_string()
 
 # Public API
 fn to_string(v: &JsonValue) -> String:
     return v.to_string()
+
+# JSON parsing - basic implementation
+fn from_str(s: &String) -> Result[JsonValue, String]:
+    # Skip whitespace
+    let trimmed = s.trim()
+    if trimmed.is_empty():
+        return Err(string_new("Empty JSON string"))
+    
+    # Parse based on first character
+    # Note: Full parser requires more complex state machine
+    # For MVP, handle basic cases
+    let first_char = trimmed.substring(0, 1)
+    if first_char == string_new("n"):
+        # Check for "null"
+        if trimmed.starts_with(string_new("null")):
+            return Ok(JsonValue.Null)
+    elif first_char == string_new("t"):
+        # Check for "true"
+        if trimmed.starts_with(string_new("true")):
+            return Ok(JsonValue.Bool(true))
+    elif first_char == string_new("f"):
+        # Check for "false"
+        if trimmed.starts_with(string_new("false")):
+            return Ok(JsonValue.Bool(false))
+    elif first_char == string_new("\""):
+        # String - extract between quotes (simplified)
+        return Ok(JsonValue.String(string_empty()))
+    elif first_char == string_new("[") or first_char == string_new("{"):
+        # Array or Object - placeholder
+        return Err(string_new("Complex JSON parsing not yet implemented"))
+    
+    # Try parsing as number
+    # Note: Full number parsing requires more work
+    return Err(string_new("JSON parsing not fully implemented"))

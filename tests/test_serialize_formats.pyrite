@@ -1,0 +1,124 @@
+# Unit tests for SPEC-LANG-0840: Built-in Serialization Formats
+# Tests JSON and TOML to_string and from_str functions
+
+import std.serialize.formats
+import std.serialize.json
+import std.string
+
+extern "C" fn string_new(cstr: *const u8) -> String
+extern "C" fn print(s: *const u8)
+
+fn test_json_null():
+    let value = JsonValue.Null
+    let json_str = json_to_string(value)
+    assert json_str == string_new("null"), "Null should serialize to 'null'"
+    print("PASS: JSON null serialization")
+
+fn test_json_bool_true():
+    let value = JsonValue.Bool(true)
+    let json_str = json_to_string(value)
+    assert json_str == string_new("true"), "Bool(true) should serialize to 'true'"
+    print("PASS: JSON bool(true) serialization")
+
+fn test_json_bool_false():
+    let value = JsonValue.Bool(false)
+    let json_str = json_to_string(value)
+    assert json_str == string_new("false"), "Bool(false) should serialize to 'false'"
+    print("PASS: JSON bool(false) serialization")
+
+fn test_json_string():
+    let test_str = string_new("hello")
+    let value = JsonValue.String(test_str)
+    let json_str = json_to_string(value)
+    # Should be escaped with quotes
+    assert json_str.starts_with(string_new("\"")), "String should start with quote"
+    print("PASS: JSON string serialization")
+
+fn test_json_from_str_null():
+    let json_str = string_new("null")
+    let result = json_from_str(json_str)
+    match result:
+        Ok(v):
+            match v:
+                Null:
+                    print("PASS: JSON null parsing")
+                _:
+                    print("FAIL: Expected Null")
+        Err(e):
+            print("FAIL: JSON null parsing failed")
+
+fn test_json_from_str_bool_true():
+    let json_str = string_new("true")
+    let result = json_from_str(json_str)
+    match result:
+        Ok(v):
+            match v:
+                Bool(b):
+                    if b.value:
+                        print("PASS: JSON bool(true) parsing")
+                    else:
+                        print("FAIL: Expected true")
+                _:
+                    print("FAIL: Expected Bool")
+        Err(e):
+            print("FAIL: JSON bool parsing failed")
+
+fn test_json_from_str_bool_false():
+    let json_str = string_new("false")
+    let result = json_from_str(json_str)
+    match result:
+        Ok(v):
+            match v:
+                Bool(b):
+                    if not b.value:
+                        print("PASS: JSON bool(false) parsing")
+                    else:
+                        print("FAIL: Expected false")
+                _:
+                    print("FAIL: Expected Bool")
+        Err(e):
+            print("FAIL: JSON bool parsing failed")
+
+fn test_toml_bool():
+    let value = TomlValue.Boolean(true)
+    let toml_str = toml_to_string(value)
+    assert toml_str == string_new("true"), "Boolean(true) should serialize to 'true'"
+    print("PASS: TOML boolean serialization")
+
+fn test_toml_string():
+    let test_str = string_new("hello")
+    let value = TomlValue.String(test_str)
+    let toml_str = toml_to_string(value)
+    assert toml_str == test_str, "String should serialize to itself"
+    print("PASS: TOML string serialization")
+
+fn test_toml_from_str_bool():
+    let toml_str = string_new("true")
+    let result = toml_from_str(toml_str)
+    match result:
+        Ok(v):
+            match v:
+                Boolean(b):
+                    if b:
+                        print("PASS: TOML boolean parsing")
+                    else:
+                        print("FAIL: Expected true")
+                _:
+                    print("FAIL: Expected Boolean")
+        Err(e):
+            print("FAIL: TOML boolean parsing failed")
+
+fn main() -> int:
+    test_json_null()
+    test_json_bool_true()
+    test_json_bool_false()
+    test_json_string()
+    test_json_from_str_null()
+    test_json_from_str_bool_true()
+    test_json_from_str_bool_false()
+    test_toml_bool()
+    test_toml_string()
+    test_toml_from_str_bool()
+    print("All serialization format tests passed!")
+    return 0
+
