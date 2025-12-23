@@ -615,6 +615,32 @@ def test_lex_comments():
     assert "docstring" in tokens[0].value
 
 
+def test_lex_boolean_and_none():
+    """Test boolean and none literal recognition (SPEC-LANG-0019)"""
+    tokens = lex("true")
+    assert tokens[0].type == TokenType.TRUE
+    
+    tokens = lex("false")
+    assert tokens[0].type == TokenType.FALSE
+    
+    tokens = lex("None")
+    assert tokens[0].type == TokenType.NONE
+
+
+def test_lex_char_unicode_escape():
+    """Test character literal with unicode escape (SPEC-LANG-0020)"""
+    tokens = lex(r"'\u{1F600}'")
+    assert tokens[0].type == TokenType.CHAR
+    assert tokens[0].value == "\U0001F600"
+
+
+def test_lex_string_unicode_escape():
+    """Test string literal with unicode escape (SPEC-LANG-0020)"""
+    tokens = lex(r'"\u{1F600} emoji"')
+    assert tokens[0].type == TokenType.STRING
+    assert tokens[0].value == "\U0001F600 emoji"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
 

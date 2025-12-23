@@ -322,6 +322,24 @@ class Lexer:
         """Handle escape sequences in strings"""
         char = self.advance()
         
+        if char == 'u' and self.peek() == '{':
+            # Unicode escape: \u{...}
+            self.advance()  # Consume {
+            code_str = ""
+            while self.peek() != '}' and self.peek() != '\0':
+                code_str += self.advance()
+            
+            if self.peek() == '}':
+                self.advance()  # Consume }
+            else:
+                raise LexerError("Unterminated Unicode escape sequence", self.make_span(self.line, self.column))
+            
+            try:
+                # Convert hex to integer and then to character
+                return chr(int(code_str, 16))
+            except ValueError:
+                raise LexerError(f"Invalid Unicode escape sequence: {code_str}", self.make_span(self.line, self.column))
+        
         escape_chars = {
             'n': '\n',
             't': '\t',
