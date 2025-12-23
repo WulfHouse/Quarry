@@ -12,5 +12,4 @@ fn main():
             print("Value:", val)
         None:
             print("Key not found")
-    print("Value:", val)
     print("Success")

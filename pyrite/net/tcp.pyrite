@@ -23,6 +23,9 @@ impl TcpStream:
     fn send(&mut self, data: &String) -> i32:
         return tcp_send(self.handle, data.data, data.len())
     
+    fn recv(&mut self, buf: &mut [u8]) -> i32:
+        return tcp_recv(self.handle, buf.data, buf.len() as i64)
+    
     fn close(&mut self):
         tcp_close(self.handle)
 

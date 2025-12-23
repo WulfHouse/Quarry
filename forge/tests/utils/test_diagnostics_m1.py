@@ -1,5 +1,6 @@
 import pytest
-from src.utils.diagnostics import Diagnostic, DiagnosticManager, Span
+from src.frontend.tokens import Span
+from src.utils.diagnostics import Diagnostic, DiagnosticManager
 
 def test_i18n_support():
     """Test internationalization support (SPEC-FORGE-0106)"""

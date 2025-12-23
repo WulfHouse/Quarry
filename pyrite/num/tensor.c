@@ -13,6 +13,13 @@ typedef struct {
 Tensor tensor_new(int64_t rows, int64_t cols) {
     Tensor t;
     t.data = malloc(rows * cols * sizeof(double));
+    if (t.data == NULL) {
+        /* Allocation failed - return empty tensor */
+        t.data = NULL;
+        t.rows = 0;
+        t.cols = 0;
+        return t;
+    }
     t.rows = rows;
     t.cols = cols;
     memset(t.data, 0, rows * cols * sizeof(double));

@@ -2810,7 +2810,8 @@ class LLVMCodeGen:
                         # But better: check variable types in current function
                         from ..types import IntType
                         # Create a temporary GenericType for Set[int]
-                        set_generic_type = GenericType("Set", [IntType()])
+                        # Use set_type.base_type since set_type is already verified as GenericType above
+                        set_generic_type = GenericType("Set", set_type.base_type, [IntType()])
         
         if set_generic_type:
             # Handle Set[T] method calls

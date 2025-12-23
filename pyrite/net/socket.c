@@ -42,10 +42,20 @@ int64_t tcp_connect(const char* address, int32_t port) {
     serv_addr.sin_port = htons(port);
     
     if (inet_pton(AF_INET, address, &serv_addr.sin_addr) <= 0) {
+#ifdef _WIN32
+        closesocket(sock);
+#else
+        close(sock);
+#endif
         return -1;
     }
     
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+#ifdef _WIN32
+        closesocket(sock);
+#else
+        close(sock);
+#endif
         return -1;
     }
     

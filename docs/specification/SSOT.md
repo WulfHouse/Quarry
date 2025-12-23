@@ -9,17 +9,17 @@
 > This document is a **high-level master specification overview** and **hypothetical wishlist** for what the Pyrite programming language and Quarry SDK are intended to eventually become. It represents the vision and goals for the project, not necessarily the current implementation state.
 > 
 > **The SSOT may not accurately convey the current state of the project and monorepo.** For information about what is currently implemented, see:
-> - [LIMITATIONS.md](../LIMITATIONS.md) - Known limitations and incomplete features
+> - [LIMITATIONS.md](../../LIMITATIONS.md) - Known limitations and incomplete features
 >
-> - [CHANGELOG.md](../CHANGELOG.md) - What has actually been released
+> - [CHANGELOG.md](../../CHANGELOG.md) - What has actually been released
 >
-> - [README.md](../README.md) - Current project status
+> - [README.md](../../README.md) - Current project status
 >
 > - Source code and tests - Actual implementation
 
 This is the complete high-level specification for the Pyrite programming language and Quarry SDK. The specification is organized into modules for easier navigation and maintenance.
 
-For complete technical, itemized specifications with detailed implementation guidance, see [`technical-ssot.md`](../technical-ssot.md). That document provides a zero-to-final map of every feature, decomposed recursively until each item is implementable in a single PR-sized chunk with objective Definition of Done and tests.
+For complete technical, itemized specifications with detailed implementation guidance, see [`technical-ssot.md`](./technical-ssot.md). That document provides a zero-to-final map of every feature, decomposed recursively until each item is implementable in a single PR-sized chunk with objective Definition of Done and tests.
 
 ## Table of Contents
 
@@ -119,7 +119,7 @@ This specification is the Single Source of Truth (SSOT) for the **intended desig
 
 - 💡 Aspirational/hypothetical
 
-For the current implementation status, see [LIMITATIONS.md](../LIMITATIONS.md) and the actual source code.
+For the current implementation status, see [LIMITATIONS.md](../../LIMITATIONS.md) and the actual source code.
 
 The specification is maintained as modular markdown files for easier navigation and maintenance. The original monolithic `SSOT.txt` file is preserved as a backup.
 
@@ -139,6 +139,6 @@ When updating the specification:
 
 - [SSOT_DISCLAIMER.md](../SSOT_DISCLAIMER.md) - Important information about this specification
 
-- [Compiler Source](../forge/src/README.md) - Compiler implementation
+- [Compiler Source](../../forge/src/README.md) - Compiler implementation
 
 - [Bootstrap Guide](../bootstrap.md) - Self-hosting process

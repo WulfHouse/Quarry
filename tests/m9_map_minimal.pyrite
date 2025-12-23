@@ -1,7 +1,7 @@
 import std.collections.map
 
 fn main():
-    print("m9_map_stress: scale=1")
+    print("m9_map_minimal: scale=1")
     var my_map: Map[int, int] = Map.new()
     print("[MARKER 1] STARTING INSERTS")
     my_map.insert(1, 2)
@@ -12,7 +12,6 @@ fn main():
             print("Value:", val)
         None:
             print("Key not found")
-    print("Value:", val)
     print("[MARKER 3] CLEANUP")
     my_map.drop()
     print("Success")

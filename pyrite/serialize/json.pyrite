@@ -12,6 +12,9 @@ enum JsonValue:
     Array(values: List[JsonValue])
     Object(entries: Map[String, JsonValue])
 
+# FFI declaration for JSON string escaping (implemented in json.c)
+extern "C" fn json_escape_string(s: *const String) -> String
+
 impl JsonValue:
     fn to_string(&self) -> String:
         match self:
@@ -25,7 +28,8 @@ impl JsonValue:
             Number(v):
                 return string_from_float(v.value)
             String(v):
-                return "\"" + v.value + "\""
+                # Use C function to properly escape JSON string
+                return json_escape_string(v)
             Array(l):
                 return "[...]" # Placeholder for now
             Object(m):
