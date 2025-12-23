@@ -4665,6 +4665,7 @@ This section contains normative requirements identified during the Post-freeze S
 - REQ-420 -> SPEC-QUARRY-0400
 - REQ-421 -> SPEC-QUARRY-0301
 - REQ-422 -> SPEC-QUARRY-0007
+- REQ-423 -> SPEC-QUARRY-0109
 
 ### 2.y.2 Audit Ledger
 
@@ -11594,6 +11595,7 @@ For each Phase exit gate and each Milestone acceptance check referenced in Secti
 | M13       | profiling accuracy checks, lockfile regression tests | SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903 |
 | M14       | TSan results, async cancellation tests | SPEC-LANG-1001, SPEC-LANG-1002, SPEC-LANG-1003, SPEC-LANG-1004, SPEC-LANG-1005 |
 | M15       | audit reports, SBOM verification | SPEC-QUARRY-0301, SPEC-QUARRY-0302, SPEC-QUARRY-0303, SPEC-QUARRY-0304 |
+| M16       | exhaustive runtime verification tests | SPEC-QUARRY-0109 |
 
 ---
 
@@ -12623,6 +12625,29 @@ This section provides objective, checklist-driven criteria for determining relea
 - Script mode working
 
 - Basic tooling functional
+
+## 2.y Post-freeze SSOT.txt Coverage Addendum (2025-12-23)
+
+### REQ-423: `quarry miri` Interpreter
+**Type:** Feature (Future)
+**Scope:** Tooling (Quarry)
+**Source:** SSOT.txt:L6459-L6475
+**Statement:** Quarry must provide an interpreter (quarry miri) capable of exhaustive undefined behavior detection, including memory safety violations, uninitialized reads, and unsafe invariant violations, even in code blocks marked as unsafe.
+
+#### SPEC-QUARRY-0109: Miri Interpreter
+**Kind:** LEAF
+**Source:** REQ-423, SSOT.txt:L6459-L6475, L15442
+**Status:** PLANNED
+**Goal:** Provide an exhaustive runtime verification tool for catching all classes of undefined behavior.
+**User-facing behavior:**
+- The `quarry miri` command runs the project or a specific function in an interpreted environment.
+- It detects and reports memory safety violations (UAF, overflows) even in `unsafe` blocks.
+- It identifies uninitialized memory reads and invalid pointer arithmetic.
+- It verifies that `unsafe` code maintains language invariants.
+**Implementation details:**
+- Uses an interpreter-based execution model (slower but exhaustive).
+- Tracks every memory allocation and access with metadata.
+- Validates each operation against formal semantics.
 
 ## 2.z SSOT.txt Coverage Audit Ledger (WIP, 2025-12-23)
 
