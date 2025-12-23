@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Dict, Set, Optional, List
 from .. import ast
 from ..types import (Type, is_copy_type, INT, F64, STRING, BOOL, CHAR, UNKNOWN,
-                    StructType, GenericType)
+                    StructType, GenericType, UnknownType, TupleType)
 from ..frontend.tokens import Span
 from ..utils.error_formatter import ErrorFormatter
 
@@ -234,12 +234,18 @@ class OwnershipAnalyzer:
         def collect_from_block(block: ast.Block):
             for stmt in block.statements:
                 if isinstance(stmt, ast.VarDecl):
-                    # Infer type from initializer
-                    var_type = self.infer_type_from_expression(stmt.initializer)
-                    if stmt.type_annotation and self.type_checker:
-                        # Use annotated type if provided
+                    # Don't overwrite existing types (e.g., from manually set type_env)
+                    if stmt.name not in self.variable_types:
+                        # Infer type from initializer
+                        var_type = self.infer_type_from_expression(stmt.initializer)
+                        if stmt.type_annotation and self.type_checker:
+                            # Use annotated type if provided
+                            var_type = self.type_checker.resolve_type(stmt.type_annotation)
+                        self.variable_types[stmt.name] = var_type
+                    elif stmt.type_annotation and self.type_checker:
+                        # If type annotation is provided, use it even if type already exists
                         var_type = self.type_checker.resolve_type(stmt.type_annotation)
-                    self.variable_types[stmt.name] = var_type
+                        self.variable_types[stmt.name] = var_type
                 elif isinstance(stmt, (ast.IfStmt, ast.WhileStmt, ast.ForStmt, ast.MatchStmt)):
                     # Recursively collect from nested blocks
                     if isinstance(stmt, ast.IfStmt):
@@ -361,7 +367,12 @@ class OwnershipAnalyzer:
                 if isinstance(obj_type, StructType) and field_name in obj_type.fields:
                     field_type = obj_type.fields[field_name]
                 
-                if field_type and not is_copy_type(field_type):
+                # Only make ownership decisions when we have actual type information
+                # Don't treat UNKNOWN as always-move (conservative approach)
+                if (field_type and 
+                    field_type != UNKNOWN and 
+                    not isinstance(field_type, UnknownType) and 
+                    not is_copy_type(field_type)):
                     # This is a partial move of a non-Copy field
                     target_name = decl.name if hasattr(decl, 'name') else "<pattern>"
                     self.state.move_value(obj_name, target_name, decl.span, field_name=field_name)
