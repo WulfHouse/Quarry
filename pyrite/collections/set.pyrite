@@ -3,35 +3,33 @@
 # This is a wrapper for the C implementation in set.c
 
 # Set struct (matches C implementation)
-struct Set:
+struct Set[T]:
     buckets: *u8  # void** in C
     len: i64
     cap: i64
     elem_size: i64
 
 # FFI declarations for C functions
-extern "C" fn set_new(elem_size: i64) -> Set
-extern "C" fn set_insert(set: *mut Set, elem: *const u8)
-extern "C" fn set_contains(set: *const Set, elem: *const u8) -> i32
-extern "C" fn set_length(set: *const Set) -> i64
-extern "C" fn set_drop(set: *mut Set)
+extern "C" fn set_new(elem_size: i64) -> Set[T]
+extern "C" fn set_insert(set: *mut Set[T], elem: *const u8)
+extern "C" fn set_contains(set: *const Set[T], elem: *const u8) -> i32
+extern "C" fn set_length(set: *const Set[T]) -> i64
+extern "C" fn set_drop(set: *mut Set[T])
 
 # Set implementation
-# Note: For MVP, methods require explicit elem_size parameter
-# Full generic support with size_of::<T>() will come later
-impl Set:
-    fn new(elem_size: i64) -> Set:
-        return set_new(elem_size)
+# Note: Codegen intercepts these calls for generic collections
+impl Set[T]:
+    fn new() -> Set[T]:
+        return
     
-    fn insert(&mut self, elem_ptr: *const u8):
-        set_insert(self, elem_ptr)
+    fn insert(&mut self, elem: T):
+        return
     
-    fn contains(&self, elem_ptr: *const u8) -> bool:
-        let result = set_contains(self, elem_ptr)
-        return result != 0
+    fn contains(&self, elem: T) -> bool:
+        return false
     
     fn length(&self) -> i64:
-        return set_length(self)
+        return 0
     
     fn drop(&mut self):
-        set_drop(self)
+        return

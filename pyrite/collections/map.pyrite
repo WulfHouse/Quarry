@@ -11,28 +11,29 @@ struct Map[K, V]:
 
 # FFI declarations for C functions
 extern "C" fn map_new(key_size: i64, value_size: i64) -> Map[K, V]
-extern "C" fn map_insert(map: *u8, key: *const u8, value: *const u8)
-extern "C" fn map_get(map: *const u8, key: *const u8) -> *const u8
-extern "C" fn map_contains(map: *const u8, key: *const u8) -> i32
-extern "C" fn map_length(map: *const u8) -> i64
-extern "C" fn map_drop(map: *u8)
+extern "C" fn map_insert(map: *mut Map[K, V], key: *const u8, value: *const u8)
+extern "C" fn map_get(map: *const Map[K, V], key: *const u8) -> *const u8
+extern "C" fn map_contains(map: *const Map[K, V], key: *const u8) -> i32
+extern "C" fn map_length(map: *const Map[K, V]) -> i64
+extern "C" fn map_drop(map: *mut Map[K, V])
 
 # Map implementation
+# Note: Codegen intercepts these calls for generic collections
 impl Map[K, V]:
     fn new() -> Map[K, V]:
-        return
+        pass
     
     fn insert(&mut self, key: K, value: V):
-        return
+        pass
     
     fn get(&self, key: K) -> V:
-        return 1 # Dummy value
+        pass
     
     fn contains(&self, key: K) -> bool:
-        return true
+        pass
     
     fn length(&self) -> i64:
-        return 0
+        pass
     
     fn drop(&mut self):
-        return
+        pass

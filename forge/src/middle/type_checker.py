@@ -1034,6 +1034,8 @@ class TypeChecker:
             return self.check_struct_literal(expr)
         elif isinstance(expr, ast.ListLiteral):
             return self.check_list_literal(expr)
+        elif isinstance(expr, ast.GenericType):
+            return self.resolve_type(expr)
         elif isinstance(expr, ast.TupleLiteral):
             element_types = [self.check_expression(elem) for elem in expr.elements]
             return TupleType(element_types)

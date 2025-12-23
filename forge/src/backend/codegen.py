@@ -417,6 +417,59 @@ class LLVMCodeGen:
             [map_struct_ty.as_pointer()]
         )
         self.map_length = ir.Function(self.module, map_length_ty, name="map_length")
+        
+        # List FFI functions
+        # List struct type: { data: *void, len: i64, cap: i64 }
+        list_struct_ty = ir.LiteralStructType([
+            ir.IntType(8).as_pointer(),  # data
+            ir.IntType(64),              # len
+            ir.IntType(64)               # cap
+        ])
+        
+        # list_new(elem_size: i64) -> List
+        list_new_ty = ir.FunctionType(list_struct_ty, [ir.IntType(64)])
+        self.list_new = ir.Function(self.module, list_new_ty, name="list_new")
+
+        # list_with_capacity(elem_size: i64, capacity: i64) -> List
+        list_with_capacity_ty = ir.FunctionType(list_struct_ty, [ir.IntType(64), ir.IntType(64)])
+        self.list_with_capacity = ir.Function(self.module, list_with_capacity_ty, name="list_with_capacity")
+        
+        # list_push(list: *mut List, elem: *const void, elem_size: i64) -> void
+        list_push_ty = ir.FunctionType(ir.VoidType(), [list_struct_ty.as_pointer(), ir.IntType(8).as_pointer(), ir.IntType(64)])
+        self.list_push = ir.Function(self.module, list_push_ty, name="list_push")
+        
+        # list_get(list: *const List, index: i64, elem_size: i64) -> *const void
+        list_get_ty = ir.FunctionType(ir.IntType(8).as_pointer(), [list_struct_ty.as_pointer(), ir.IntType(64), ir.IntType(64)])
+        self.list_get = ir.Function(self.module, list_get_ty, name="list_get")
+        
+        # list_length(list: *const List) -> i64
+        list_length_ty = ir.FunctionType(ir.IntType(64), [list_struct_ty.as_pointer()])
+        self.list_length = ir.Function(self.module, list_length_ty, name="list_length")
+
+        # Set FFI functions
+        # Set struct type: { buckets: *void, len: i64, cap: i64, elem_size: i64 }
+        set_struct_ty = ir.LiteralStructType([
+            ir.IntType(8).as_pointer(),  # buckets
+            ir.IntType(64),              # len
+            ir.IntType(64),              # cap
+            ir.IntType(64)               # elem_size
+        ])
+        
+        # set_new(elem_size: i64) -> Set
+        set_new_ty = ir.FunctionType(set_struct_ty, [ir.IntType(64)])
+        self.set_new = ir.Function(self.module, set_new_ty, name="set_new")
+        
+        # set_insert(set: *mut Set, elem: *const void) -> void
+        set_insert_ty = ir.FunctionType(ir.VoidType(), [set_struct_ty.as_pointer(), ir.IntType(8).as_pointer()])
+        self.set_insert = ir.Function(self.module, set_insert_ty, name="set_insert")
+        
+        # set_contains(set: *const Set, elem: *const void) -> i8
+        set_contains_ty = ir.FunctionType(ir.IntType(8), [set_struct_ty.as_pointer(), ir.IntType(8).as_pointer()])
+        self.set_contains = ir.Function(self.module, set_contains_ty, name="set_contains")
+        
+        # set_length(set: *const Set) -> i64
+        set_length_ty = ir.FunctionType(ir.IntType(64), [set_struct_ty.as_pointer()])
+        self.set_length = ir.Function(self.module, set_length_ty, name="set_length")
     
     def compile_program(self, program: ast.Program) -> ir.Module:
         """Generate LLVM IR for entire program"""
@@ -2200,6 +2253,11 @@ class LLVMCodeGen:
                     if type_obj:
                         obj_type = type_obj
                         is_static_call = True  # This is a static method call
+        elif self.type_checker and isinstance(call.object, ast.GenericType):
+            # Static call on generic type: Map[int, int].new()
+            obj_type = self.type_checker.resolve_type(call.object)
+            is_static_call = True
+            obj = None
         
         # Generate object expression (for string literals, generate it here)
         if isinstance(call.object, ast.StringLiteral):
@@ -2525,6 +2583,108 @@ class LLVMCodeGen:
                     result = self.builder.call(self.map_length, [map_ptr])
                     return result
         
+        # Special handling for List method calls
+        if obj_type and isinstance(obj_type, GenericType) and obj_type.name == "List":
+            # Handle List[T] method calls
+            if is_static_call and (method_name == "new" or method_name == "with_capacity"):
+                # List.new() or List.with_capacity(cap)
+                elem_type = obj_type.type_args[0]
+                elem_llvm = self.type_to_llvm(elem_type)
+                elem_size = self._get_type_size(elem_llvm)
+                elem_size_const = ir.Constant(ir.IntType(64), elem_size)
+                
+                if method_name == "new":
+                    return self.builder.call(self.list_new, [elem_size_const])
+                else: # with_capacity
+                    if len(call.arguments) < 1:
+                        raise CodeGenError("List.with_capacity() requires one argument", call.span)
+                    cap_val = self.gen_expression(call.arguments[0])
+                    return self.builder.call(self.list_with_capacity, [elem_size_const, cap_val])
+            
+            elif not is_static_call and obj:
+                # Instance method calls on List
+                # Get pointer to List struct
+                if not isinstance(obj.type, ir.PointerType):
+                    list_alloca = self.builder.alloca(obj.type, name="list_ptr")
+                    self.builder.store(obj, list_alloca)
+                    list_ptr = list_alloca
+                else:
+                    list_ptr = obj
+                
+                elem_type = obj_type.type_args[0]
+                elem_llvm = self.type_to_llvm(elem_type)
+                elem_size = self._get_type_size(elem_llvm)
+                elem_size_const = ir.Constant(ir.IntType(64), elem_size)
+
+                if method_name == "push":
+                    if len(call.arguments) < 1:
+                        raise CodeGenError("List.push() requires one argument", call.span)
+                    elem_val = self.gen_expression(call.arguments[0])
+                    # Convert elem to pointer
+                    if not isinstance(elem_val.type, ir.PointerType):
+                        elem_alloca = self.builder.alloca(elem_val.type, name="elem_ptr")
+                        self.builder.store(elem_val, elem_alloca)
+                        elem_ptr = self.builder.bitcast(elem_alloca, ir.IntType(8).as_pointer())
+                    else:
+                        elem_ptr = self.builder.bitcast(elem_val, ir.IntType(8).as_pointer())
+                    # Call list_push
+                    self.builder.call(self.list_push, [list_ptr, elem_ptr, elem_size_const])
+                    return ir.Constant(ir.IntType(32), 0)
+                
+                elif method_name == "get":
+                    if len(call.arguments) < 1:
+                        raise CodeGenError("List.get() requires one argument", call.span)
+                    index_val = self.gen_expression(call.arguments[0])
+                    # Call list_get
+                    result_ptr = self.builder.call(self.list_get, [list_ptr, index_val, elem_size_const])
+                    # Bitcast and load result
+                    typed_ptr = self.builder.bitcast(result_ptr, elem_llvm.as_pointer())
+                    return self.builder.load(typed_ptr)
+                
+                elif method_name == "length":
+                    return self.builder.call(self.list_length, [list_ptr])
+
+        # Special handling for Set method calls
+        if obj_type and isinstance(obj_type, GenericType) and obj_type.name == "Set":
+            # Handle Set[T] method calls
+            if is_static_call and method_name == "new":
+                elem_type = obj_type.type_args[0]
+                elem_llvm = self.type_to_llvm(elem_type)
+                elem_size = self._get_type_size(elem_llvm)
+                elem_size_const = ir.Constant(ir.IntType(64), elem_size)
+                return self.builder.call(self.set_new, [elem_size_const])
+            
+            elif not is_static_call and obj:
+                # Instance method calls on Set
+                if not isinstance(obj.type, ir.PointerType):
+                    set_alloca = self.builder.alloca(obj.type, name="set_ptr")
+                    self.builder.store(obj, set_alloca)
+                    set_ptr = set_alloca
+                else:
+                    set_ptr = obj
+                
+                if method_name == "insert" or method_name == "contains":
+                    if len(call.arguments) < 1:
+                        raise CodeGenError(f"Set.{method_name}() requires one argument", call.span)
+                    elem_val = self.gen_expression(call.arguments[0])
+                    # Convert elem to pointer
+                    if not isinstance(elem_val.type, ir.PointerType):
+                        elem_alloca = self.builder.alloca(elem_val.type, name="elem_ptr")
+                        self.builder.store(elem_val, elem_alloca)
+                        elem_ptr = self.builder.bitcast(elem_alloca, ir.IntType(8).as_pointer())
+                    else:
+                        elem_ptr = self.builder.bitcast(elem_val, ir.IntType(8).as_pointer())
+                    
+                    if method_name == "insert":
+                        self.builder.call(self.set_insert, [set_ptr, elem_ptr])
+                        return ir.Constant(ir.IntType(32), 0)
+                    else: # contains
+                        result = self.builder.call(self.set_contains, [set_ptr, elem_ptr])
+                        return self.builder.trunc(result, ir.IntType(1))
+                
+                elif method_name == "length":
+                    return self.builder.call(self.set_length, [set_ptr])
+
         # Try to find method function
         # First, try inherent method: Type_method
         if obj_type:

@@ -3,98 +3,40 @@
 # This is a wrapper for the C implementation in list.c
 
 # List struct (matches C implementation)
-struct List:
-    _data: *u8  # Opaque pointer (void* in C)
+struct List[T]:
+    _data: *u8  # T* in C
     len: i64
     cap: i64
 
 # FFI declarations for C functions
-# Note: Using *u8 instead of *const void (void pointers not supported in LLVM)
-extern "C" fn list_new(elem_size: i64) -> List
-extern "C" fn list_with_capacity(elem_size: i64, capacity: i64) -> List
-extern "C" fn list_push(list: *mut List, elem: *const u8, elem_size: i64)
-extern "C" fn list_get(list: *const List, index: i64, elem_size: i64) -> *const u8
-extern "C" fn list_length(list: *const List) -> int
-extern "C" fn list_is_empty(list: *const List) -> int
-extern "C" fn list_drop(list: *mut List)
-
-# Example usage (when FFI is implemented):
-#
-# fn main():
-#     var numbers = List[int].new()
-#     numbers.push(1)
-#     numbers.push(2)
-#     numbers.push(3)
-#     print("Length:", numbers.length())
-#     
-#     for i in 0..numbers.length():
-#         print("Item:", numbers.get(i))
-
-# API Documentation:
-#
-# List[T] - Generic dynamic array
-#
-# Methods:
-#   new() -> List[T]
-#     Create empty list. O(1)
-#
-#   with_capacity(n: int) -> List[T]
-#     Create list with pre-allocated capacity. O(1)
-#
-#   push(&mut self, item: T)
-#     Add item to end. O(1) amortized
-#
-#   pop(&mut self) -> Option[T]
-#     Remove and return last item. O(1)
-#
-#   get(&self, index: int) -> &T
-#     Get reference to item at index. O(1)
-#     Panics if index out of bounds
-#
-#   length(&self) -> int
-#     Get number of items. O(1)
-#
-#   is_empty(&self) -> bool
-#     Check if list is empty. O(1)
-#
-#   clone(&self) -> List[T]
-#     Create deep copy. O(n)
-
-# Memory layout:
-# struct List {
-#     data: *T,      // Heap-allocated array
-#     len: int,      // Number of elements
-#     cap: int       // Capacity (allocated size)
-# }
-
-# Ownership:
-# - List owns its heap allocation
-# - Dropping a List frees its buffer
-# - Move-only (not Copy)
+extern "C" fn list_new(elem_size: i64) -> List[T]
+extern "C" fn list_with_capacity(elem_size: i64, capacity: i64) -> List[T]
+extern "C" fn list_push(list: *mut List[T], elem: *const u8, elem_size: i64)
+extern "C" fn list_get(list: *const List[T], index: i64, elem_size: i64) -> *const u8
+extern "C" fn list_length(list: *const List[T]) -> i64
+extern "C" fn list_is_empty(list: *const List[T]) -> i32
+extern "C" fn list_drop(list: *mut List[T])
 
 # List implementation
-# Note: For MVP, methods require explicit elem_size parameter
-# Full generic support with size_of::<T>() will come later
-impl List:
-    fn new(elem_size: i64) -> List:
-        return list_new(elem_size)
+# Note: Codegen intercepts these calls for generic collections
+impl List[T]:
+    fn new() -> List[T]:
+        pass
     
-    fn with_capacity(elem_size: i64, capacity: i64) -> List:
-        return list_with_capacity(elem_size, capacity)
+    fn with_capacity(capacity: i64) -> List[T]:
+        pass
     
-    fn push(&mut self, elem_ptr: *const u8, elem_size: i64):
-        list_push(self, elem_ptr, elem_size)
+    fn push(&mut self, elem: T):
+        pass
     
-    fn get(&self, index: i64, elem_size: i64) -> *const u8:
-        return list_get(self, index, elem_size)
+    fn get(&self, index: i64) -> T:
+        pass
     
-    fn length(&self) -> int:
-        return list_length(self)
+    fn length(&self) -> i64:
+        pass
     
     fn is_empty(&self) -> bool:
-        let result = list_is_empty(self)
-        return result == 1
+        pass
     
     fn drop(&mut self):
-        list_drop(self)
-
+        pass

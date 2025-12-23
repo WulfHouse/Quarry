@@ -1,0 +1,26 @@
+# M9 List and Set Generic Test
+
+import std.collections.list
+import std.collections.set
+
+fn main():
+    # Test List[int]
+    var my_list: List[int] = List.new()
+    my_list.push(10)
+    my_list.push(20)
+    let l_len = my_list.length()
+    print("List length:", l_len)
+    
+    # Test Set[int]
+    var my_set: Set[int] = Set.new()
+    my_set.insert(100)
+    my_set.insert(200)
+    my_set.insert(100) # Duplicate
+    let s_len = my_set.length()
+    print("Set length:", s_len)
+    
+    let has_100 = my_set.contains(100)
+    print("Set contains 100:", has_100)
+    
+    print("Success")
+

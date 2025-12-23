@@ -2058,11 +2058,41 @@ class Parser:
             if self.match_token(TokenType.LBRACE):
                 return self.parse_struct_literal(name, start_span)
             
-            # Return identifier - parse_postfix() will handle array indexing [expr],
-            # method calls, field access, etc.
-            # Generic type expressions like Type[Args] should be handled in type
-            # contexts, not expression contexts. For now, we don't support them
-            # in expression contexts to avoid ambiguity with array indexing.
+            # Check for generic type instantiation: Map[int, int].new()
+            if self.match_token(TokenType.LBRACKET):
+                # Peek ahead to see if it's followed by '.' after closing ']'
+                # If so, it's a static method call on a generic type
+                depth = 0
+                look_pos = self.pos
+                found_generic = False
+                while look_pos < len(self.tokens):
+                    tok = self.tokens[look_pos]
+                    if tok.type == TokenType.LBRACKET:
+                        depth += 1
+                    elif tok.type == TokenType.RBRACKET:
+                        depth -= 1
+                        if depth == 0:
+                            # Found matching closing ], check if next is '.'
+                            if look_pos + 1 < len(self.tokens) and self.tokens[look_pos + 1].type == TokenType.DOT:
+                                found_generic = True
+                            break
+                    look_pos += 1
+                
+                if found_generic:
+                    self.advance() # consume [
+                    type_args = []
+                    while not self.match_token(TokenType.RBRACKET):
+                        type_args.append(self.parse_type())
+                        if not self.match_token(TokenType.RBRACKET):
+                            self.expect(TokenType.COMMA)
+                    self.expect(TokenType.RBRACKET)
+                    
+                    return ast.GenericType(
+                        name=name,
+                        type_args=type_args,
+                        span=self.make_span(start_span)
+                    )
+            
             return ast.Identifier(name=name, span=self.make_span(start_span))
         
         raise ParseError(

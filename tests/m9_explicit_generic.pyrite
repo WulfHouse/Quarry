@@ -1,0 +1,10 @@
+# M9 Explicit Generic Constructor Test
+
+import std.collections.map
+
+fn main():
+    # Explicit generic constructor - should be supported
+    var my_map = Map[int, int].new()
+    my_map.insert(1, 2)
+    print("Success")
+
