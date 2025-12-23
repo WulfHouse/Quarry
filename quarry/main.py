@@ -181,8 +181,9 @@ def cmd_build(release: bool = False, incremental: bool = True, deterministic: bo
             if locked:
                 cmd.append("--locked")
             
-            # Run from workspace directory, but Python path should include forge
-            result = subprocess.run(cmd, cwd=str(workspace_path), env={**os.environ, "PYTHONPATH": str(project_root / "forge")})
+            # Run from workspace directory, but Python path should include forge and quarry root
+            pythonpath = f"{project_root / 'forge'}{os.pathsep}{project_root}"
+            result = subprocess.run(cmd, cwd=str(workspace_path), env={**os.environ, "PYTHONPATH": pythonpath})
             if result.returncode != 0:
                 failed.append(workspace_name)
                 print(f"  [FAILED] {workspace_name}")

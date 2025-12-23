@@ -199,6 +199,14 @@ class LLVMCodeGen:
                     ir.IntType(64),              # key_size
                     ir.IntType(64)               # value_size
                 ])
+            elif typ.name == "Set":
+                # Set[T]: { buckets: *void, len: i64, cap: i64, elem_size: i64 }
+                return ir.LiteralStructType([
+                    ir.IntType(8).as_pointer(),  # buckets
+                    ir.IntType(64),              # len
+                    ir.IntType(64),              # cap
+                    ir.IntType(64)               # elem_size
+                ])
             # If GenericType wraps an EnumType (e.g., Type enum), use the base_type
             elif typ.base_type and isinstance(typ.base_type, EnumType):
                 return self.type_to_llvm(typ.base_type)
@@ -404,9 +412,9 @@ class LLVMCodeGen:
         )
         self.map_get = ir.Function(self.module, map_get_ty, name="map_get")
         
-        # map_contains(map: *const Map, key: *const void) -> i8
+        # map_contains(map: *const Map, key: *const void) -> i32
         map_contains_ty = ir.FunctionType(
-            ir.IntType(8),
+            ir.IntType(32),
             [map_struct_ty.as_pointer(), ir.IntType(8).as_pointer()]
         )
         self.map_contains = ir.Function(self.module, map_contains_ty, name="map_contains")
@@ -463,8 +471,8 @@ class LLVMCodeGen:
         set_insert_ty = ir.FunctionType(ir.VoidType(), [set_struct_ty.as_pointer(), ir.IntType(8).as_pointer()])
         self.set_insert = ir.Function(self.module, set_insert_ty, name="set_insert")
         
-        # set_contains(set: *const Set, elem: *const void) -> i8
-        set_contains_ty = ir.FunctionType(ir.IntType(8), [set_struct_ty.as_pointer(), ir.IntType(8).as_pointer()])
+        # set_contains(set: *const Set, elem: *const void) -> i32
+        set_contains_ty = ir.FunctionType(ir.IntType(32), [set_struct_ty.as_pointer(), ir.IntType(8).as_pointer()])
         self.set_contains = ir.Function(self.module, set_contains_ty, name="set_contains")
         
         # set_length(set: *const Set) -> i64
@@ -2542,9 +2550,13 @@ class LLVMCodeGen:
                         key_ptr = self.builder.bitcast(key_val, ir.IntType(8).as_pointer())
                     
                     if method_name == "get":
-                        # map.get(key) -> Option[&V] (for now, return pointer or null)
+                        # map.get(key) -> V
                         result_ptr = self.builder.call(self.map_get, [map_ptr, key_ptr])
-                        return result_ptr
+                        # Bitcast to value type and load
+                        value_type = obj_type.type_args[1]
+                        value_llvm = self.type_to_llvm(value_type)
+                        typed_ptr = self.builder.bitcast(result_ptr, value_llvm.as_pointer())
+                        return self.builder.load(typed_ptr)
                     elif method_name == "set" or method_name == "insert":
                         # map.set(key, value) or map.insert(key, value)
                         if len(call.arguments) < 2:
