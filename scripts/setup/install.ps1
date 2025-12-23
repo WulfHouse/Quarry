@@ -1,6 +1,5 @@
 # Pyrite Language Installer for Windows
-# Usage: irm https://get.pyrite-lang.org/install.ps1 | iex
-#        or: .\install.ps1
+# Usage: .\install.ps1
 
 $ErrorActionPreference = "Stop"
 
@@ -11,7 +10,7 @@ $InstallDir = $env:PYRITE_INSTALL_DIR
 if (-not $InstallDir) { $InstallDir = "$env:USERPROFILE\.pyrite" }
 
 $BinDir = "$InstallDir\bin"
-$RepoUrl = "https://github.com/wulfhq/pyrite/archive/refs/heads/main.zip"
+$RepoUrl = "https://github.com/WulfHouse/Quarry/archive/refs/heads/main.zip"
 
 function Write-Info($msg) {
     Write-Host "[pyrite] $msg" -ForegroundColor Green
@@ -334,7 +333,7 @@ try {
     Write-Info "  > quarry new myproject       # Create new project"
     Write-Host ""
     Write-Info "Learn more:"
-    Write-Info "  - Documentation: https://pyrite-lang.org/docs"
+    Write-Info "  - Documentation: https://github.com/WulfHouse/Quarry/tree/main/docs"
     Write-Info "  - Examples: $InstallDir\forge\examples\"
     Write-Host ""
     Write-Warn "Please restart your terminal to refresh PATH"
@@ -352,7 +351,7 @@ try {
     Write-Host "Stack trace:" -ForegroundColor Yellow
     Write-Host $_.ScriptStackTrace -ForegroundColor Gray
     Write-Host ""
-    Write-Warn "Please report this error at: https://github.com/wulfhq/pyrite/issues"
+    Write-Warn "Please report this error at: https://github.com/WulfHouse/Quarry/issues"
     Write-Host ""
 } finally {
     # Keep window open indefinitely for inspection

@@ -255,7 +255,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Install Pyrite
-        run: curl -sSf https://get.pyrite-lang.org | sh
+        run: curl -sSf https://raw.githubusercontent.com/WulfHouse/Quarry/main/scripts/setup/install.sh | sh
       
       - name: Format check
         run: quarry fmt --check

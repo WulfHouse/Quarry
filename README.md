@@ -85,7 +85,7 @@ pyrite/
 ├── docs/                           # Documentation
 │   ├── SSOT.md                     # Language Specification (modular index, aspirational)
 │   ├── SSOT.txt                    # Original specification (preserved as backup, aspirational)
-│   └── specification/              # Modular specification files (aspirational)
+│   ├── specification/              # Modular specification files (aspirational)
 │   ├── bootstrap.md                # Bootstrap guide
 │   ├── performance/                # Performance documentation
 │   ├── quarry/                     # Quarry build system docs
@@ -182,57 +182,57 @@ pyrite/
 │   │   ├── split_large_test_file.py
 │   │   ├── test_coverage_safety.py
 │   │   └── verify_dev_env.py
-│   └── [wrappers]                      # Entry point wrappers (pyrite, quarry, etc.)
+│   └── [wrappers]                  # Entry point wrappers (pyrite, quarry, etc.)
 │
-├── tools/                              # Development tools
-│   ├── coverage/                       # Coverage analysis tools
+├── tools/                          # Development tools
+│   ├── coverage/                   # Coverage analysis tools
 │   │   ├── analyze_coverage.py
 │   │   ├── find_dead_code.py
 │   │   ├── get_coverage_percentage.py
 │   │   └── get_uncovered_lines.py
-│   ├── testing/                        # Test runners
-│   │   ├── pytest.py                   # Main test runner
-│   │   ├── pytest_fast.py              # Fast test suite
+│   ├── testing/                    # Test runners
+│   │   ├── pytest.py               # Main test runner
+│   │   ├── pytest_fast.py          # Fast test suite
 │   │   ├── run_tests_batched.py
 │   │   ├── run_tests_local.py
 │   │   ├── run_tests_safe.py
 │   │   ├── run_tests_with_progress.py
 │   │   ├── test_timing.py
 │   │   └── check_test_timing.py
-│   ├── build/                          # Build tools
-│   │   ├── build_runtime.py            # Build runtime library
-│   │   └── rebuild.py                  # Rebuild Forge
-│   ├── runtime/                        # Runtime tools
-│   │   ├── pyrite.py                   # Forge compiler wrapper
-│   │   ├── pyrite_lsp.py               # LSP server
-│   │   ├── pyrite_run.py               # Run Pyrite programs
-│   │   └── quarry.py                   # Quarry build system
-│   ├── utils/                          # Utility tools
+│   ├── build/                      # Build tools
+│   │   ├── build_runtime.py        # Build runtime library
+│   │   └── rebuild.py              # Rebuild Forge
+│   ├── runtime/                    # Runtime tools
+│   │   ├── pyrite.py               # Forge compiler wrapper
+│   │   ├── pyrite_lsp.py           # LSP server
+│   │   ├── pyrite_run.py           # Run Pyrite programs
+│   │   └── quarry.py               # Quarry build system
+│   ├── utils/                      # Utility tools
 │   │   ├── debug_try_operator.py
-│   │   ├── run_logged.ps1              # Command logging wrapper
-│   │   ├── run_safe.ps1                # Convenience wrapper
+│   │   ├── run_logged.ps1          # Command logging wrapper
+│   │   ├── run_safe.ps1            # Convenience wrapper
 │   │   └── validate_command_safety.ps1
-│   └── docs/                           # Tool documentation
+│   └── docs/                       # Tool documentation
 │       ├── DEVELOPER_COMMAND_POLICY.md
 │       └── README_COMMAND_POLICY.md
 │
-├── tests/                               # Integration and acceptance tests
-│   ├── acceptance/                      # Acceptance tests
-│   ├── integration/                     # Integration tests
-│   └── test-projects/                   # Test projects
+├── tests/                          # Integration and acceptance tests
+│   ├── acceptance/                 # Acceptance tests
+│   ├── integration/                # Integration tests
+│   └── test-projects/              # Test projects
 │
-├── test-consumer/                       # Test consumer project
+├── test-consumer/                  # Test consumer project
 │
-├── vscode-pyrite/                       # VS Code extension
-│   ├── src/                             # Extension source
-│   ├── syntaxes/                        # Syntax highlighting
-│   └── package.json                     # Extension manifest
+├── vscode-pyrite/                  # VS Code extension
+│   ├── src/                        # Extension source
+│   ├── syntaxes/                   # Syntax highlighting
+│   └── package.json                # Extension manifest
 │
-├── .logs/                               # Developer execution logs
+├── .logs/                          # Developer execution logs
 │
-├── .coveragerc                          # Coverage configuration
-├── .gitignore                           # Git ignore rules
-└── pyproject.toml                       # Python project configuration
+├── .coveragerc                     # Coverage configuration
+├── .gitignore                      # Git ignore rules
+└── pyproject.toml                  # Python project configuration
 ```
 
 ## Key Components

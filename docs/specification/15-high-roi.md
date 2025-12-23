@@ -1189,7 +1189,7 @@ Stable Release implementation (developer experience).
 
 Public metrics that make developer adoption measurable:
 
-    quarry.dev/metrics
+    (aspirational: quarry.dev/metrics)
     
     Performance: 98.3% of C speed (1,247 benchmarks)
     Safety: 0 memory CVEs (C: 892, C++: 654, Rust: 0)
@@ -1205,7 +1205,7 @@ Features:
 
 Impact: **MAKES SUCCESS MEASURABLE** - transforms developer adoption goals from aspiration to
 
-evidence. "Just look at quarry.dev/metrics" becomes standard advocacy response. 
+evidence. "Just look at (aspirational: quarry.dev/metrics)" becomes standard advocacy response. 
 Objective data beats subjective claims. Competitive positioning with proof. 
 Trust multiplier through transparency.
 

@@ -218,7 +218,7 @@ environments and time.
 8.3 Official Package Registry
 --------------------------------------------------------------------------------
 
-Pyrite packages are published to the official Quarry Registry (quarry.dev):
+Pyrite packages are published to the official Quarry Registry (aspirational: quarry.dev):
 
     quarry publish
 
@@ -2612,6 +2612,7 @@ Example GitHub Actions workflow:
         runs-on: ubuntu-latest
         steps:
           - uses: actions/checkout@v2
+          # Aspirational: does not exist yet
           - uses: pyrite-lang/setup-quarry@v1
           - run: quarry fmt --check
           - run: quarry lint
@@ -2885,7 +2886,7 @@ CI Integration:
     quarry audit --fix --ci
 
 Audit database:
-  • Quarry maintains central vulnerability database (quarry.dev/advisories)
+  • Quarry maintains central vulnerability database (aspirational: quarry.dev/advisories)
   • Updated continuously from multiple sources (CVE, NVD, security researchers)
   • Community-reported vulnerabilities via quarry report-vuln
 
@@ -3064,7 +3065,7 @@ Quarry.toml configuration:
     reject-unsigned = true                 # Fail on unsigned packages
 
 Registry enforcement:
-  • Quarry Registry (quarry.dev) encourages signing (badged packages)
+  • Quarry Registry (aspirational: quarry.dev) encourages signing (badged packages)
   • Security-sensitive packages require signing for featured status
   • Signature verification integrated into quarry install by default
 
@@ -4354,7 +4355,7 @@ Impact: High (productivity multiplier for all developers)
 --------------------------------------------------------------------------------
 
 To make Pyrite's goal of widespread developer adoption measurable rather than purely 
-aspirational, the ecosystem provides a public metrics dashboard at quarry.dev/metrics that 
+aspirational, the ecosystem provides a public metrics dashboard at (aspirational: quarry.dev/metrics) that 
 displays real-time, verifiable data about language performance, safety, 
 learning, and adoption.
 
@@ -4491,9 +4492,10 @@ Public API
 Dashboard data accessible via API:
 
     # Query metrics programmatically
+    # Aspirational: does not exist yet
     curl https://quarry.dev/api/metrics/performance
     
-    # Embed in documentation
+    # Aspirational: does not exist yet
     <script src="https://quarry.dev/widgets/metrics.js"></script>
 
 Community Contribution
@@ -4543,7 +4545,7 @@ Why Transparency Dashboard Is Transformative
   • Rust doesn't have public dashboard → metrics scattered
   • Go has limited metrics → not comprehensive
   • Pyrite dashboard → one place for all evidence
-  • Result: "Just look at quarry.dev/metrics" becomes standard response
+  • Result: "Just look at (aspirational: quarry.dev/metrics)" becomes standard response
 
 This transforms subjective claims into objective evidence. The path to "most 
 admired" becomes visible: watch metrics improve over time, celebrate milestones 

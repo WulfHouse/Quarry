@@ -319,7 +319,7 @@ Advanced Tooling:
       - Cache-line analysis
       - Padding visualization
       - Aliasing assumptions
-  ✓ Community metrics dashboard (quarry.dev/metrics)
+  ✓ Community metrics dashboard (aspirational: quarry.dev/metrics)
       - Public, real-time performance and adoption data
       - Makes developer adoption metrics measurable
       - Evidence-based advocacy enabler
@@ -385,7 +385,7 @@ Standard Library Expansion:
       - InlineMap[K, V, N] - Inline hash map for small collections
 
 Ecosystem:
-  ✓ Pyrite Playground (play.pyrite-lang.org)
+  ✓ Pyrite Playground (aspirational: play.pyrite-lang.org)
       - Browser-based experimentation
   ✓ 1000+ packages on Quarry Registry
       - Community contributions

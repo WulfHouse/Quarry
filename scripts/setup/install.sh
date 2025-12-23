@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 # Pyrite Language Installer for Unix (macOS, Linux)
-# Usage: curl -sSf https://get.pyrite-lang.org | sh
-#        or: bash install.sh
+# Usage: bash install.sh
 
 set -e
 
 PYRITE_VERSION="${PYRITE_VERSION:-latest}"
 INSTALL_DIR="${PYRITE_INSTALL_DIR:-$HOME/.pyrite}"
 BIN_DIR="$INSTALL_DIR/bin"
-REPO_URL="https://github.com/wulfhq/pyrite/archive/refs/heads/main.tar.gz"
+REPO_URL="https://github.com/WulfHouse/Quarry/archive/refs/heads/main.tar.gz"
 
 # Colors
 RED='\033[0;31m'
@@ -324,7 +323,7 @@ main() {
     log "  $ quarry new myproject       # Create new project"
     echo ""
     log "Learn more:"
-    log "  • Documentation: https://pyrite-lang.org/docs"
+    log "  • Documentation: https://github.com/WulfHouse/Quarry/tree/main/docs"
     log "  • Examples: ~/.pyrite/forge/examples/"
     echo ""
 }

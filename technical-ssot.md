@@ -1178,7 +1178,7 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 **Type:** Feature
 **Scope:** Ecosystem
 **Source:** SSOT Section 8.3
-**Statement:** The Quarry Registry (quarry.dev) serves as the official hub for sharing and discovering Pyrite packages, with automated documentation and security tracking.
+**Statement:** The Quarry Registry (aspirational: quarry.dev) serves as the official hub for sharing and discovering Pyrite packages, with automated documentation and security tracking.
 
 ### REQ-170: First-class Integrated Testing
 **Type:** Feature
@@ -1748,7 +1748,7 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 **Type:** Feature
 **Scope:** Ecosystem
 **Source:** SSOT Section 8.25
-**Statement:** A public metrics dashboard (quarry.dev/metrics) provides real-time, verifiable data on Pyrite's performance, safety records, and community adoption rates.
+**Statement:** A public metrics dashboard (aspirational: quarry.dev/metrics) provides real-time, verifiable data on Pyrite's performance, safety records, and community adoption rates.
 
 ### REQ-265: Verifiable Performance Benchmarks
 **Type:** Feature
@@ -4983,7 +4983,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - Provide a basic, high-performance HTTP client and server implementation.
 - Support TLS via a standard library wrapper (e.g., around OpenSSL or rustls).
 **User-facing behavior:**
-- `let client = HttpClient::new(); let resp = client.get("https://pyrite-lang.org")?;`
+- `let client = HttpClient::new(); let resp = client.get("https://github.com/WulfHouse/Quarry")?;`
 **Semantics:**
 - Asynchronous by default (integrates with SPEC-LANG-1000).
 **Errors/diagnostics:**
@@ -7217,7 +7217,7 @@ Total new P1 LEAFs: 25.
 - REST API similar to crates.io
 - Semantic versioning enforced
 - Checksums for security
-- Public registry at quarry.dev
+- Public registry at (aspirational: quarry.dev)
 
 **Rationale:** Follows Rust/Cargo model, proven approach, minimal risk.
 

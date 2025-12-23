@@ -711,7 +711,7 @@ Translation coverage tracking:
       • P0923 - Generic associated type issue
       • W1234 - Performance hint for GPU kernel
     
-    Contribute: https://github.com/pyrite-lang/translations
+    Contribute: https://github.com/WulfHouse/Quarry
 
 This infrastructure positions Pyrite to be among the first systems programming languages 
 with comprehensive global 

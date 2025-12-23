@@ -473,7 +473,7 @@ def get_explanation(error_code: str) -> str:
     
     parts.append("=" * 70)
     parts.append("For more information, see the Pyrite documentation:")
-    parts.append("https://pyrite-lang.org/docs/errors")
+    parts.append("https://github.com/WulfHouse/Quarry/tree/main/docs/errors")
     
     return '\n'.join(parts)
 

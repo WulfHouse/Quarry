@@ -97,7 +97,7 @@ developer experience:
   code updates for game and web development. Deterministic builds enable 
   verifiable supply-chain security. Binary size profiling (quarry bloat) makes 
   embedded constraints visible. Energy profiling (quarry energy) optimizes for 
-  sustainability and battery life. The community dashboard (quarry.dev/metrics) 
+  sustainability and battery life. The community dashboard (aspirational: quarry.dev/metrics) 
   provides transparent, real-time evidence of Pyrite's performance, safety, and 
   learning characteristics. Great tooling transforms Pyrite from "technically 
   impressive" to "joy to use daily."
@@ -124,7 +124,7 @@ developer experience:
   services.
 
 **Learn-By-Doing Ecosystem** (Section 8.14, Section 10, 15.13, 15.40)
-  Zero-installation experimentation via play.pyrite-lang.org. Every documentation 
+  Zero-installation experimentation via (aspirational: play.pyrite-lang.org). Every documentation 
   example is a live playground link. Share code via URL. See compiler errors in 
   real-time with inline explanations. The interactive REPL (pyrite repl) provides 
   local, instant experimentation with ownership visualization - making abstract 

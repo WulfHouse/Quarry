@@ -446,7 +446,7 @@ Day 1: Installation and First Program
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # Install Pyrite (single command)
-    $ curl --sSf https://get.pyrite-lang.org | sh
+    $ curl --sSf https://raw.githubusercontent.com/WulfHouse/Quarry/main/scripts/setup/install.sh | sh
     
     # Write first program (hello.pyrite)
     fn main():
@@ -572,10 +572,12 @@ Year 1: Contributing to Ecosystem
     $ quarry publish my-awesome-lib
     
     # Track adoption on dashboard
+    <!-- Aspirational: does not exist yet -->
     https://quarry.dev/packages/my-awesome-lib
     Downloads: 1,247 this month
     
     # See your impact on metrics
+    <!-- Aspirational: does not exist yet -->
     https://quarry.dev/metrics
     Ecosystem: 15,247 packages (+1 yours!)
 
@@ -1302,8 +1304,6 @@ Translation coverage tracking:
       • P0891 - Advanced lifetime error
       • P0923 - Generic associated type issue
       • W1234 - Performance hint for GPU kernel
-    
-    Contribute: https://github.com/pyrite-lang/translations
 
 This infrastructure positions Pyrite to be among the first systems programming languages 
 with comprehensive global 
@@ -5640,7 +5640,7 @@ environments and time.
 8.3 Official Package Registry
 --------------------------------------------------------------------------------
 
-Pyrite packages are published to the official Quarry Registry (quarry.dev):
+Pyrite packages are published to the official Quarry Registry (aspirational: quarry.dev):
 
     quarry publish
 
@@ -8034,6 +8034,7 @@ Example GitHub Actions workflow:
         runs-on: ubuntu-latest
         steps:
           - uses: actions/checkout@v2
+          # Aspirational: does not exist yet
           - uses: pyrite-lang/setup-quarry@v1
           - run: quarry fmt --check
           - run: quarry lint
@@ -8307,7 +8308,7 @@ CI Integration:
     quarry audit --fix --ci
 
 Audit database:
-  • Quarry maintains central vulnerability database (quarry.dev/advisories)
+  • Quarry maintains central vulnerability database (aspirational: quarry.dev/advisories)
   • Updated continuously from multiple sources (CVE, NVD, security researchers)
   • Community-reported vulnerabilities via quarry report-vuln
 
@@ -8486,7 +8487,7 @@ Quarry.toml configuration:
     reject-unsigned = true                 # Fail on unsigned packages
 
 Registry enforcement:
-  • Quarry Registry (quarry.dev) encourages signing (badged packages)
+  • Quarry Registry (aspirational: quarry.dev) encourages signing (badged packages)
   • Security-sensitive packages require signing for featured status
   • Signature verification integrated into quarry install by default
 
@@ -9776,7 +9777,7 @@ Impact: High (productivity multiplier for all developers)
 --------------------------------------------------------------------------------
 
 To make Pyrite's goal of widespread developer adoption measurable rather than purely 
-aspirational, the ecosystem provides a public metrics dashboard at quarry.dev/metrics that 
+aspirational, the ecosystem provides a public metrics dashboard at (aspirational: quarry.dev/metrics) that 
 displays real-time, verifiable data about language performance, safety, 
 learning, and adoption.
 
@@ -9913,9 +9914,10 @@ Public API
 Dashboard data accessible via API:
 
     # Query metrics programmatically
+    # Aspirational: does not exist yet
     curl https://quarry.dev/api/metrics/performance
     
-    # Embed in documentation
+    # Aspirational: does not exist yet
     <script src="https://quarry.dev/widgets/metrics.js"></script>
 
 Community Contribution
@@ -9965,7 +9967,7 @@ Why Transparency Dashboard Is Transformative
   • Rust doesn't have public dashboard → metrics scattered
   • Go has limited metrics → not comprehensive
   • Pyrite dashboard → one place for all evidence
-  • Result: "Just look at quarry.dev/metrics" becomes standard response
+  • Result: "Just look at (aspirational: quarry.dev/metrics)" becomes standard response
 
 This transforms subjective claims into objective evidence. The path to "most 
 admired" becomes visible: watch metrics improve over time, celebrate milestones 
@@ -13376,7 +13378,7 @@ lower the barrier to entry and enable frictionless sharing of code examples.
 Features
 ~~~~~~~~
 
-The Playground (play.pyrite-lang.org) provides:
+The Playground (aspirational: play.pyrite-lang.org) provides:
 
   • Zero-installation experimentation: Write and run Pyrite in the browser
   • Real compiler: Uses WebAssembly-compiled pyritec for authentic experience
@@ -13389,7 +13391,7 @@ The Playground (play.pyrite-lang.org) provides:
 Example Workflow
 ~~~~~~~~~~~~~~~~
 
-1. Visit play.pyrite-lang.org
+1. Visit (aspirational: play.pyrite-lang.org)
 2. Write code:
 
    fn main():
@@ -13398,7 +13400,7 @@ Example Workflow
        print("Sum:", sum)
 
 3. Click "Run" → See output immediately
-4. Click "Share" → Get link: play.pyrite-lang.org/abc123
+4. Click "Share" → Get link: (aspirational: play.pyrite-lang.org/abc123)
 5. Paste link in forum post, documentation, or chat
 
 10.2 Integration with Documentation
@@ -14582,7 +14584,7 @@ Advanced Tooling:
       - Cache-line analysis
       - Padding visualization
       - Aliasing assumptions
-  ✓ Community metrics dashboard (quarry.dev/metrics)
+  ✓ Community metrics dashboard (aspirational: quarry.dev/metrics)
       - Public, real-time performance and adoption data
       - Makes developer adoption metrics measurable
       - Evidence-based advocacy enabler
@@ -14648,7 +14650,7 @@ Standard Library Expansion:
       - InlineMap[K, V, N] - Inline hash map for small collections
 
 Ecosystem:
-  ✓ Pyrite Playground (play.pyrite-lang.org)
+  ✓ Pyrite Playground (aspirational: play.pyrite-lang.org)
       - Browser-based experimentation
   ✓ 1000+ packages on Quarry Registry
       - Community contributions
@@ -15994,7 +15996,7 @@ Stable Release implementation (developer experience).
 
 Public metrics that make developer adoption measurable:
 
-    quarry.dev/metrics
+    (aspirational: quarry.dev/metrics)
     
     Performance: 98.3% of C speed (1,247 benchmarks)
     Safety: 0 memory CVEs (C: 892, C++: 654, Rust: 0)
@@ -16010,7 +16012,7 @@ Features:
 
 Impact: **MAKES SUCCESS MEASURABLE** - transforms developer adoption goals from aspiration to
 
-evidence. "Just look at quarry.dev/metrics" becomes standard advocacy response. 
+evidence. "Just look at (aspirational: quarry.dev/metrics)" becomes standard advocacy response. 
 Objective data beats subjective claims. Competitive positioning with proof. 
 Trust multiplier through transparency.
 
@@ -16612,7 +16614,7 @@ developer experience:
   code updates for game and web development. Deterministic builds enable 
   verifiable supply-chain security. Binary size profiling (quarry bloat) makes 
   embedded constraints visible. Energy profiling (quarry energy) optimizes for 
-  sustainability and battery life. The community dashboard (quarry.dev/metrics) 
+  sustainability and battery life. The community dashboard (aspirational: quarry.dev/metrics) 
   provides transparent, real-time evidence of Pyrite's performance, safety, and 
   learning characteristics. Great tooling transforms Pyrite from "technically 
   impressive" to "joy to use daily."
@@ -16639,7 +16641,7 @@ developer experience:
   services.
 
 **Learn-By-Doing Ecosystem** (Section 8.14, Section 10, 15.13, 15.40)
-  Zero-installation experimentation via play.pyrite-lang.org. Every documentation 
+  Zero-installation experimentation via (aspirational: play.pyrite-lang.org). Every documentation 
   example is a live playground link. Share code via URL. See compiler errors in 
   real-time with inline explanations. The interactive REPL (pyrite repl) provides 
   local, instant experimentation with ownership visualization - making abstract 

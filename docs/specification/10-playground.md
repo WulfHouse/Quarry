@@ -17,7 +17,7 @@ lower the barrier to entry and enable frictionless sharing of code examples.
 Features
 ~~~~~~~~
 
-The Playground (play.pyrite-lang.org) provides:
+The Playground (aspirational: play.pyrite-lang.org) provides:
 
   • Zero-installation experimentation: Write and run Pyrite in the browser
   • Real compiler: Uses WebAssembly-compiled pyritec for authentic experience
@@ -30,7 +30,7 @@ The Playground (play.pyrite-lang.org) provides:
 Example Workflow
 ~~~~~~~~~~~~~~~~
 
-1. Visit play.pyrite-lang.org
+1. Visit (aspirational: play.pyrite-lang.org)
 2. Write code:
 
    fn main():
@@ -39,7 +39,7 @@ Example Workflow
        print("Sum:", sum)
 
 3. Click "Run" → See output immediately
-4. Click "Share" → Get link: play.pyrite-lang.org/abc123
+4. Click "Share" → Get link: (aspirational: play.pyrite-lang.org/abc123)
 5. Paste link in forum post, documentation, or chat
 
 10.2 Integration with Documentation

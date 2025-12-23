@@ -443,7 +443,7 @@ Day 1: Installation and First Program
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # Install Pyrite (single command)
-    $ curl --sSf https://get.pyrite-lang.org | sh
+    $ curl --sSf https://raw.githubusercontent.com/WulfHouse/Quarry/main/scripts/setup/install.sh | sh
     
     # Write first program (hello.pyrite)
     fn main():
@@ -569,10 +569,12 @@ Year 1: Contributing to Ecosystem
     $ quarry publish my-awesome-lib
     
     # Track adoption on dashboard
+    <!-- Aspirational: does not exist yet -->
     https://quarry.dev/packages/my-awesome-lib
     Downloads: 1,247 this month
     
     # See your impact on metrics
+    <!-- Aspirational: does not exist yet -->
     https://quarry.dev/metrics
     Ecosystem: 15,247 packages (+1 yours!)
 
