@@ -3951,28 +3951,28 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-024 -> SPEC-FORGE-0101
 - REQ-025 -> SPEC-FORGE-0102, SPEC-FORGE-0103
 - REQ-026 -> SPEC-QUARRY-0202
-- REQ-027 -> SPEC-FORGE-0100
-- REQ-028 -> SPEC-FORGE-0100
-- REQ-029 -> SPEC-QUARRY-0200
-- REQ-030 -> SPEC-QUARRY-0200
-- REQ-031 -> SPEC-QUARRY-0200
-- REQ-032 -> SPEC-QUARRY-0200
-- REQ-033 -> SPEC-QUARRY-0200
+- REQ-027 -> SPEC-FORGE-0110
+- REQ-028 -> SPEC-FORGE-0105
+- REQ-029 -> SPEC-QUARRY-0501
+- REQ-030 -> SPEC-QUARRY-0502
+- REQ-031 -> SPEC-QUARRY-0503
+- REQ-032 -> SPEC-QUARRY-0504
+- REQ-033 -> SPEC-QUARRY-0505
 - REQ-034 -> SPEC-FORGE-0100
-- REQ-035 -> SPEC-LANG-0001, SPEC-LANG-0100
-- REQ-036 -> SPEC-LANG-0001
-- REQ-037 -> SPEC-LANG-0001
+- REQ-035 -> SPEC-LANG-0016
+- REQ-036 -> SPEC-LANG-0017
+- REQ-037 -> SPEC-LANG-0007
 - REQ-038 -> SPEC-LANG-0002
 - REQ-039 -> SPEC-LANG-0002
 - REQ-040 -> SPEC-LANG-0003
 - REQ-041 -> SPEC-LANG-0004
-- REQ-042 -> SPEC-LANG-0004
-- REQ-043 -> SPEC-LANG-0004
-- REQ-044 -> SPEC-LANG-0001
-- REQ-045 -> SPEC-LANG-0001
-- REQ-046 -> SPEC-LANG-0004
+- REQ-042 -> SPEC-LANG-0103
+- REQ-043 -> SPEC-LANG-0018
+- REQ-044 -> SPEC-LANG-0019
+- REQ-045 -> SPEC-LANG-0006
+- REQ-046 -> SPEC-LANG-0020
 - REQ-047 -> SPEC-LANG-0005
-- REQ-048 -> SPEC-LANG-0004
+- REQ-048 -> SPEC-LANG-0019
 - REQ-049 -> SPEC-LANG-0009
 - REQ-050 -> SPEC-LANG-0010, SPEC-LANG-0011
 - REQ-051 -> SPEC-FORGE-0001
@@ -4786,6 +4786,16 @@ This section decomposes every language feature into SPEC items. Each SPEC is eit
 
 - SPEC-LANG-0007: Punctuation and Comment tokens
 
+- SPEC-LANG-0016: Indentation and Whitespace tokens
+
+- SPEC-LANG-0017: Statement and Block structure (Lexical)
+
+- SPEC-LANG-0018: Floating-point literal tokens
+
+- SPEC-LANG-0019: Boolean and None literal tokens
+
+- SPEC-LANG-0020: Character literal tokens
+
 #### SPEC-LANG-0002: Identifier Tokens
 
 **Kind:** LEAF  
@@ -5202,6 +5212,126 @@ string"""
 - Positive: `let x = 5; # comment`, `"""docstring"""`
 
 - Negative: `""" unterminated docstring`
+
+#### SPEC-LANG-0016: Indentation and Whitespace tokens
+
+**Kind:** LEAF
+
+**Source:** REQ-035, SSOT Section 3.1
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Lexer tracks indentation level (spaces/tabs).
+
+- Mixing tabs and spaces in indentation is a compile-time error.
+
+- Generates INDENT and DEDENT tokens for the parser.
+
+**User-facing behavior:**
+
+- Clean, Python-like syntax for blocks.
+
+**Tests required:**
+
+- Unit: Verify INDENT/DEDENT generation for various nesting levels.
+
+#### SPEC-LANG-0017: Statement and Block structure (Lexical)
+
+**Kind:** LEAF
+
+**Source:** REQ-036, SSOT Section 3.1
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Lexer recognizes newline as statement terminator in appropriate contexts.
+
+- Handles line continuations (explicit or implicit inside brackets).
+
+**User-facing behavior:**
+
+- No mandatory semicolons for most code.
+
+**Tests required:**
+
+- Unit: Verify NEWLINE token generation and suppression.
+
+#### SPEC-LANG-0018: Floating-point literal tokens
+
+**Kind:** LEAF
+
+**Source:** REQ-043, SSOT Section 3.1
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Lexer recognizes float literals (e.g., `1.0`, `0.5`, `1e10`).
+
+- Supports `f32` suffix for single-precision.
+
+**User-facing behavior:**
+
+- Standard floating-point representation.
+
+**Tests required:**
+
+- Unit: Test various float formats and suffixes.
+
+#### SPEC-LANG-0019: Boolean and None literal tokens
+
+**Kind:** LEAF
+
+**Source:** REQ-044, REQ-048, SSOT Section 3.1
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Lexer recognizes `true`, `false`, and `None` as distinct literal tokens.
+
+**User-facing behavior:**
+
+- First-class support for booleans and optionality.
+
+**Tests required:**
+
+- Unit: Test recognition of boolean and None keywords as literals.
+
+#### SPEC-LANG-0020: Character literal tokens
+
+**Kind:** LEAF
+
+**Source:** REQ-046, SSOT Section 3.1
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Lexer recognizes character literals (e.g., `'a'`, `'\n'`, `'\u{1F600}'`).
+
+- Supports Unicode escape sequences.
+
+**User-facing behavior:**
+
+- Full Unicode support for characters.
+
+**Tests required:**
+
+- Unit: Test various character escapes and Unicode points.
 
 **Implementation notes:**
 
@@ -5833,6 +5963,10 @@ let zeros = [0; 100]        # Repeat syntax
 - Binary operators combine two expressions into one.
 
 - Assignment operators are right-associative.
+
+- Arithmetic overflow (for `+`, `-`, `*`) is checked and raises an error in debug builds (REQ-042).
+
+- In release builds, overflow wraps using two's complement by default.
 
 **Edge cases:**
 
@@ -9934,6 +10068,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-FORGE-0109: Error suppression and warning levels
 
+- SPEC-FORGE-0110: Performance and Allocation Diagnostics
+
 #### SPEC-FORGE-0101: Error Code Assignment
 
 **Kind:** LEAF  
@@ -10185,6 +10321,38 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Tests required:**
 
 - Integration: Verify suppression of specific warnings in test files.
+
+#### SPEC-FORGE-0110: Performance and Allocation Diagnostics
+
+**Kind:** LEAF
+
+**Source:** REQ-027, SSOT Section 2.3
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement analysis passes that detect potentially expensive operations.
+
+- Warn for heap allocations inside loops (warning[P1050]).
+
+- Warn for implicit copies of large values (> 128 bytes) (warning[P1051]).
+
+- Integration with @noalloc contract checking.
+
+**User-facing behavior:**
+
+- Compiler provides feedback on performance pitfalls during development.
+
+**Tests required:**
+
+- Integration: Verify P1050 and P1051 are issued for relevant code patterns.
+
+**Implementation notes:**
+
+- This pass runs after type checking and before code generation.
 
 [... Continue with diagnostics SPEC items ...]
 
@@ -11510,6 +11678,138 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-QUARRY-0002
 
+### 6.2 Language Server Protocol (LSP)
+
+#### SPEC-QUARRY-0500: Language Server Architecture
+
+**Kind:** NODE
+
+**Source:** REQ-029 to REQ-033, SSOT Section 2.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Children:**
+
+- SPEC-QUARRY-0501: LSP Server Core (JSON-RPC)
+
+- SPEC-QUARRY-0502: Parameter Behavior Hover Provider
+
+- SPEC-QUARRY-0503: Performance Cost Hover Provider
+
+- SPEC-QUARRY-0504: Type and Layout Hover Provider
+
+- SPEC-QUARRY-0505: Configurable Detail Levels
+
+#### SPEC-QUARRY-0501: LSP Server Core (JSON-RPC)
+
+**Kind:** LEAF
+
+**Source:** REQ-029, SSOT Section 2.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement base LSP server with JSON-RPC over stdin/stdout.
+
+- Support `initialize`, `shutdown`, and basic lifecycle messages.
+
+- Integrate with Forge for on-the-fly diagnostics.
+
+**User-facing behavior:**
+
+- IDE connects to Pyrite and provides real-time feedback.
+
+**Tests required:**
+
+- Integration: Verify JSON-RPC message handling.
+
+#### SPEC-QUARRY-0502: Parameter Behavior Hover Provider
+
+**Kind:** LEAF
+
+**Source:** REQ-030, SSOT Section 2.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `textDocument/hover` for function parameters.
+
+- Show ownership behavior (Takes ownership vs Borrows).
+
+- Provide warnings for ownership consumption.
+
+**User-facing behavior:**
+
+- Hover over parameters to understand their impact.
+
+#### SPEC-QUARRY-0503: Performance Cost Hover Provider
+
+**Kind:** LEAF
+
+**Source:** REQ-031, SSOT Section 2.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Show operation costs (bytes copied, estimated cycles).
+
+- Integration with `quarry cost` analysis.
+
+**User-facing behavior:**
+
+- See performance impact of code changes instantly.
+
+#### SPEC-QUARRY-0504: Type and Layout Hover Provider
+
+**Kind:** LEAF
+
+**Source:** REQ-032, SSOT Section 2.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Show memory layout (Size, Alignment, Location).
+
+- Display behavioral badges ([Copy], [Move], [NoDrop]).
+
+**User-facing behavior:**
+
+- Deep understanding of data representation in hover.
+
+#### SPEC-QUARRY-0505: Configurable Detail Levels
+
+**Kind:** LEAF
+
+**Source:** REQ-033, SSOT Section 2.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Support detail level settings (Beginner, Intermediate, Advanced).
+
+- Filter hover content based on selected level.
+
+**User-facing behavior:**
+
+- Adjust tooltip complexity to match experience.
+
 ---
 
 ## 7. Testing + Quality Gates
@@ -11643,7 +11943,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Tokenize all basic Pyrite constructs.
 
-    - Included: SPEC-LANG-0002, SPEC-LANG-0003, SPEC-LANG-0004, SPEC-LANG-0005, SPEC-LANG-0006, SPEC-LANG-0007, SPEC-FORGE-0002.
+    - Included: SPEC-LANG-0002, SPEC-LANG-0003, SPEC-LANG-0004, SPEC-LANG-0005, SPEC-LANG-0006, SPEC-LANG-0007, SPEC-LANG-0016, SPEC-LANG-0017, SPEC-LANG-0018, SPEC-LANG-0019, SPEC-LANG-0020, SPEC-FORGE-0002.
 
     - Dependencies: None.
 
@@ -11653,7 +11953,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Establish error reporting and compiler pass structure.
 
-    - Included: SPEC-FORGE-0001 (NODE), SPEC-FORGE-0101, SPEC-FORGE-0102, SPEC-FORGE-0103, SPEC-FORGE-0104, SPEC-FORGE-0105, SPEC-FORGE-0106, SPEC-FORGE-0107, SPEC-FORGE-0108, SPEC-FORGE-0109.
+    - Included: SPEC-FORGE-0001 (NODE), SPEC-FORGE-0101, SPEC-FORGE-0102, SPEC-FORGE-0103, SPEC-FORGE-0104, SPEC-FORGE-0105, SPEC-FORGE-0106, SPEC-FORGE-0107, SPEC-FORGE-0108, SPEC-FORGE-0109, SPEC-FORGE-0110.
 
     - Dependencies: M0.
 
@@ -11791,7 +12091,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Interactive tools for developer onboarding and visualization.
 
-    - Included: SPEC-QUARRY-0201, SPEC-QUARRY-0202, SPEC-QUARRY-0203, SPEC-QUARRY-0204, SPEC-QUARRY-0401, SPEC-QUARRY-0402, SPEC-QUARRY-0403, SPEC-QUARRY-0404.
+    - Included: SPEC-QUARRY-0201, SPEC-QUARRY-0202, SPEC-QUARRY-0203, SPEC-QUARRY-0204, SPEC-QUARRY-0401, SPEC-QUARRY-0402, SPEC-QUARRY-0403, SPEC-QUARRY-0404, SPEC-QUARRY-0501, SPEC-QUARRY-0502, SPEC-QUARRY-0503, SPEC-QUARRY-0504, SPEC-QUARRY-0505.
 
     - Dependency satisfaction note: Depends on M7 (Codegen for JIT/WASM) and M8 (Build Orchestration).
 
@@ -12074,6 +12374,7 @@ Total new P1 LEAFs: 25.
 | AUDIT-013| SPEC-LANG-0200| B | NODE missing ordering rationale | Added rationale |
 | AUDIT-014| SPEC-FORGE-0003, 0004, 0005, 0007| B | NODEs missing ordering rationale | Added rationale |
 | AUDIT-015| REQ-001..025| B | REQs mapped to NODEs instead of LEAFs | Remapped 25 REQs to LEAF specs |
+| AUDIT-016| REQ-026..050| B | REQs mapped to NODEs instead of LEAFs | Remapped 25 REQs to LEAF specs; added 11 new LEAFs |
 
 ### REQ-to-LEAF Mapping Verification (Batch 1)
 
@@ -12082,6 +12383,15 @@ Total new P1 LEAFs: 25.
 - **Mapping Coverage Delta:** +25 REQs remapped to LEAFs
 - **New Dependencies introduced:** None
 - **Roadmap Consistency:** Verified (all LEAFs are children of previously mapped NODEs already in roadmap)
+- **Status:** PASS
+
+### REQ-to-LEAF Mapping Verification (Batch 2)
+
+- **REQ Range:** REQ-026..REQ-050
+- **New LEAFs created:** 11 (SPEC-FORGE-0110, SPEC-LANG-0016..0020, SPEC-QUARRY-0501..0505)
+- **Mapping Coverage Delta:** +25 REQs remapped to LEAFs
+- **New Dependencies introduced:** None
+- **Roadmap Consistency:** Verified (new LEAFs added to M0, M1, M12)
 - **Status:** PASS
 
 ### Loop B (Scoped): Newly added LEAFs
