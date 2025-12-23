@@ -104,13 +104,20 @@ If a feature can be decomposed into sub-features, it MUST be decomposed until ea
 
 ## 0.1 Spec Freeze (Release Contract)
 
-- **Freeze Date:** December 22, 2025
-- **Freeze Status:** This document is the authoritative technical contract for Pyrite Alpha v1.0 and Beta releases. The roadmap and SPEC schema defined herein are frozen for implementation.
+- **Freeze Date:** December 23, 2025
+
+- **Freeze Status:** This document is the authoritative technical contract for Pyrite Alpha v1.1 and Beta releases. The roadmap and SPEC schema defined herein are frozen for implementation.
+
 - **Change Control Rules:**
+
   - Any proposed change to a SPEC or Roadmap item must be submitted via a Pull Request.
+
   - Changes impacting REQ-to-SPEC mappings must update Section 2.x.
+
   - Changes to quality gates or evidence requirements must update Section 7.
+
   - Changes to milestones or delivery order must update Section 8.
+  
   - Any change to a LEAF schema requires a re-run of Verification Loops B and C to ensure consistency.
 
 ---
@@ -4288,7 +4295,7 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-361 -> Meta
 - REQ-362 -> Meta
 - REQ-363 -> Meta
-- REQ-364 -> SPEC-QUARRY-0100
+- REQ-364 -> SPEC-FORGE-0100
 - REQ-365 -> Meta
 - REQ-366 -> Meta
 - REQ-367 -> Meta
@@ -4298,6 +4305,9 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-371 -> Meta
 - REQ-372 -> Meta
 - REQ-373 -> Meta
+- REQ-374 -> SPEC-LANG-0701
+- REQ-375 -> SPEC-LANG-1004
+- REQ-376 -> SPEC-FORGE-0303
 
 ---
 
@@ -9326,7 +9336,9 @@ let zeros = [0; 100]        # Repeat syntax
 
 - Implement `@kernel` attribute for function declarations.
 
-- Enforce no heap allocation, no recursion, and no system calls in `@kernel` functions.
+- Enforce no heap allocation, no recursion, and no system calls in `@kernel` functions (REQ-328).
+
+- Implicitly inherit and enforce `@no_panic` constraint for all `@kernel` functions (REQ-374).
 
 - Transitively enforce these constraints on all functions called from a `@kernel`.
 
@@ -9338,7 +9350,7 @@ let zeros = [0; 100]        # Repeat syntax
 
 - Developers mark functions with `@kernel` to indicate GPU eligibility.
 
-- Compiler errors identify exactly where and why a kernel violates hardware constraints.
+- Compiler errors identify exactly where and why a kernel violates hardware constraints, including panics.
 
 **Semantics:**
 
@@ -11396,19 +11408,21 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Implement `async with` blocks for scoping background tasks
+- Implement `async with` blocks for scoping background tasks.
 
-- Ensure all tasks within block complete before exit
+- Compiler-enforced guarantee that all tasks spawned within an `async with` block are completed or cancelled before exit (REQ-375).
 
-- Implement automatic cancellation of sibling tasks when one task fails/panics (REQ-342)
+- Ensure all tasks within block complete before exit.
 
-- Support propagation of panics from background tasks to parent
+- Implement automatic cancellation of sibling tasks when one task fails/panics (REQ-342).
+
+- Support propagation of panics from background tasks to parent.
 
 **User-facing behavior:**
 
-- Simplified, reliable management of concurrent task groups
+- Simplified, reliable management of concurrent task groups without background task leaks.
 
-- Automatic cleanup and error handling for group tasks
+- Automatic cleanup and error handling for group tasks.
 
 **Semantics:**
 
@@ -11674,6 +11688,76 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-LANG-1201: Native C FFI (extern)
 
 - SPEC-LANG-1202: Python interoperability strategy
+
+#### SPEC-LANG-1201: Native C FFI (extern)
+
+**Kind:** LEAF
+
+**Source:** REQ-353, SSOT Section 11.1
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `extern` keyword for declaring C functions in Pyrite.
+
+- Support platform-standard C ABI calling conventions for all supported targets.
+
+- Enable direct calls to `extern` functions from Pyrite code with zero runtime overhead.
+
+- Support `extern` global variable declarations.
+
+- Ensure type safety at the FFI boundary through manual type translation.
+
+- Support linking against static and dynamic C libraries via `Quarry.toml`.
+
+**User-facing behavior:**
+
+- Seamless integration with existing C libraries and system APIs.
+
+- High-performance interoperability without complex boilerplate.
+
+**Tests required:**
+
+- Integration: Call standard C library functions (e.g., `printf`, `sin`) and verify results.
+
+- Integration: Verify linking against a custom C library.
+
+#### SPEC-LANG-1202: Python Interoperability Strategy
+
+**Kind:** LEAF
+
+**Source:** REQ-355, REQ-380, REQ-381, REQ-382, SSOT Section 11.4
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Define the mechanism for optional Python runtime dependency (REQ-381).
+
+- Implement explicit GIL (Global Interpreter Lock) boundaries for Python calls (REQ-380).
+
+- Implement automatic conversion of Python exceptions to Pyrite `Result` types (REQ-382).
+
+- Support mapping between basic Pyrite types and Python types.
+
+- Ensure no hidden GIL acquisition or release during execution.
+
+**User-facing behavior:**
+
+- Access to Python's data science and numerical ecosystem when needed.
+
+- Transparent performance characteristics for interoperability calls.
+
+**Tests required:**
+
+- Integration: Prototype calling a simple Python script and receiving a Result.
+
+- Integration: Verify no-op performance when Python is not imported.
 
 #### SPEC-LANG-1300: Documentation and Education
 
@@ -13087,17 +13171,19 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Codegen generates multiple variants per @multi_version attribute
+- Codegen generates multiple variants per `@multi_version` attribute.
 
-- Runtime library implements CPU feature detection (CPUID/hwcaps)
+- Compiler always generates a baseline version guaranteed to run on the minimum supported instruction set for the target architecture (REQ-376).
 
-- Atomic function pointer swap for cached dispatch
+- Runtime library implements CPU feature detection (CPUID/hwcaps).
+
+- Atomic function pointer swap for cached dispatch.
 
 **Tests required:**
 
-- Integration: Verify multiple symbols in object file
+- Integration: Verify multiple symbols (including baseline) in object file.
 
-- Integration: Verify runtime selection on different hardware
+- Integration: Verify runtime selection on different hardware.
 
 #### SPEC-FORGE-0304: Bounds Check Elision
 
@@ -14671,6 +14757,10 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - Support "live links" from official documentation that pre-load code into the playground (REQ-351).
 
+- Implement "Explain" buttons for error codes that display detailed documentation (REQ-352).
+
+- Implement "Suggest Fix" feature for applying automated corrections to common mistakes (REQ-352).
+
 **User-facing behavior:**
 
 - Zero-installation environment for learning and experimenting with Pyrite.
@@ -14678,6 +14768,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - Immediate feedback on code correctness and ownership semantics.
 
 - Seamless transition from reading documentation to running examples.
+
+- Accessible explanations and automated fixes for compiler errors.
 
 **Tests required:**
 
@@ -15596,7 +15688,7 @@ For each Phase exit gate and each Milestone acceptance check referenced in Secti
 |-----------|-------------------------|------------------|
 | M9        | stdlib unit tests, I/O smoke tests | SPEC-LANG-0801, SPEC-LANG-0802, SPEC-LANG-0803 |
 | M10       | serialization conformance tests, networking stress tests | SPEC-LANG-0804, SPEC-LANG-0805, SPEC-LANG-0806 |
-| M11       | contract violation tests, allocation reports, sanitizer logs | SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207, SPEC-FORGE-0208, SPEC-QUARRY-0031, SPEC-QUARRY-0032 |
+| M11       | contract violation tests, allocation reports, sanitizer logs | SPEC-LANG-0401, SPEC-LANG-0402, SPEC-LANG-0403, SPEC-LANG-0404, SPEC-LANG-0405, SPEC-LANG-0406, SPEC-LANG-0407, SPEC-LANG-0408, SPEC-LANG-0510, SPEC-LANG-0511, SPEC-FORGE-0201, SPEC-FORGE-0202, SPEC-FORGE-0203, SPEC-FORGE-0204, SPEC-FORGE-0207, SPEC-FORGE-0208, SPEC-QUARRY-0031, SPEC-QUARRY-0032, SPEC-LANG-1201, SPEC-LANG-1202 |
 | M12       | REPL integration tests, visualization golden tests, auto-fix verification, doc extraction | SPEC-QUARRY-0201, SPEC-QUARRY-0202, SPEC-QUARRY-0203, SPEC-QUARRY-0204, SPEC-QUARRY-0025, SPEC-QUARRY-0030, SPEC-QUARRY-0033, SPEC-QUARRY-0034, SPEC-QUARRY-0035, SPEC-QUARRY-0401, SPEC-QUARRY-0402, SPEC-QUARRY-0403, SPEC-QUARRY-0404 |
 | M13       | profiling accuracy checks, lockfile regression tests, cross-compilation smoke tests | SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-QUARRY-0113, SPEC-QUARRY-0036, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0604, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903, SPEC-FORGE-0305, SPEC-FORGE-0306, SPEC-FORGE-0307 |
 | M14       | TSan results, async cancellation tests | SPEC-LANG-1001, SPEC-LANG-1002, SPEC-LANG-1003, SPEC-LANG-1004, SPEC-LANG-1005 |
@@ -16213,6 +16305,15 @@ Total new P1 LEAFs: 34.
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
 - **Roadmap Placement:** Consistent (M11, M12, M13, M14)
 - **New Dependencies:** SPEC-LANG-0700 (for GPU), SPEC-LANG-1100 (for Observability)
+- **Status:** PASS
+
+### REQ-to-LEAF Mapping Verification (Batch 15)
+
+- **REQ Range:** REQ-352..REQ-376
+- **New LEAFs created/expanded:** 6 (SPEC-QUARRY-0204, SPEC-LANG-1201, SPEC-LANG-1202, SPEC-LANG-0701, SPEC-LANG-1004, SPEC-FORGE-0303)
+- **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+- **Roadmap Placement:** Consistent (M11, M12, M14)
+- **New Dependencies:** None
 - **Status:** PASS
 
 ### Loop B (Scoped): Newly added LEAFs
