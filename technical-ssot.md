@@ -2,13 +2,13 @@
 
 - Last updated: December 23, 2025
 - Mode: REQ_TO_LEAF
-- Baseline totals: REQ=423 SPEC=268 NODE=35 LEAF=233
-- Progress: mapped_to_leaf=250/423
+- Baseline totals: REQ=423 SPEC=300 NODE=40 LEAF=260
+- Progress: mapped_to_leaf=300/423
 - Cursor:
-  - next_unmapped_req: REQ-251
+  - next_unmapped_req: REQ-301
   - batch_size: 25
-  - last_completed_req: REQ-250
-- This run targets: REQ -> LEAF Mapping (Batch 7)
+  - last_completed_req: REQ-300
+- This run targets: REQ -> LEAF Mapping (Batch 12)
 
 # Pyrite + Quarry Technical Specification (SSOT Implementation Guide)
 
@@ -4200,31 +4200,31 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-273 -> SPEC-LANG-0815
 - REQ-274 -> SPEC-LANG-0815
 - REQ-275 -> SPEC-LANG-0815
-- REQ-276 -> SPEC-LANG-0801
-- REQ-277 -> SPEC-LANG-0801
-- REQ-278 -> SPEC-LANG-0801
-- REQ-279 -> SPEC-LANG-0801
-- REQ-280 -> SPEC-LANG-0801
-- REQ-281 -> SPEC-LANG-0802
-- REQ-282 -> SPEC-LANG-0801
+- REQ-276 -> SPEC-LANG-0823
+- REQ-277 -> SPEC-LANG-0850
+- REQ-278 -> SPEC-LANG-0820
+- REQ-279 -> SPEC-LANG-0821
+- REQ-280 -> SPEC-LANG-0824
+- REQ-281 -> SPEC-LANG-0825
+- REQ-282 -> SPEC-LANG-0824
 - REQ-283 -> SPEC-QUARRY-0101
-- REQ-284 -> SPEC-LANG-0802
-- REQ-285 -> SPEC-LANG-0802
-- REQ-286 -> SPEC-LANG-0802
-- REQ-287 -> SPEC-LANG-0803
-- REQ-288 -> SPEC-LANG-0803
-- REQ-289 -> SPEC-LANG-0804
-- REQ-290 -> SPEC-LANG-0804
-- REQ-291 -> SPEC-LANG-0805
-- REQ-292 -> SPEC-LANG-0800
-- REQ-293 -> SPEC-LANG-0800
-- REQ-294 -> SPEC-LANG-0800
-- REQ-295 -> SPEC-LANG-0800
-- REQ-296 -> SPEC-LANG-0806
-- REQ-297 -> SPEC-LANG-0806
-- REQ-298 -> SPEC-LANG-0806
-- REQ-299 -> SPEC-LANG-0806
-- REQ-300 -> SPEC-LANG-0600
+- REQ-284 -> SPEC-LANG-0826
+- REQ-285 -> SPEC-LANG-0827
+- REQ-286 -> SPEC-LANG-0828
+- REQ-287 -> SPEC-LANG-0830
+- REQ-288 -> SPEC-LANG-0831
+- REQ-289 -> SPEC-LANG-0840
+- REQ-290 -> SPEC-LANG-0841
+- REQ-291 -> SPEC-LANG-0850
+- REQ-292 -> SPEC-LANG-0835
+- REQ-293 -> SPEC-LANG-0836
+- REQ-294 -> SPEC-LANG-0837
+- REQ-295 -> SPEC-LANG-0838
+- REQ-296 -> SPEC-LANG-0870
+- REQ-297 -> SPEC-LANG-0871
+- REQ-298 -> SPEC-LANG-0872
+- REQ-299 -> SPEC-LANG-0873
+- REQ-300 -> SPEC-LANG-0601
 - REQ-301 -> SPEC-LANG-0600
 - REQ-302 -> SPEC-LANG-0600
 - REQ-303 -> SPEC-LANG-0807
@@ -10016,7 +10016,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Kind:** NODE
 
-**Source:** REQ-267, SSOT Section 9.1
+**Source:** REQ-267, REQ-292, REQ-293, REQ-294, REQ-295, SSOT Section 9.1
 
 **Status:** PLANNED
 
@@ -10028,12 +10028,16 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-LANG-0802: String and StringBuilder
 - SPEC-LANG-0803: File and Path I/O
 - SPEC-LANG-0815: Stdlib Design Conventions (Borrowing, Costs, Builders)
+- SPEC-LANG-0835: Time and Duration Utilities
+- SPEC-LANG-0836: Integrated CLI Argument Parsing
+- SPEC-LANG-0837: Native Regular Expressions
+- SPEC-LANG-0838: Mathematical and Random Utilities
 
 #### SPEC-LANG-0801: Core Collection Suite (List, Map, Set)
 
 **Kind:** NODE
 
-**Source:** REQ-063, REQ-267, REQ-268, REQ-269, SSOT Section 9.1
+**Source:** REQ-063, REQ-267, REQ-268, REQ-269, REQ-276, REQ-277, REQ-280, REQ-282, SSOT Section 9.1
 
 **Status:** PLANNED
 
@@ -10044,6 +10048,8 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-LANG-0820: List[T] implementation
 - SPEC-LANG-0821: Map[K, V] implementation
 - SPEC-LANG-0822: Set[T] implementation
+- SPEC-LANG-0823: Lazy Iterator System
+- SPEC-LANG-0824: Performance-optimized Inline Collections
 
 #### SPEC-LANG-0820: List[T] Implementation
 
@@ -10159,11 +10165,11 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-LANG-0801
 
-#### SPEC-LANG-0802: String and StringBuilder
+#### SPEC-LANG-0823: Lazy Iterator System
 
 **Kind:** LEAF
 
-**Source:** REQ-270, REQ-271, SSOT Section 9.1
+**Source:** REQ-276, SSOT Section 9.1
 
 **Status:** PLANNED
 
@@ -10171,49 +10177,93 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Implement `String` (heap-allocated UTF-8 string) and `StringBuilder` for efficient construction.
-
-- Provide slicing support (`&str`).
-
-- Implement common methods: `find`, `split`, `replace`, `to_lowercase`, etc.
+- Implement `Iterator` trait with `next() -> Option[T]`.
+- Implement lazy adapters: `map`, `filter`, `take`, `enumerate`.
+- Ensure adapters are zero-allocation (struct-based, not closure-allocating where possible).
+- Integrate with `List`, `Map`, `Set`.
 
 **User-facing behavior:**
 
-- Safe, efficient Unicode string handling.
+- Composable, efficient data processing: `list.iter().filter(|x| x > 0).map(|x| x * 2)`.
 
 **Semantics:**
 
-- Strings are immutable by default but can be modified via `StringBuilder` or if owned/mutable.
-
-**Errors/diagnostics:**
-
-- Error on invalid UTF-8 sequences during conversion.
-
-**Examples:**
-
-- Positive: `let s = String::from("Hello"); let mut sb = StringBuilder::new(); sb.append(s);`
-
-- Negative: `s[1] = 'a'` (Error: strings are immutable slices)
+- Iterators are consumed upon usage.
+- Evaluation is deferred until a terminal operation (e.g., `collect`, `fold`) is called.
 
 **Tests required:**
 
-- Unit: UTF-8 validation tests, concatenation performance.
-
-- Integration: Formatting and parsing tests.
+- Unit: Verify laziness and zero-allocation properties via allocation counters in tests.
+- Integration: Complex chains of transformations.
 
 **Implementation notes:**
 
-- File: `pyrite/stdlib/src/string.pyrite`
+- File: `pyrite/stdlib/src/collections/iter.pyrite`
 
 **Dependencies:**
 
 - SPEC-LANG-0801
 
-#### SPEC-LANG-0803: File and Path I/O
+#### SPEC-LANG-0824: Performance-optimized Inline Collections
 
 **Kind:** LEAF
 
-**Source:** REQ-272, REQ-273, REQ-274, SSOT Section 9.2
+**Source:** REQ-280, REQ-282, SSOT Section 9.2
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement `SmallVec[T, N]` using stack storage for up to N elements before heap spilling.
+- Implement `InlineMap[K, V, N]` with similar stack-first behavior.
+- Ensure API compatibility with `List[T]` and `Map[K, V]`.
+
+**User-facing behavior:**
+
+- Drop-in performance optimization for small, hot-path collections.
+
+**Semantics:**
+
+- N must be a compile-time constant.
+- Spilling to heap must be transparent to the user.
+
+**Tests required:**
+
+- Unit: Verify no heap allocation for size <= N.
+- Integration: Verify correct transition to heap for size > N.
+
+**Implementation notes:**
+
+- File: `pyrite/stdlib/src/collections/inline.pyrite`
+
+**Dependencies:**
+
+- SPEC-LANG-0801
+
+#### SPEC-LANG-0802: String and StringBuilder
+
+**Kind:** NODE
+
+**Source:** REQ-270, REQ-271, REQ-281, REQ-284, REQ-285, REQ-286, SSOT Section 9.3
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Children:**
+
+- SPEC-LANG-0826: UTF-8 String Core
+- SPEC-LANG-0827: StringBuilder Implementation
+- SPEC-LANG-0828: Type-safe String Formatting (format!)
+- SPEC-LANG-0825: Small String Optimization (SSO)
+
+#### SPEC-LANG-0826: UTF-8 String Core
+
+**Kind:** LEAF
+
+**Source:** REQ-270, REQ-284, SSOT Section 9.3
 
 **Status:** PLANNED
 
@@ -10221,49 +10271,201 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Implement `File` for synchronous and asynchronous I/O.
-
-- Implement `Path` and `PathBuf` for cross-platform path manipulation.
-
-- Support reading/writing bytes and strings.
+- Implement `String` (heap-allocated) and `str` (slice) types.
+- Ensure all string data is valid UTF-8.
+- Implement basic methods: `len`, `is_empty`, `as_bytes`, `from_utf8`.
+- Support slicing with `s[start..end]`.
 
 **User-facing behavior:**
 
-- Consistent file API across OSs.
+- Safe, Unicode-aware string handling.
 
 **Semantics:**
 
-- Uses system calls directly with error wrapping.
-
-**Errors/diagnostics:**
-
-- `io::Error` for missing files, permission issues, etc.
-
-**Examples:**
-
-- Positive: `let data = File::read_to_string("config.toml")?;`
-
-- Negative: `File::open("/root/secret")` (Error: Permission Denied)
+- Slicing uses byte indices but panics if indices are not on character boundaries (or use `chars()` for iteration).
 
 **Tests required:**
 
-- Unit: Path normalization and join tests.
-
-- Integration: Create, read, delete files on all supported OSs.
+- Unit: UTF-8 validation, slicing boundaries, multi-byte character handling.
 
 **Implementation notes:**
 
-- File: `pyrite/stdlib/src/io/mod.pyrite`
+- File: `pyrite/stdlib/src/string/core.pyrite`
 
-**Dependencies:**
+#### SPEC-LANG-0827: StringBuilder Implementation
 
-- SPEC-LANG-1201 (FFI for syscalls)
+**Kind:** LEAF
+
+**Source:** REQ-271, REQ-285, SSOT Section 9.3
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `StringBuilder` for efficient string construction.
+- Support `append`, `append_str`, `append_char`, `clear`.
+- Pre-allocation support via `with_capacity`.
+
+**User-facing behavior:**
+
+- Efficient way to build strings without intermediate allocations.
+
+**Tests required:**
+
+- Unit: Growth logic, capacity management.
+
+**Implementation notes:**
+
+- File: `pyrite/stdlib/src/string/builder.pyrite`
+
+#### SPEC-LANG-0828: Type-safe String Formatting (format!)
+
+**Kind:** LEAF
+
+**Source:** REQ-286, SSOT Section 9.3
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `format!` macro for type-safe string interpolation.
+- Support both heap-allocated result and fixed-size stack buffers.
+- Integration with `Display` trait.
+
+**User-facing behavior:**
+
+- `let s = format!("Value: {}", x);`
+
+**Tests required:**
+
+- Unit: Formatting various types, buffer overflow handling for stack buffers.
+
+**Implementation notes:**
+
+- File: `pyrite/stdlib/src/string/format.pyrite`
+
+#### SPEC-LANG-0825: Small String Optimization (SSO)
+
+**Kind:** LEAF
+
+**Source:** REQ-281, SSOT Section 9.2
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement `SmallString[N]` with inline storage.
+- Automatic transition to heap when size exceeds N.
+
+**User-facing behavior:**
+
+- Optimization for short strings to avoid heap allocations.
+
+**Tests required:**
+
+- Unit: Verify no allocation for small strings.
+
+**Implementation notes:**
+
+- File: `pyrite/stdlib/src/string/sso.pyrite`
+
+#### SPEC-LANG-0803: File and Path I/O
+
+**Kind:** NODE
+
+**Source:** REQ-272, REQ-273, REQ-274, REQ-287, REQ-288, SSOT Section 9.4
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Children:**
+
+- SPEC-LANG-0830: Result-based File Operations
+- SPEC-LANG-0831: Cross-platform Path Handling
+
+#### SPEC-LANG-0830: Result-based File Operations
+
+**Kind:** LEAF
+
+**Source:** REQ-272, REQ-287, SSOT Section 9.4
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `File::open`, `File::create`, `File::read_to_string`, `File::write_all`.
+- All operations return `Result[T, io::Error]`.
+- Support for synchronous I/O.
+
+**User-facing behavior:**
+
+- Explicit error handling for file I/O.
+
+**Tests required:**
+
+- Integration: Read/write files, handle missing file errors.
+
+**Implementation notes:**
+
+- File: `pyrite/stdlib/src/io/file.pyrite`
+
+#### SPEC-LANG-0831: Cross-platform Path Handling
+
+**Kind:** LEAF
+
+**Source:** REQ-273, REQ-288, SSOT Section 9.4
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `Path` and `PathBuf`.
+- Support directory separators for Windows/Unix.
+- Methods: `join`, `parent`, `extension`, `exists`.
+
+**User-facing behavior:**
+
+- Platform-independent path manipulation.
+
+**Tests required:**
+
+- Unit: Joining paths with different separators, normalization.
+
+**Implementation notes:**
+
+- File: `pyrite/stdlib/src/io/path.pyrite`
 
 #### SPEC-LANG-0804: Serialization (JSON, TOML)
 
+**Kind:** NODE
+
+**Source:** REQ-275, REQ-289, REQ-290, SSOT Section 9.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Children:**
+
+- SPEC-LANG-0840: Built-in Serialization Formats
+- SPEC-LANG-0841: Automated Serialization Derivation (@derive)
+
+#### SPEC-LANG-0840: Built-in Serialization Formats
+
 **Kind:** LEAF
 
-**Source:** REQ-275, REQ-276, SSOT Section 9.3
+**Source:** REQ-289, SSOT Section 9.5
 
 **Status:** PLANNED
 
@@ -10271,49 +10473,26 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Provide built-in support for JSON and TOML serialization/deserialization.
-
-- Implement `Serialize` and `Deserialize` traits (or macros).
-
-- Focus on performance (zero-copy parsing where possible).
+- Implement JSON and TOML encoders/decoders in the standard library.
+- Provide `to_string` and `from_str` for both formats.
 
 **User-facing behavior:**
 
-- `let config: Config = toml::from_str(content)?;`
-
-**Semantics:**
-
-- Compile-time generation of serialization logic (metaprogramming).
-
-**Errors/diagnostics:**
-
-- Syntax errors during parsing with line numbers.
-
-**Examples:**
-
-- Positive: `let json_str = json::to_string(&user)?;`
-
-- Negative: `json::from_str("{ bad: }")` (Error: expected value)
+- Easy data interchange with standard formats.
 
 **Tests required:**
 
-- Unit: Conformance tests against official JSON/TOML suites.
-
-- Performance: Large file parsing benchmarks.
+- Unit: Conformance tests for JSON/TOML specs.
 
 **Implementation notes:**
 
-- File: `pyrite/stdlib/src/serialize/mod.pyrite`
+- File: `pyrite/stdlib/src/serialize/formats.pyrite`
 
-**Dependencies:**
-
-- SPEC-LANG-0802
-
-#### SPEC-LANG-0805: Networking (TCP, HTTP)
+#### SPEC-LANG-0841: Automated Serialization Derivation (@derive)
 
 **Kind:** LEAF
 
-**Source:** REQ-277, REQ-284, SSOT Section 9.4
+**Source:** REQ-290, SSOT Section 9.5
 
 **Status:** PLANNED
 
@@ -10321,49 +10500,85 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Implement `TcpStream` and `TcpListener`.
-
-- Provide a basic, high-performance HTTP client and server implementation.
-
-- Support TLS via a standard library wrapper (e.g., around OpenSSL or rustls).
+- Implement `@derive(Serialize, Deserialize)` compiler support.
+- Automatically generate implementation of `Serialize`/`Deserialize` traits for structs.
 
 **User-facing behavior:**
 
-- `let client = HttpClient::new(); let resp = client.get("https://github.com/WulfHouse/Quarry")?;`
-
-**Semantics:**
-
-- Asynchronous by default (integrates with SPEC-LANG-1000).
-
-**Errors/diagnostics:**
-
-- `net::Error` for connection timeouts, DNS failures.
-
-**Examples:**
-
-- Positive: Simple HTTP GET request.
-
-- Negative: Connection refused error handling.
+- `@derive(Serialize) struct Config { ... }`
 
 **Tests required:**
 
-- Integration: Spin up local server, perform requests.
+- Integration: Verify derived code correctly serializes complex nested structs.
 
-- Performance: Throughput and latency tests for TCP/HTTP.
+**Implementation notes:**
+
+- File: `pyrite/stdlib/src/serialize/derive.pyrite`
+
+#### SPEC-LANG-0805: Networking (TCP, HTTP)
+
+**Kind:** NODE
+
+**Source:** REQ-277, REQ-291, SSOT Section 9.6
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Children:**
+
+- SPEC-LANG-0850: TCP and HTTP Client/Server
+
+#### SPEC-LANG-0850: TCP and HTTP Client/Server
+
+**Kind:** LEAF
+
+**Source:** REQ-291, SSOT Section 9.6
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `TcpStream`, `TcpListener`.
+- Implement high-level `HttpClient` and `HttpServer`.
+- Support GET, POST, PUT, DELETE.
+
+**User-facing behavior:**
+
+- Ready-to-use networking primitives.
+
+**Tests required:**
+
+- Integration: Local echo server, HTTP request to a mock server.
 
 **Implementation notes:**
 
 - File: `pyrite/stdlib/src/net/mod.pyrite`
 
-**Dependencies:**
-
-- SPEC-LANG-1000
-
 #### SPEC-LANG-0806: Numerics and Tensors
+
+**Kind:** NODE
+
+**Source:** REQ-296, REQ-297, REQ-298, REQ-299, SSOT Section 9.11
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Children:**
+
+- SPEC-LANG-0870: High-performance Tensor Abstraction
+- SPEC-LANG-0871: Flexible Tensor Layouts
+- SPEC-LANG-0872: Zero-cost Tensor Views
+- SPEC-LANG-0873: Specialized Numerical Algorithms
+
+#### SPEC-LANG-0870: High-performance Tensor Abstraction
 
 **Kind:** LEAF
 
-**Source:** REQ-285 to REQ-299, SSOT Section 9.10
+**Source:** REQ-296, SSOT Section 9.11
 
 **Status:** PLANNED
 
@@ -10371,45 +10586,89 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Definition of Done:**
 
-- Implement multi-dimensional array type (`Tensor[T, Rank]`).
-
-- Support common linear algebra operations (add, mul, dot, transpose).
-
-- Leverage SIMD (SPEC-LANG-0600) for performance.
-
-- Support float and integer types.
+- Implement `Tensor[T, Rank]` with compile-time shape checking where possible.
+- Support fundamental math operations (+, -, *, /).
 
 **User-facing behavior:**
 
-- NumPy-like ergonomic API for numerical computing.
-
-**Semantics:**
-
-- Uses contiguous memory layout; supports slicing/views without copy.
-
-**Errors/diagnostics:**
-
-- `ERR-SHAPE-001`: Incompatible shapes for operation.
-
-**Examples:**
-
-- Positive: `let a = Tensor::ones([2, 2]); let b = a * 2.0;`
-
-- Negative: `a + Tensor::ones([3, 3])` (Error: shape mismatch)
+- Multi-dimensional array support for numerical computing.
 
 **Tests required:**
 
-- Unit: Verify mathematical correctness against reference implementations.
-
-- Performance: GFLOPS measurements for matrix multiplication.
+- Unit: Shape checking, arithmetic correctness.
 
 **Implementation notes:**
 
-- File: `pyrite/stdlib/src/num/tensor.pyrite`
+- File: `pyrite/stdlib/src/math/tensor.pyrite`
 
-**Dependencies:**
+#### SPEC-LANG-0871: Flexible Tensor Layouts
 
-- SPEC-LANG-0600, SPEC-LANG-0801
+**Kind:** LEAF
+
+**Source:** REQ-297, SSOT Section 9.11
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Support `RowMajor`, `ColMajor`, and `Strided` layouts.
+- Ability to change layout via `to_layout()`.
+
+**User-facing behavior:**
+
+- Control over memory layout for cache optimization.
+
+**Tests required:**
+
+- Unit: Verify indexing logic for each layout.
+
+#### SPEC-LANG-0872: Zero-cost Tensor Views
+
+**Kind:** LEAF
+
+**Source:** REQ-298, SSOT Section 9.11
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `TensorView` for slicing without data copy.
+- Enforce borrowing rules to prevent mutation of base tensor while view exists.
+
+**User-facing behavior:**
+
+- `let view = tensor[0..10, 5..15];`
+
+**Tests required:**
+
+- Unit: Slicing boundaries, borrow checker enforcement.
+
+#### SPEC-LANG-0873: Specialized Numerical Algorithms
+
+**Kind:** LEAF
+
+**Source:** REQ-299, SSOT Section 9.11
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Implement specialized GEMM (General Matrix Multiply) and other kernels using compile-time parameters.
+- Leverage `SPEC-LANG-0600` (SIMD).
+
+**User-facing behavior:**
+
+- High-performance linear algebra by default.
+
+**Tests required:**
+
+- Performance: Benchmark against naive implementations.
 
 #### SPEC-LANG-0807: Algorithmic Helpers
 
@@ -10453,6 +10712,115 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **User-facing behavior:**
 
 - Consistent, predictable, and performance-aware standard library experience.
+
+#### SPEC-LANG-0835: Time and Duration Utilities
+
+**Kind:** LEAF
+
+**Source:** REQ-292, SSOT Section 9.7
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `Instant` for monotonic time measurement.
+- Implement `Duration` for representing spans of time.
+- Implement `DateTime` for calendar dates and times with timezone support.
+
+**User-facing behavior:**
+
+- `let start = Instant::now(); ... let elapsed = start.elapsed();`
+
+**Tests required:**
+
+- Unit: Duration arithmetic, DateTime formatting and parsing.
+
+**Implementation notes:**
+
+- File: `pyrite/stdlib/src/time/mod.pyrite`
+
+#### SPEC-LANG-0836: Integrated CLI Argument Parsing
+
+**Kind:** LEAF
+
+**Source:** REQ-293, SSOT Section 9.8
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `Args` for manual flag and positional argument parsing.
+- Support structured derivation into structs via `@derive(Args)`.
+
+**User-facing behavior:**
+
+- `let args = Args::parse();` or `@derive(Args) struct Cli { ... }`
+
+**Tests required:**
+
+- Unit: Parsing various flag formats, handling missing arguments.
+
+**Implementation notes:**
+
+- File: `pyrite/stdlib/src/cli/mod.pyrite`
+
+#### SPEC-LANG-0837: Native Regular Expressions
+
+**Kind:** LEAF
+
+**Source:** REQ-294, SSOT Section 9.9
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `Regex` for pattern matching and text extraction.
+- Support standard regex syntax and capture groups.
+
+**User-facing behavior:**
+
+- `let re = Regex::new(r"(\d+)")?; let m = re.find(text)?;`
+
+**Tests required:**
+
+- Unit: Conformance tests for regex patterns.
+
+**Implementation notes:**
+
+- File: `pyrite/stdlib/src/text/regex.pyrite`
+
+#### SPEC-LANG-0838: Mathematical and Random Utilities
+
+**Kind:** LEAF
+
+**Source:** REQ-295, SSOT Section 9.10
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `math` module with trig, log, and pow functions.
+- Implement `random` module with CSPRNG (Cryptographically Secure Pseudo-Random Number Generator).
+
+**User-facing behavior:**
+
+- `let x = math::sin(y); let secret = random::bytes(32);`
+
+**Tests required:**
+
+- Unit: Math precision tests, randomness statistical tests (e.g., Dieharder).
+
+**Implementation notes:**
+
+- File: `pyrite/stdlib/src/math/mod.pyrite`
 
 #### SPEC-LANG-0900: Memory Management
 
@@ -14907,7 +15275,7 @@ Total new P1 LEAFs: 34.
 
     - Goal: Essential data structures and I/O for practical applications.
 
-    - Included: SPEC-LANG-0800 (NODE), SPEC-LANG-0801 (NODE), SPEC-LANG-0820, SPEC-LANG-0821, SPEC-LANG-0822, SPEC-LANG-0802, SPEC-LANG-0803.
+    - Included: SPEC-LANG-0800 (NODE), SPEC-LANG-0801 (NODE), SPEC-LANG-0820, SPEC-LANG-0821, SPEC-LANG-0822, SPEC-LANG-0823, SPEC-LANG-0824, SPEC-LANG-0802 (NODE), SPEC-LANG-0826, SPEC-LANG-0827, SPEC-LANG-0828, SPEC-LANG-0825, SPEC-LANG-0803 (NODE), SPEC-LANG-0830, SPEC-LANG-0831, SPEC-LANG-0815, SPEC-LANG-0835, SPEC-LANG-0836, SPEC-LANG-0837, SPEC-LANG-0838.
 
     - Dependency satisfaction note: Depends on M7 (Codegen) and M3 (Type System).
 
@@ -14917,7 +15285,7 @@ Total new P1 LEAFs: 34.
 
     - Goal: Serialization, networking, and numeric primitives.
 
-    - Included: SPEC-LANG-0804, SPEC-LANG-0805, SPEC-LANG-0806.
+    - Included: SPEC-LANG-0804 (NODE), SPEC-LANG-0840, SPEC-LANG-0841, SPEC-LANG-0805 (NODE), SPEC-LANG-0850, SPEC-LANG-0806 (NODE), SPEC-LANG-0870, SPEC-LANG-0871, SPEC-LANG-0872, SPEC-LANG-0873.
 
     - Dependency satisfaction note: Depends on M9 and M5 (Advanced Type System).
 
@@ -15313,6 +15681,14 @@ Total new P1 LEAFs: 34.
 - **New LEAFs created:** 1 (SPEC-LANG-0815)
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
 - **Roadmap Placement:** Consistent (M11, M13, M15, M9)
+- **Status:** PASS
+
+### REQ-to-LEAF Mapping Verification (Batch 12)
+
+- **REQ Range:** REQ-276..REQ-300
+- **New LEAFs created:** 18 (SPEC-LANG-0823..0828, SPEC-LANG-0830..0831, SPEC-LANG-0835..0838, SPEC-LANG-0840..0841, SPEC-LANG-0850, SPEC-LANG-0870..0873)
+- **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+- **Roadmap Placement:** Consistent (M9, M10)
 - **Status:** PASS
 
 ### Loop B (Scoped): Newly added LEAFs
