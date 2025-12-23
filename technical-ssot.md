@@ -4192,14 +4192,14 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-265 -> SPEC-QUARRY-0403
 - REQ-266 -> SPEC-QUARRY-0402
 - REQ-267 -> SPEC-LANG-0800
-- REQ-268 -> SPEC-LANG-0800
-- REQ-269 -> SPEC-LANG-0800
-- REQ-270 -> SPEC-LANG-0801
+- REQ-268 -> SPEC-LANG-0815
+- REQ-269 -> SPEC-LANG-0815
+- REQ-270 -> SPEC-LANG-0815
 - REQ-271 -> SPEC-FORGE-0304
-- REQ-272 -> SPEC-LANG-0801
-- REQ-273 -> SPEC-LANG-0800
-- REQ-274 -> SPEC-LANG-0801
-- REQ-275 -> SPEC-LANG-0802
+- REQ-272 -> SPEC-LANG-0815
+- REQ-273 -> SPEC-LANG-0815
+- REQ-274 -> SPEC-LANG-0815
+- REQ-275 -> SPEC-LANG-0815
 - REQ-276 -> SPEC-LANG-0801
 - REQ-277 -> SPEC-LANG-0801
 - REQ-278 -> SPEC-LANG-0801
@@ -10027,6 +10027,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-LANG-0801: Core Collection Suite (List, Map, Set)
 - SPEC-LANG-0802: String and StringBuilder
 - SPEC-LANG-0803: File and Path I/O
+- SPEC-LANG-0815: Stdlib Design Conventions (Borrowing, Costs, Builders)
 
 #### SPEC-LANG-0801: Core Collection Suite (List, Map, Set)
 
@@ -10427,6 +10428,31 @@ let b = a              # Copy: both a and b valid (int is Copy)
 - SPEC-LANG-0809: Structured parallelism (parallelize)
 
 - SPEC-LANG-0810: Cache-aware tiling (tile)
+
+#### SPEC-LANG-0815: Stdlib Design Conventions (Borrowing, Costs, Builders)
+
+**Kind:** LEAF
+
+**Source:** REQ-268, REQ-269, REQ-270, REQ-272, REQ-273, REQ-274, REQ-275, SSOT Section 9.1
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Establish and enforce standard library API conventions:
+    - Borrow-by-default: APIs prefer `&str` and `&[T]` over owned types (REQ-268).
+    - Explicit consumption: Functions taking ownership must be marked `@consumes` (REQ-269).
+    - Safe fallible accessors: Collections provide `.get()` returning `Optional[T]` (REQ-270).
+    - Performance transparency: Expensive operations (`.clone()`, `.to_owned()`) are visually distinct (REQ-273).
+    - Pre-allocation patterns: Collections emphasize `with_capacity(n)` (REQ-274).
+    - Builder pattern: Use builders for complex object construction (e.g., `StringBuilder`) (REQ-275).
+    - Unchecked accessors: Provide `.get_unchecked()` within `unsafe` blocks for performance (REQ-272).
+
+**User-facing behavior:**
+
+- Consistent, predictable, and performance-aware standard library experience.
 
 #### SPEC-LANG-0900: Memory Management
 
@@ -15279,6 +15305,14 @@ Total new P1 LEAFs: 34.
 - **New LEAFs created:** 5 (SPEC-QUARRY-0306..0308, SPEC-QUARRY-0114..0115)
 - **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
 - **Roadmap Placement:** Consistent (M11, M13, M15)
+- **Status:** PASS
+
+### REQ-to-LEAF Mapping Verification (Batch 11)
+
+- **REQ Range:** REQ-251..REQ-275
+- **New LEAFs created:** 1 (SPEC-LANG-0815)
+- **Mapping Coverage Delta:** +25 REQs mapped to LEAFs
+- **Roadmap Placement:** Consistent (M11, M13, M15, M9)
 - **Status:** PASS
 
 ### Loop B (Scoped): Newly added LEAFs
