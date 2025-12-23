@@ -21,6 +21,7 @@ class TokenType(Enum):
     IN = auto()
     MATCH = auto()
     CASE = auto()
+    MOVE = auto()
     RETURN = auto()
     BREAK = auto()
     CONTINUE = auto()
@@ -122,6 +123,7 @@ KEYWORDS = {
     'in': TokenType.IN,
     'match': TokenType.MATCH,
     'case': TokenType.CASE,
+    'move': TokenType.MOVE,
     'return': TokenType.RETURN,
     'break': TokenType.BREAK,
     'continue': TokenType.CONTINUE,

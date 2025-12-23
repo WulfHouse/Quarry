@@ -2033,7 +2033,14 @@ class Parser:
         if self.match_token(TokenType.IF):
             return self.parse_if_expression()
         
-        # Closure expression: fn[...] or fn(...)
+        # Closure expression: move fn[...] or fn(...) or move fn(...)
+        is_move = False
+        if self.match_token(TokenType.MOVE):
+            is_move = True
+            self.advance()
+            self.expect(TokenType.FN)
+            return self.parse_closure(is_move=True)
+        
         if self.match_token(TokenType.FN):
             return self.parse_closure()
         
@@ -2116,22 +2123,23 @@ class Parser:
             self.current().span
         )
     
-    def parse_closure(self) -> ast.Expression:
+    def parse_closure(self, is_move: bool = False) -> ast.Expression:
         """
         Parse closure expression: fn[...] or fn(...)
         fn[...] = parameter closure (compile-time, zero-cost)
         fn(...) = runtime closure (first-class, may allocate)
         """
         start_span = self.current().span
-        self.expect(TokenType.FN)
+        if not is_move:
+            self.expect(TokenType.FN)
         
         # Check if it's a parameter closure or runtime closure
         if self.match_token(TokenType.LBRACKET):
             # Parameter closure: fn[i: int]: body
-            return self.parse_parameter_closure(start_span)
+            return self.parse_parameter_closure(start_span, is_move=is_move)
         elif self.match_token(TokenType.LPAREN):
             # Runtime closure: fn(x: int) -> bool: body
-            return self.parse_runtime_closure(start_span)
+            return self.parse_runtime_closure(start_span, is_move=is_move)
         elif self.match_token(TokenType.IDENTIFIER):
             # This looks like a function declaration (fn name(...)), not a closure
             # If we're here, the parser is in the wrong context (should be in parse_item, not parse_expression)
@@ -2146,7 +2154,7 @@ class Parser:
                 self.current().span
             )
     
-    def parse_parameter_closure(self, start_span: Span) -> ast.ParameterClosure:
+    def parse_parameter_closure(self, start_span: Span, is_move: bool = False) -> ast.ParameterClosure:
         """Parse parameter closure: fn[i: int]: body"""
         self.expect(TokenType.LBRACKET)
         
@@ -2191,14 +2199,14 @@ class Parser:
             params=params,
             return_type=return_type,
             body=body,
+            is_move=is_move,
             span=self.make_span(start_span)
         )
     
-    def parse_runtime_closure(self, start_span: Span) -> ast.RuntimeClosure:
+    def parse_runtime_closure(self, start_span: Span, is_move: bool = False) -> ast.RuntimeClosure:
         """Parse runtime closure: fn(x: int) -> bool: body"""
         # Check for 'move' keyword
-        is_move = False
-        # (move keyword would be before 'fn', handled in caller)
+        # (is_move already set from caller)
         
         self.expect(TokenType.LPAREN)
         

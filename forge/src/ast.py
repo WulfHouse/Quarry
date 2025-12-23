@@ -491,6 +491,7 @@ class ParameterClosure(ASTNode):
     params: List['Param']
     return_type: Optional['Type']
     body: 'Block'
+    is_move: bool = False
     # Compiler guarantees (set during type checking)
     can_inline: bool = True  # Must be True
     allocates: bool = False  # Must be False
