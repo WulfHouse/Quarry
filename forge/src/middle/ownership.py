@@ -28,6 +28,11 @@ class ValueInfo:
     allocation_span: Span
     moved_to: Optional[str] = None  # Name of variable it was moved to
     move_span: Optional[Span] = None  # Where the move occurred
+    moved_fields: Set[str] = None  # Set of field names that have been moved
+
+    def __post_init__(self):
+        if self.moved_fields is None:
+            self.moved_fields = set()
 
 
 class OwnershipState:
@@ -35,7 +40,7 @@ class OwnershipState:
     
     def __init__(self):
         self.values: Dict[int, ValueInfo] = {}  # var_id -> ValueInfo
-        self.moved: Set[int] = set()  # Set of moved variable IDs
+        self.moved: Set[int] = set()  # Set of moved variable IDs (whole value)
         self.var_id_counter = 0
         self.name_to_id: Dict[str, int] = {}  # var_name -> var_id
     
@@ -53,34 +58,49 @@ class OwnershipState:
         self.name_to_id[var_name] = var_id
         return var_id
     
-    def is_owned(self, var_id: int) -> bool:
-        """Check if a value is still owned (not moved)"""
-        return var_id in self.values and var_id not in self.moved
+    def is_owned(self, var_id: int, field_name: Optional[str] = None) -> bool:
+        """Check if a value (or field) is still owned (not moved)"""
+        if var_id not in self.values:
+            return False
+        
+        # If whole value is moved, nothing is owned
+        if var_id in self.moved:
+            return False
+        
+        # If checking a specific field
+        if field_name:
+            return field_name not in self.values[var_id].moved_fields
+        
+        # If checking the whole value, it must not have any moved fields (SPEC-LANG-0309)
+        return not self.values[var_id].moved_fields
     
-    def is_owned_by_name(self, var_name: str) -> bool:
-        """Check if a variable still owns its value"""
+    def is_owned_by_name(self, var_name: str, field_name: Optional[str] = None) -> bool:
+        """Check if a variable still owns its value (or field)"""
         if var_name not in self.name_to_id:
             return False
         var_id = self.name_to_id[var_name]
-        return self.is_owned(var_id)
+        return self.is_owned(var_id, field_name)
     
-    def move_value(self, from_var: str, to_var: Optional[str], span: Span):
-        """Move ownership from one variable to another"""
+    def move_value(self, from_var: str, to_var: Optional[str], span: Span, field_name: Optional[str] = None):
+        """Move ownership from one variable (or field) to another"""
         if from_var not in self.name_to_id:
-            return  # Variable doesn't exist (will be caught by name resolution)
+            return  # Variable doesn't exist
         
         from_id = self.name_to_id[from_var]
         
         if from_id in self.moved:
-            return  # Already moved (error will be reported elsewhere)
+            return  # Already moved
         
-        # Mark as moved
-        self.moved.add(from_id)
-        
-        # Update value info
-        if from_id in self.values:
-            self.values[from_id].moved_to = to_var
-            self.values[from_id].move_span = span
+        if field_name:
+            # Partial move of a field (SPEC-LANG-0309)
+            if from_id in self.values:
+                self.values[from_id].moved_fields.add(field_name)
+        else:
+            # Move whole value
+            self.moved.add(from_id)
+            if from_id in self.values:
+                self.values[from_id].moved_to = to_var
+                self.values[from_id].move_span = span
     
     def get_value_info(self, var_name: str) -> Optional[ValueInfo]:
         """Get value info for a variable"""
@@ -92,7 +112,19 @@ class OwnershipState:
     def clone(self) -> 'OwnershipState':
         """Create a copy of this state"""
         new_state = OwnershipState()
-        new_state.values = self.values.copy()
+        # Deep copy ValueInfo objects because they contain mutable moved_fields
+        for vid, info in self.values.items():
+            new_info = ValueInfo(
+                var_id=info.var_id,
+                var_name=info.var_name,
+                type=info.type,
+                allocation_span=info.allocation_span,
+                moved_to=info.moved_to,
+                move_span=info.move_span,
+                moved_fields=info.moved_fields.copy()
+            )
+            new_state.values[vid] = new_info
+        
         new_state.moved = self.moved.copy()
         new_state.var_id_counter = self.var_id_counter
         new_state.name_to_id = self.name_to_id.copy()
@@ -304,11 +336,31 @@ class OwnershipAnalyzer:
             if source_type and not is_copy_type(source_type):
                 # This is a move
                 self.check_identifier_use(decl.initializer)
-                # Use decl.name (legacy) or a placeholder if it's a tuple
                 target_name = decl.name if hasattr(decl, 'name') else "<pattern>"
                 self.state.move_value(source_name, target_name, decl.span)
                 # Track timeline event
                 self.add_timeline_event(source_name, "move", f"'{source_name}' moved to '{target_name}'", decl.span)
+        elif isinstance(decl.initializer, ast.FieldAccess):
+            # Partial move (SPEC-LANG-0309)
+            if isinstance(decl.initializer.object, ast.Identifier):
+                obj_name = decl.initializer.object.name
+                field_name = decl.initializer.field
+                
+                # Infer field type (simplified)
+                obj_type = self.variable_types.get(obj_name)
+                field_type = UNKNOWN
+                if isinstance(obj_type, StructType) and field_name in obj_type.fields:
+                    field_type = obj_type.fields[field_name]
+                
+                if field_type and not is_copy_type(field_type):
+                    # Check if object or field already moved
+                    self.check_field_use(obj_name, field_name, decl.initializer.span)
+                    
+                    target_name = decl.name if hasattr(decl, 'name') else "<pattern>"
+                    self.state.move_value(obj_name, target_name, decl.span, field_name=field_name)
+                    self.add_timeline_event(obj_name, "move", f"field '{field_name}' of '{obj_name}' moved to '{target_name}'", decl.span)
+            else:
+                self.analyze_expression(decl.initializer)
         else:
             # Analyze the initializer
             self.analyze_expression(decl.initializer)
@@ -548,9 +600,11 @@ class OwnershipAnalyzer:
             self.analyze_method_call(expr)
             return False
         elif isinstance(expr, ast.FieldAccess):
-            # Check that the object is still valid
+            # Check that the object (or specific field) is still valid (SPEC-LANG-0309)
             if isinstance(expr.object, ast.Identifier):
-                self.check_identifier_use(expr.object)
+                obj_name = expr.object.name
+                field_name = expr.field
+                self.check_field_use(obj_name, field_name, expr.span)
             else:
                 self.analyze_expression(expr.object)
             return False
@@ -581,6 +635,29 @@ class OwnershipAnalyzer:
                     f"Cannot use moved value '{ident.name}' (moved to '{value_info.moved_to}' at {value_info.move_span})",
                     ident.span
                 )
+            elif value_info and value_info.moved_fields:
+                self.error(
+                    f"Cannot use '{ident.name}' because it has partially moved fields: {', '.join(value_info.moved_fields)}",
+                    ident.span
+                )
+
+    def check_field_use(self, obj_name: str, field_name: str, span: Span):
+        """Check if a struct field can be used (SPEC-LANG-0309)"""
+        self.add_timeline_event(obj_name, "use", f"field '{field_name}' of '{obj_name}' used", span)
+        
+        if not self.state.is_owned_by_name(obj_name):
+            value_info = self.state.get_value_info(obj_name)
+            if value_info and value_info.moved_to is not None:
+                self.error(
+                    f"Cannot use field '{field_name}' of moved value '{obj_name}'",
+                    span
+                )
+        
+        if not self.state.is_owned_by_name(obj_name, field_name):
+            self.error(
+                f"Cannot use already moved field '{field_name}' of '{obj_name}'",
+                span
+            )
     
     def analyze_function_call(self, call: ast.FunctionCall):
         """Analyze function call (may move arguments)"""
