@@ -20,7 +20,7 @@ class CompilationError(Exception):
     pass
 
 
-def compile_file(source_path: str, output_path: Optional[str] = None, emit_llvm: bool = False, deterministic: bool = False, visual: bool = False, warn_cost: bool = False, incremental: bool = True) -> bool:
+def compile_file(source_path: str, output_path: Optional[str] = None, emit_llvm: bool = False, deterministic: bool = False, visual: bool = False, warn_cost: bool = False, incremental: bool = True, output_format: str = "text") -> bool:
     """Compile a Pyrite source file
     
     Args:
@@ -44,10 +44,10 @@ def compile_file(source_path: str, output_path: Optional[str] = None, emit_llvm:
         print(f"Error reading file: {e}")
         return False
     
-    return compile_source(source, source_path, output_path, emit_llvm, deterministic, visual, warn_cost, incremental)
+    return compile_source(source, source_path, output_path, emit_llvm, deterministic, visual, warn_cost, incremental, output_format)
 
 
-def compile_source(source: str, filename: str = "<input>", output_path: Optional[str] = None, emit_llvm: bool = False, deterministic: bool = False, visual: bool = False, warn_cost: bool = False, incremental: bool = True) -> bool:
+def compile_source(source: str, filename: str = "<input>", output_path: Optional[str] = None, emit_llvm: bool = False, deterministic: bool = False, visual: bool = False, warn_cost: bool = False, incremental: bool = True, output_format: str = "text") -> bool:
     """Compile Pyrite source code
     
     Args:
@@ -242,7 +242,11 @@ def compile_source(source: str, filename: str = "<input>", output_path: Optional
                     level="warning",
                     help_messages=[warning.get("help_hint", "")]
                 )
-                print(diag.format(source))
+                if output_format == "json":
+                    import json
+                    print(json.dumps(diag.to_json(), indent=2))
+                else:
+                    print(diag.format(source))
         
         if emit_llvm:
             # Output LLVM IR only
@@ -356,7 +360,7 @@ def main() -> int:
         Exit code (0 for success, non-zero for failure)
     """
     if len(sys.argv) < 2:
-        print("Usage: python -m src.compiler <input.pyrite> [-o output] [--emit-llvm] [--deterministic] [--visual] [--warn-cost] [--incremental] [--no-incremental] [--explain CODE]")
+        print("Usage: python -m src.compiler <input.pyrite> [-o output] [--emit-llvm] [--deterministic] [--visual] [--warn-cost] [--incremental] [--no-incremental] [--explain CODE] [--format json]")
         print("\nOptions:")
         print("  -o <output>      Specify output file")
         print("  --emit-llvm      Output LLVM IR instead of executable")
@@ -366,6 +370,7 @@ def main() -> int:
         print("  --incremental    Enable incremental compilation (default: on)")
         print("  --no-incremental Disable incremental compilation")
         print("  --explain CODE   Show detailed explanation for error code")
+        print("  --format json    Output diagnostics in JSON format")
         return 1
     
     # Check for --explain flag
@@ -386,6 +391,7 @@ def main() -> int:
     visual = False
     warn_cost = False
     incremental = True  # Default to incremental
+    output_format = "text"  # Default to text format
     
     # Parse arguments
     i = 2
@@ -420,12 +426,18 @@ def main() -> int:
                     from .utils.error_explanations import list_error_codes
                     print(list_error_codes())
                     return 0
+        elif sys.argv[i] == '--format' and i + 1 < len(sys.argv):
+            output_format = sys.argv[i + 1]
+            if output_format not in ["text", "json"]:
+                print(f"Unknown format: {output_format}. Use 'text' or 'json'")
+                return 1
+            i += 2
         else:
             print(f"Unknown option: {sys.argv[i]}")
             return 1
     
     # Compile
-    success = compile_file(input_file, output_file, emit_llvm, deterministic, visual, warn_cost, incremental)
+    success = compile_file(input_file, output_file, emit_llvm, deterministic, visual, warn_cost, incremental, output_format)
     return 0 if success else 1
 
 

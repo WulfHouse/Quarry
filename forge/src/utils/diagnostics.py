@@ -1,6 +1,7 @@
 """Enhanced error diagnostics for Pyrite"""
 
-from typing import List, Tuple, Optional
+import json
+from typing import List, Tuple, Optional, Dict, Any
 from dataclasses import dataclass
 from ..frontend.tokens import Span
 from colorama import init, Fore, Style
@@ -105,6 +106,36 @@ class Diagnostic:
         lines.append(f"   = For more information, run: pyrite --explain {self.code}")
         
         return '\n'.join(lines)
+    
+    def to_json(self) -> Dict[str, Any]:
+        """Convert diagnostic to JSON format (SPEC-FORGE-0107)"""
+        return {
+            "code": self.code,
+            "message": self.message,
+            "severity": self.level,
+            "span": {
+                "file": self.span.filename,
+                "start_line": self.span.start_line,
+                "start_column": self.span.start_column,
+                "end_line": self.span.end_line,
+                "end_column": self.span.end_column,
+            },
+            "notes": self.notes,
+            "help": self.help_messages,
+            "related_spans": [
+                {
+                    "note": note,
+                    "span": {
+                        "file": span.filename,
+                        "start_line": span.start_line,
+                        "start_column": span.start_column,
+                        "end_line": span.end_line,
+                        "end_column": span.end_column,
+                    }
+                }
+                for note, span in self.related_spans
+            ]
+        }
     
     def suggest_fixes(self) -> List[FixSuggestion]:
         """Generate fix suggestions for this diagnostic"""

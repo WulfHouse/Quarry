@@ -13890,7 +13890,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Source:** REQ-025, SSOT Section 2.1
 
-**Status:** PLANNED
+**Status:** EXISTS-TODAY
 
 **Priority:** P0
 
@@ -13916,7 +13916,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Source:** REQ-025, SSOT Section 2.1
 
-**Status:** PLANNED
+**Status:** EXISTS-TODAY
 
 **Priority:** P0
 
@@ -13942,7 +13942,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Source:** REQ-034, SSOT Section 2.6
 
-**Status:** PLANNED
+**Status:** EXISTS-TODAY
 
 **Priority:** P0
 
@@ -13968,7 +13968,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Source:** REQ-028, SSOT Section 2.4
 
-**Status:** PLANNED
+**Status:** EXISTS-TODAY
 
 **Priority:** P0
 
@@ -14020,7 +14020,7 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 **Source:** REQ-025, SSOT Section 2.1
 
-**Status:** PLANNED
+**Status:** EXISTS-TODAY
 
 **Priority:** P0
 
