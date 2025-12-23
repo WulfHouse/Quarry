@@ -15,10 +15,20 @@ impl Tensor:
         return tensor_new(rows, cols)
     
     fn get(&self, r: i64, c: i64) -> f64:
-        return tensor_get(self, r, c)
+        # Safety: This FFI call dereferences raw pointers. The caller must ensure:
+        # 1. The tensor is initialized (data pointer is valid)
+        # 2. The indices are in bounds (0 <= r < rows, 0 <= c < cols)
+        # 3. The pointer passed to tensor_get is valid
+        unsafe:
+            return tensor_get(self, r, c)
     
     fn set(&mut self, r: i64, c: i64, val: f64):
-        tensor_set(self, r, c, val)
+        # Safety: This FFI call dereferences raw pointers. The caller must ensure:
+        # 1. The tensor is initialized (data pointer is valid)
+        # 2. The indices are in bounds (0 <= r < rows, 0 <= c < cols)
+        # 3. The pointer passed to tensor_set is valid
+        unsafe:
+            tensor_set(self, r, c, val)
     
     fn drop(&mut self):
         tensor_drop(self)
