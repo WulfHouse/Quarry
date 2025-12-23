@@ -1,1287 +1,377 @@
 ---
 alwaysApply: true
 ---
-
-# Pyrite/Quarry Unified Coding Agent Workflow
-
-This rule file provides the complete workflow for AI coding agents implementing the Pyrite language, Forge compiler, and Quarry SDK as specified in `docs/specification/technical-ssot.md`.
+**SSOT:** `docs/specification/technical-ssot.md` (FROZEN Dec 23, 2025)
+**Structure:** REQ-IDs → SPEC-IDs (NODE=grouping, LEAF=atomic work unit)
+**Command Prefix (MANDATORY):** `& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh`
 
 ---
 
-## 0. AGENT RESUME STATE (MANDATORY - UPDATE AFTER EACH SPEC)
+## 0. AGENT STATE (CRITICAL - UPDATE AFTER EACH SPEC)
 
-**CRITICAL:** This section MUST be updated immediately after completing each SPEC. This is the primary state retention mechanism for agent continuity across sessions.
+### 0.1 Current State (LIVE - UPDATE THIS)
 
 ```yaml
-## AGENT RESUME STATE (DO NOT DELETE)
-
-- Last updated: [Current Date]
-- Current Milestone: M[X]
-- Last Completed SPEC: SPEC-[COMPONENT]-[NUMBER]
-- Last Commit Hash: [git sha]
-- Last Commit Message: "[Full commit message]"
-- Next SPEC Target: SPEC-[COMPONENT]-[NUMBER]
-- Phase: [0-4] ([Phase Name])
-- Status: [READY | IMPLEMENTING | TESTING | BLOCKED]
-- Active Branch: [branch name]
-- Tests Passing: [X/Y] ([fast|full] suite)
-- Notes: [Any critical context for next agent]
+Last updated: December 23, 2025
+Milestone: M10 | Last SPEC: SPEC-LANG-0840 | Next: SPEC-LANG-0841
+Commit: 61abb48 "CHECKPOINT: M10 SPEC-LANG-0840 verified+complete"
+Phase: 3 (Beta) | Status: READY | Branch: 1.2.0-alpha
+Tests: [To be verified] | Notes: SPEC-LANG-0840 complete, JSON/TOML formats implemented
 ```
 
-### 0.1 How to Update This State
+### 0.2 State History (Last 5)
+```
+1. 2025-12-23 M10 SPEC-LANG-0840→SPEC-LANG-0841 | SPEC-LANG-0840 complete
+2. 2025-12-23 M9 SPEC-LANG-0822→M10 SPEC-LANG-0840 | M0-M9 complete
+3-5. [Date] M[X] SPEC-[ID]→SPEC-[ID] | [Notes]
+```
 
-**After EVERY SPEC completion:**
-1. Update "Last updated" with current date
-2. Update "Current Milestone" with the milestone of completed SPEC
-3. Update "Last Completed SPEC" with the SPEC-ID you just finished
-4. Run `git log -1 --oneline` and update "Last Commit Hash" and "Last Commit Message"
-5. Identify the next SPEC from Section 8.1 milestone list and update "Next SPEC Target"
-6. Update "Tests Passing" with latest test results
-7. Add any critical notes for the next agent instance
+### 0.3 Session Startup (DO THIS FIRST)
+```
+1. READ Section 0.1 → Note "Next" SPEC
+2. VERIFY: git log -1 --pretty=format:"%s" matches "Last SPEC"
+3. If mismatch: git log --grep="CHECKPOINT:" -1 → Update 0.1 → Commit "STATE: Synchronized"
+4. LOCATE SPEC in technical-ssot.md → Read DoD, deps, tests
+5. GO: Implement → Test → CHECKPOINT → Update 0.1 → STATE commit
+```
 
-**Example Update Flow:**
+### 0.4 Update Template (After Each SPEC)
+```yaml
+Last updated: [YYYY-MM-DD]
+Milestone: M[X] | Last SPEC: SPEC-[COMP]-[NUM] | Next: SPEC-[COMP]-[NUM]
+Commit: [7-char sha] "CHECKPOINT: M[X] SPEC-[COMP]-[NUM] verified+complete"
+Phase: [0-4] ([Name]) | Status: READY | Branch: [name]
+Tests: [X/1813] (full) OR [X/457] (fast) | Notes: [Context]
+```
+
+### 0.5 Control Commands
+- **"GO"** (all caps) = Start/resume work immediately (no confirmation)
+
+---
+
+## 1. CORE WORKFLOW
+
+### 1.1 LEAF SPEC (Atomic Unit)
+```
+Step 1: IMPLEMENT (satisfy all DoD criteria, handle edge cases, add diagnostics)
+Step 2: TEST (unit+integration+golden+perf per "Tests required")
+Step 3: VERIFY (run full suite, fix until 100% pass, never skip tests)
+Step 4: CHECKPOINT (git add . && git commit -m "CHECKPOINT: M[X] SPEC-[COMP]-[NUM] verified+complete")
+Step 5: UPDATE STATE (edit Section 0.1 with new state)
+Step 6: STATE COMMIT (git add .cursor/rules/unified-workflow.mdc && git commit -m "STATE: Updated after M[X] SPEC-[COMP]-[NUM]")
+```
+
+### 1.2 NODE SPEC (Container)
+```
+1. Review "Children:" list → Identify LEAFs/sub-NODEs
+2. Implement each child (LEAF workflow) in dependency order
+3. Verify integration → Full test suite → Final commit
+```
+
+### 1.3 Dual-Commit Pattern (MANDATORY)
+**Every SPEC = 2 commits:** CHECKPOINT (code+tests) + STATE (Section 0.1 update)
+**Why:** Git history tracks both implementation + navigation metadata
+
+---
+
+## 2. TESTING (NEVER SKIP)
+
+### 2.1 When to Test
+✅ Before commit | ✅ Before marking todo complete | ✅ After SPEC done | ✅ After bug fix
+
+### 2.2 Commands
 ```powershell
-# 1. Complete SPEC-LANG-0002
-# 2. Commit: "CHECKPOINT: M0 SPEC-LANG-0002 verified+complete"
-# 3. Update state section in this file:
-#    - Last Completed SPEC: SPEC-LANG-0002
-#    - Last Commit Message: "CHECKPOINT: M0 SPEC-LANG-0002 verified+complete"
-#    - Next SPEC Target: SPEC-LANG-0003
-# 4. Commit the rule file update: "STATE: Updated agent resume state after M0 SPEC-LANG-0002"
+# Fast (dev iteration): ~457 tests, ~8s
+& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh python tools/testing/pytest_fast.py
+
+# Full (pre-commit): 1813+ tests
+& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/
 ```
 
-### 0.2 State Verification on Agent Start
+### 2.3 Failure Protocol
+IF test fails → HALT → Analyze (impl bug vs test bug) → Fix (never modify SSOT) → Re-run → Repeat until 100% pass
 
-**First action of EVERY agent session:**
-```powershell
-# 1. Read this state section (Section 0)
-git log -1 --pretty=format:"%s"
-
-# 2. Verify consistency:
-#    - Does git log match "Last Completed SPEC"?
-#    - If mismatch: git log is authoritative, update this section
-
-# 3. Identify next work:
-#    - Read "Next SPEC Target"
-#    - Verify dependencies are satisfied
-#    - Begin implementation
-```
-
-### 0.4 State Synchronization (Recovery Procedure)
-
-**If Section 0 and git log are out of sync:**
-
-This can happen if:
-- Previous agent didn't update Section 0
-- Manual commits were made outside the workflow
-- The state update commit failed
-
-**Recovery Steps:**
-1. **Git log is ALWAYS authoritative** for implementation progress
-2. **Reconstruct state from git:**
-   ```powershell
-   # Find last CHECKPOINT commit
-   git log --grep="CHECKPOINT:" -1 --pretty=format:"%s"
-   
-   # Example output: "CHECKPOINT: M6 SPEC-LANG-0307 verified+complete"
-   # Parse: Milestone=M6, Last SPEC=SPEC-LANG-0307
-   ```
-3. **Update Section 0 to match git reality:**
-   - Set "Last Completed SPEC" from git log
-   - Look up milestone in technical-ssot.md Section 8.1
-   - Identify next SPEC in that milestone's list
-   - Update all other fields accordingly
-4. **Commit the corrected state:**
-   ```powershell
-   git add .cursor/rules/unified-workflow.mdc
-   git commit -m "STATE: Synchronized agent resume state with git log"
-   ```
-5. **Continue normal workflow**
-
-**Example:**
-```
-# Git log shows: "CHECKPOINT: M9 SPEC-LANG-0821 verified+complete"
-# But Section 0 says: "Last Completed SPEC: SPEC-LANG-0820"
-
-# Action: Update Section 0 to reflect SPEC-LANG-0821 completion
-#         Set "Next SPEC Target: SPEC-LANG-0822"
-#         Commit with "STATE: Synchronized agent resume state with git log"
-```
-
-### 0.3 State Update Template (Copy This)
-
-**Use this template when updating Section 0.5 after each SPEC:**
-
-```yaml
-## AGENT RESUME STATE (DO NOT DELETE)
-
-- Last updated: [YYYY-MM-DD]
-- Current Milestone: M[X]
-- Last Completed SPEC: SPEC-[COMPONENT]-[NUMBER]
-- Last Commit Hash: [7-char sha from git log -1 --oneline]
-- Last Commit Message: "CHECKPOINT: M[X] SPEC-[COMPONENT]-[NUMBER] verified+complete"
-- Next SPEC Target: SPEC-[COMPONENT]-[NUMBER]
-- Phase: [0|1|2|3|4] ([Foundations|Self-hosting|Alpha|Beta|Stabilization])
-- Status: READY
-- Active Branch: [main|feature/name]
-- Tests Passing: [X/1813] (full suite) OR [X/457] (fast suite)
-- Notes: [Context, blockers, or important info for next agent]
-```
-
-### 0.5 Current State (Live - UPDATE THIS AFTER EACH SPEC)
-
-```yaml
-## AGENT RESUME STATE (DO NOT DELETE)
-
-- Last updated: December 23, 2025
-- Current Milestone: [To be determined by first agent]
-- Last Completed SPEC: [Check git log]
-- Last Commit Hash: [Check git log]
-- Last Commit Message: "[Check git log]"
-- Next SPEC Target: [To be determined after reading git log]
-- Phase: [To be determined]
-- Status: READY
-- Active Branch: [Check git branch]
-- Tests Passing: [Run tests to determine]
-- Notes: Initial state - first agent should read git log to determine current progress
-```
-
-**IMPORTANT:** The first agent to use this file MUST populate the initial state by reading `git log` and running tests.
-
-### 0.6 State History (Last 5 Completions)
-
-**Purpose:** Provides context on recent progress for debugging and continuity.
-
-**Maintenance:** After updating Section 0.5, ADD a new entry here (keep only last 5).
-
-```
-STATE HISTORY (Most recent first):
-
-1. [Date] M[X] SPEC-[ID] → M[X] SPEC-[NEXT-ID] | [Agent notes]
-2. [Date] M[X] SPEC-[ID] → M[X] SPEC-[NEXT-ID] | [Agent notes]
-3. [Date] M[X] SPEC-[ID] → M[X] SPEC-[NEXT-ID] | [Agent notes]
-4. [Date] M[X] SPEC-[ID] → M[X] SPEC-[NEXT-ID] | [Agent notes]
-5. [Date] M[X] SPEC-[ID] → M[X] SPEC-[NEXT-ID] | [Agent notes]
-```
-
-**Example Entry:**
-```
-1. 2025-12-23 M9 SPEC-LANG-0820 → M9 SPEC-LANG-0821 | List[T] complete, 1813/1813 tests passing
-```
+### 2.4 Coverage Targets
+Forge: 100% (critical paths) | Pyrite: 90%+ | Quarry: 80%+
 
 ---
 
-## 0.7 CONTROL COMMANDS
-
-### GO Command
-
-**When you see "GO" in all caps, immediately start or resume work:**
-
-- **"GO"** = Start implementing the workflow from current state
-- **Action:** Read Section 0.5 → Identify Next SPEC Target → Begin implementation
-- **No confirmation needed** - proceed directly to work
-- **Context:** User is ready for you to execute the workflow autonomously
-
----
-
-## 0.8 QUICK START (Read This First!)
-
-**If you're a new agent instance, follow this 30-second startup:**
-
-```
-1. READ Section 0.5 (Current State - Live)
-   → See: "Next SPEC Target: SPEC-[COMPONENT]-[NUMBER]"
-
-2. VERIFY with git:
-   → Run: git log -1 --pretty=format:"%s"
-   → Should match "Last Completed SPEC"
-   → If not: Follow Section 0.4 recovery
-
-3. LOCATE SPEC in technical-ssot.md:
-   → Search for: "SPEC-[COMPONENT]-[NUMBER]:"
-   → Read: Definition of Done, Tests required, Implementation notes
-
-4. IMPLEMENT the SPEC:
-   → Code → Tests → Verify → Commit (CHECKPOINT)
-
-5. UPDATE Section 0.5:
-   → Edit this file's Section 0.5 with new state
-   → Commit (STATE)
-
-6. REPEAT or REPORT completion to user
-```
-
-**Most Common Mistake:** Forgetting to update Section 0 after committing. This breaks continuity!
-
-**Remember:** Two commits per SPEC: `CHECKPOINT:` then `STATE:`
-
----
-
-## 1. PROJECT ARCHITECTURE & SINGLE SOURCE OF TRUTH
-
-### 1.1 Technical Specification Authority
-
-- **SSOT Location:** `docs/specification/technical-ssot.md`
-- **Status:** FROZEN (December 23, 2025) - This is the authoritative technical contract
-- **Structure:** Work Breakdown Structure (WBS) consisting of:
-  - **REQ-IDs:** Atomic requirements extracted from SSOT (REQ-001 through REQ-423)
-  - **SPEC-IDs:** Technical specifications derived from REQs
-    - **NODE:** Groups related specifications; contains children
-    - **LEAF:** Indivisible unit of work; implementable in a single commit
-  
-### 1.2 Repository Structure
+## 3. PROJECT STRUCTURE
 
 ```
 Quarry/
-├── docs/specification/       # SSOT and technical specs
-├── forge/                    # Compiler (Stage0 Python, Stage1+ Pyrite)
-│   ├── src/                  # Stage0 Python implementation
-│   └── src-pyrite/           # Stage1/2 Pyrite implementation
-├── pyrite/                   # Standard library
-├── quarry/                   # Build system and package manager
-├── tools/                    # Development tools
-│   ├── runtime/              # Command wrappers (pyrite.py, quarry.py)
-│   ├── testing/              # Test runners
-│   └── coverage/             # Coverage analysis
-├── scripts/                  # Utility scripts (bootstrap, gates)
-│   └── run_gates.sh          # Quality gate script (MANDATORY prefix)
-├── tests/                    # Integration and acceptance tests
-└── .agent-artifacts/         # Agent-generated temporary files
+├── docs/specification/technical-ssot.md  # SSOT (frozen)
+├── forge/src/                            # Stage0 Python compiler
+├── pyrite/                               # Standard library
+├── quarry/                               # Build system + pkg manager
+├── scripts/run_gates.sh                  # Quality gates (mandatory prefix)
+├── tests/                                # unit/ integration/ acceptance/
+└── .agent-artifacts/                     # Agent temp files (.txt only)
 ```
+
+**Code Locations:** Lexer: `forge/src/frontend/lexer.py` | Parser: `forge/src/frontend/parser.py` | TypeChecker: `forge/src/middle/type_checker.py` | Codegen: `forge/src/backend/codegen.py` | Stdlib: `pyrite/stdlib/src/` | Quarry: `quarry/main.py`
 
 ---
 
-## 2. COMMAND EXECUTION RULES
+## 4. MILESTONES (technical-ssot.md Section 8.1)
 
-### 2.1 Mandatory Command Prefix
+**Phase 0 (Foundations):** M0 Lexical | M1 Diagnostics
+**Phase 1 (Self-hosting):** M2 Parsing | M3 Types | M4 Build
+**Phase 2 (Alpha):** M5 Advanced Types | M6 Ownership | M7 Codegen | M8 Build Orchestration
+**Phase 3 (Beta):** M9 Stdlib Core | M10 Extended Stdlib | M11 DbC | M12 REPL/Docs
+**Phase 4 (Stabilization):** M13 Perf Tools | M14 Concurrency | M15 Security
 
-**ALL commands MUST be prefixed with:**
-
-```powershell
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh
-```
-
-This wrapper:
-- Enforces quality gates before execution
-- Validates environment state
-- Ensures consistent execution across Windows/Unix environments
-- Prevents destructive operations
-
-### 2.2 Command Examples
-
-```powershell
-# Correct - Running tests
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/
-
-# Correct - Building project
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh python scripts/quarry build
-
-# INCORRECT - Missing prefix
-pytest tests/  # ❌ Will be rejected
-```
+**Milestone Map:**
+- M0: SPEC-LANG-0002..0020, SPEC-FORGE-0002
+- M1: SPEC-FORGE-0001,0101..0110
+- M2: SPEC-LANG-0101..0120,0009..0015, SPEC-FORGE-0009..0018
+- M3: SPEC-LANG-0201..0247, SPEC-FORGE-0019..0023
+- M4: SPEC-QUARRY-0001,0010..0018,0021..0024,0026
+- M5: SPEC-LANG-0204,0205, SPEC-FORGE-0005
+- M6: SPEC-LANG-0300..0316, SPEC-FORGE-0006
+- M7: SPEC-FORGE-0024..0029,0205,0206,0008, SPEC-LANG-0501..0508
+- M8: SPEC-QUARRY-0004..0006,0014,0019,0020
+- M9: SPEC-LANG-0800,0801,0820..0838,0815
+- M10: SPEC-LANG-0804,0840,0841,0805,0850,0806,0870..0873
+- M11: SPEC-LANG-0401..0409,0510,0511,0807,1101..1104,1201,1203,1501, SPEC-FORGE-0201..0209
+- M12: SPEC-QUARRY-0201..0205,0007,0025,0030,0033..0035,0401..0406,0501..0505, SPEC-LANG-1301,1302
+- M13: SPEC-QUARRY-0101..0115,0036, SPEC-LANG-0601..0605,0807..0810,0901..0903, SPEC-FORGE-0305..0308
+- M14: SPEC-LANG-1000..1005
+- M15: SPEC-QUARRY-0300..0308
 
 ---
 
-## 3. SPEC IMPLEMENTATION WORKFLOW (Core Process)
+## 5. DEFINITION OF DONE (DoD)
 
-### 3.1 Before Starting Work
-
-1. **Read Agent Resume State (Section 0 of this file):**
-   - Check "Last Completed SPEC" to see what was just done
-   - Check "Next SPEC Target" to see what to work on
-   - Check "Status" to see if there are any blockers
-   - Read "Notes" for any critical context from previous agent
-
-2. **Verify State with Git:**
-   ```powershell
-   git log -1 --pretty=format:"%s"
-   ```
-   - Review the last commit message to confirm it matches Section 0
-   - If mismatch: git log is authoritative, update Section 0 first
-   - Identify which SPEC was last completed
-   - Determine which milestone you're working on
-
-3. **Locate Target SPEC:**
-   - Use "Next SPEC Target" from Section 0, OR
-   - Open `docs/specification/technical-ssot.md`
-   - Find your assigned SPEC-ID (e.g., `SPEC-LANG-0101`, `SPEC-FORGE-0024`)
-   - Read the complete SPEC including:
-     - **Kind:** NODE or LEAF
-     - **Source:** Which REQ-IDs it implements
-     - **Status:** PLANNED, PARTIAL, or EXISTS-TODAY
-     - **Priority:** P0, P1, P2, P3
-     - **Definition of Done (DoD):** Objective completion criteria
-     - **Dependencies:** Other SPECs that must be complete first
-     - **Tests required:** Specific test categories needed
-
-4. **Verify Dependencies:**
-   - Check that all dependency SPEC-IDs are marked as complete
-   - If dependencies are incomplete, work on those first
-   - Respect milestone ordering (M0 → M1 → M2 → ... → M15)
-
-### 3.2 Implementing a LEAF SPEC
-
-A LEAF SPEC is the atomic unit of work. Complete it in this order:
-
-#### Step 1: Implementation
-- Write code to satisfy ALL criteria in the "Definition of Done"
-- Follow the "Implementation notes" section for file locations and algorithms
-- Respect "User-facing behavior" requirements exactly as stated
-- Handle all "Edge cases" and "Failure modes" listed
-- Add appropriate error codes and diagnostics as specified
-
-#### Step 2: Test Writing
-- Write tests for ALL categories specified in "Tests required:"
-  - **Unit tests:** Test the component in isolation
-  - **Integration tests:** Test interaction with other components
-  - **Golden tests:** Compare output against expected results
-  - **Performance tests:** Verify efficiency requirements (if applicable)
-- Cover all edge cases and failure modes
-- Ensure tests are deterministic and reproducible
-
-#### Step 3: Test Execution (Verification Loop)
-```powershell
-# Run ALL tests in the project
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/
-
-# If tests fail:
-# - Investigate the failure
-# - Fix the implementation or test
-# - DO NOT proceed until ALL tests pass
-# - DO NOT modify technical-ssot.md to "make tests pass"
-```
-
-#### Step 4: Commit (Checkpoint)
-Once ALL tests pass:
-```powershell
-git add .
-git commit -m "CHECKPOINT: M[X] SPEC-[COMPONENT]-[NUMBER] verified+complete"
-
-# Examples:
-# git commit -m "CHECKPOINT: M1 SPEC-FORGE-0110 verified+complete"
-# git commit -m "CHECKPOINT: M6 SPEC-LANG-0301 verified+complete"
-# git commit -m "CHECKPOINT: M9 SPEC-LANG-0820 verified+complete"
-```
-
-**Commit Message Format (MANDATORY):**
-```
-CHECKPOINT: M[milestone_number] SPEC-[COMPONENT]-[ID] verified+complete
-```
-Where:
-- `[milestone_number]`: M0, M1, M2, etc. (from Section 8.1 of technical-ssot.md)
-- `[COMPONENT]`: LANG, FORGE, or QUARRY
-- `[ID]`: 4-digit specification number (e.g., 0110)
-
-#### Step 5: Update Agent Resume State (MANDATORY)
-
-**CRITICAL:** After making the checkpoint commit, you MUST update Section 0 of this file:
-
-1. **Open `.cursor/rules/unified-workflow.mdc`**
-2. **Update the "Current State (Live)" section (Section 0.3):**
-   - Last updated: [Current date]
-   - Current Milestone: M[X]
-   - Last Completed SPEC: SPEC-[COMPONENT]-[NUMBER]
-   - Last Commit Hash: [from git log -1]
-   - Last Commit Message: [from git log -1]
-   - Next SPEC Target: [Look up in Section 8.1 of technical-ssot.md]
-   - Phase: [Current phase number and name]
-   - Status: READY
-   - Tests Passing: [Current count]
-   - Notes: [Any relevant context]
-
-3. **Commit the state update:**
-   ```powershell
-   git add .cursor/rules/unified-workflow.mdc
-   git commit -m "STATE: Updated agent resume state after M[X] SPEC-[COMPONENT]-[NUMBER]"
-   ```
-
-**Why this matters:** The next agent instance will read Section 0 to immediately understand:
-- Where you left off
-- What was just completed
-- What to work on next
-- Current test status
-- Any blockers or context
-
-### 3.3 Implementing a NODE SPEC
-
-A NODE SPEC is a grouping container. Complete it by:
-
-1. **Review Children:**
-   - Read the "Children:" list in the NODE SPEC
-   - These are the LEAF (or sub-NODE) SPECs you must complete
-
-2. **Implement Children in Order:**
-   - Complete each child SPEC following the LEAF workflow above
-   - Respect dependency ordering and "Ordering rationale"
-   - Make a commit after EACH child SPEC is verified
-
-3. **Final NODE Verification:**
-   - After all children are complete, verify the NODE's overall integration
-   - Run full test suite one final time
-   - Make a final commit for the NODE itself
-
-### 3.4 Handling SPEC Type Misclassification
-
-If you discover a LEAF SPEC is actually too complex for a single PR:
-
-1. **Stop implementation immediately**
-2. **Relabel it as a NODE** in `technical-ssot.md`
-3. **Decompose it into sub-LEAFs:**
-   - Create 2-7 new LEAF SPECs as children
-   - Assign unique SPEC-IDs not used elsewhere
-   - Ensure each new LEAF is truly atomic
-4. **Update the parent NODE:**
-   - Add "Children:" list
-   - Add "Ordering rationale:"
-5. **Verify ID uniqueness:**
-   - Search `technical-ssot.md` for each new ID
-   - Ensure no duplicates exist
-6. **Commit the specification update:**
-   ```
-   git commit -m "SPEC-REWORK: SPEC-[ID] relabeled NODE, decomposed into [N] LEAFs"
-   ```
+**SPEC incomplete until ALL checked:**
+- [ ] All DoD bullets implemented
+- [ ] User-facing behavior met exactly
+- [ ] Edge cases handled (logic/errors)
+- [ ] Failure modes + diagnostics (error codes)
+- [ ] All tests (per "Tests required") written + passing
+- [ ] Examples (positive+negative) work
+- [ ] Code in correct files (per "Implementation notes")
+- [ ] Dependencies satisfied
 
 ---
 
-## 4. TESTING REQUIREMENTS (Quality Gates)
+## 6. ERROR HANDLING
 
-### 4.1 When Tests MUST Be Run
+**Format:** `error[P####]` (P=Pyrite, ####=unique number)
+**Required Components:**
+1. WHAT (description)
+2. WHY (safety/correctness issue)
+3. NEXT (actionable suggestions, multiple options)
+4. LOCATION (multi-line source with highlighting)
 
-Tests MUST be executed and pass in ALL of the following scenarios:
-
-1. **Before marking any To-Do item as complete**
-2. **Before making ANY commit**
-3. **Before finishing prompt execution**
-4. **After completing implementation of a SPEC**
-5. **After fixing any bug or addressing any linter error**
-
-### 4.2 Test Execution Command
-
-```powershell
-# Full test suite (required before commits)
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/
-
-# Fast test suite (for rapid iteration during development)
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh python tools/testing/pytest_fast.py
+**Example:**
 ```
-
-### 4.3 Test Failure Protocol
-
-If ANY test fails:
-
-1. **STOP all forward progress**
-2. **Investigate the root cause:**
-   - Is the implementation incorrect?
-   - Is the test incorrect?
-   - Is there a regression in an unrelated area?
-3. **Fix the underlying issue:**
-   - Modify implementation to meet the DoD
-   - Fix test logic ONLY if the test itself is wrong
-   - NEVER modify `technical-ssot.md` to make tests pass
-4. **Re-run ALL tests**
-5. **Only proceed when 100% of tests pass**
-
-### 4.4 Test Coverage Requirements
-
-Based on Section 7 of `technical-ssot.md`:
-
-- **Compiler (Forge):** 100% line coverage for critical paths
-- **Standard Library (Pyrite):** 90%+ coverage
-- **Tooling (Quarry):** 80%+ coverage
-
----
-
-## 5. PROGRESS STATE MANAGEMENT
-
-### 5.1 State Retention via Git Commits
-
-The project uses **git commits as the primary state retention mechanism** for agent continuity.
-
-**Why:** Different agent instances can resume work by reading commit history.
-
-**How:**
-- Each SPEC completion is a commit checkpoint
-- Commit messages encode progress (milestone + SPEC-ID)
-- Future agents read `git log` to determine current state
-
-### 5.2 Commit Message as State Ledger
-
-When a new agent instance starts:
-```powershell
-# Agent reads the last commit
-git log -1 --pretty=format:"%s"
-
-# Example output:
-# "CHECKPOINT: M6 SPEC-LANG-0307 verified+complete"
-
-# Agent interprets:
-# - Currently in Milestone 6 (Ownership & Borrowing)
-# - Last completed: SPEC-LANG-0307 (Borrow Exclusivity Rules)
-# - Next: SPEC-LANG-0308 (Re-borrowing and Borrow Stack Management)
-```
-
-### 5.3 Multi-SPEC Tasks (Iterative Workflow)
-
-When asked to complete multiple SPECs (e.g., "Complete all of M9"):
-
-1. **Before starting:**
-   - View `git log -1` to check current state
-   - Read Section 0 of this file to see "Next SPEC Target"
-   - Read the milestone definition in Section 8.1 of `technical-ssot.md`
-   - Create a plan listing all SPECs in the milestone
-
-2. **For each SPEC in order:**
-   - Complete the SPEC (implement + test + verify)
-   - Run full test suite
-   - Make a checkpoint commit
-   - **Update Section 0 (Agent Resume State)** with completion info
-   - Commit the state update with "STATE:" prefix
-   - **DO NOT skip commits or state updates** - each SPEC needs its own checkpoint AND state record
-
-3. **Progress tracking:**
-   - Commits serve as breadcrumbs for resumption
-   - Section 0 provides high-level navigation for next agent
-   - If interrupted, next agent reads Section 0 + git log to continue
-
-**Example of complete SPEC cycle:**
-```powershell
-# 1. Implement SPEC-LANG-0820
-# 2. Test until all pass
-# 3. Commit code: "CHECKPOINT: M9 SPEC-LANG-0820 verified+complete"
-# 4. Update Section 0 in this file
-# 5. Commit state: "STATE: Updated agent resume state after M9 SPEC-LANG-0820"
-# 6. Move to SPEC-LANG-0821
-# 7. Repeat
-```
-
-### 5.4 Commit Frequency
-
-**Commit after EVERY:**
-- Completed LEAF SPEC (verified + tests passing)
-- Completed NODE SPEC (all children done + tests passing)
-- SPEC type reclassification (LEAF → NODE decomposition)
-- Major bug fix affecting multiple files
-
-**ALWAYS follow each SPEC checkpoint commit with a STATE update commit:**
-```powershell
-# Pattern for every SPEC completion:
-git commit -m "CHECKPOINT: M[X] SPEC-[ID] verified+complete"
-# ... update Section 0 ...
-git add .cursor/rules/unified-workflow.mdc
-git commit -m "STATE: Updated agent resume state after M[X] SPEC-[ID]"
-```
-
-**Do NOT commit:**
-- Partial work on a SPEC
-- Changes with failing tests
-- Experimental or debugging code
-- SPEC checkpoints without subsequent state updates
-
-### 5.5 The Dual-Commit Pattern (CHECKPOINT + STATE)
-
-**Every SPEC completion requires TWO commits:**
-
-**Commit 1 - CHECKPOINT (Implementation):**
-```powershell
-# Contains: Code changes, test additions, documentation
-git add [implementation files] [test files]
-git commit -m "CHECKPOINT: M[X] SPEC-[COMPONENT]-[NUMBER] verified+complete"
-```
-
-**Commit 2 - STATE (Metadata):**
-```powershell
-# Contains: Updated Section 0 in this rule file
-git add .cursor/rules/unified-workflow.mdc
-git commit -m "STATE: Updated agent resume state after M[X] SPEC-[COMPONENT]-[NUMBER]"
-```
-
-**Why two commits?**
-- **CHECKPOINT** preserves implementation progress (code + tests)
-- **STATE** preserves navigation metadata (where to resume)
-- Git history becomes a dual-track ledger: implementation + navigation
-- Any agent can resume by reading either:
-  - Latest CHECKPOINT commit (what was done)
-  - Section 0 (what to do next)
-
-**Verification:**
-```powershell
-# After completing SPEC-LANG-0820, git log should show:
-# commit abc123 STATE: Updated agent resume state after M9 SPEC-LANG-0820
-# commit def456 CHECKPOINT: M9 SPEC-LANG-0820 verified+complete
-```
-
-**Cycle Summary:** Read state → Implement → Test → CHECKPOINT commit → Update Section 0 → STATE commit → Next SPEC
-
----
-
-## 6. MILESTONE AND ROADMAP NAVIGATION
-
-### 6.1 Milestone Structure (Section 8.1 of technical-ssot.md)
-
-**Phase 0: Foundations**
-- M0: Lexical Core (Tokenization)
-- M1: Pipeline & Diagnostics (Error reporting)
-
-**Phase 1: Self-hosting baseline**
-- M2: Parsing & Name Resolution (AST + Symbol tables)
-- M3: Type System Core (Inference, compatibility)
-- M4: Build System Foundations (Quarry CLI basics)
-
-**Phase 2: Alpha v1.0 completeness**
-- M5: Advanced Type System (Traits, lifetimes)
-- M6: Ownership & Borrowing (Memory safety)
-- M7: Code Generation & Linking (LLVM backend)
-- M8: Full Build Orchestration (Incremental builds)
-
-**Phase 3: Beta completeness**
-- M9: Standard Library Core (Collections, I/O)
-- M10: Extended Stdlib (Serialization, networking)
-- M11: Language Features & Verification (DbC, contracts)
-- M12: Learning & Exploration Tools (REPL, docs)
-
-**Phase 4: Stabilization + performance**
-- M13: Performance Analysis Tooling (Profiling, cost analysis)
-- M14: Concurrency & Parallelism (Threading, async)
-- M15: Supply-Chain Security (Auditing, SBOM)
-
-### 6.2 Milestone Dependencies
-
-**Critical Path Rule:** Later milestones depend on earlier ones.
-
-- M2 depends on M0, M1
-- M3 depends on M2
-- M6 depends on M5 (which depends on M3)
-- M9 depends on M7 (which depends on M6)
-- etc.
-
-**Parallel Work:** Some milestones are parallelizable:
-- M4 (Build System) can start after M1 (doesn't need M2/M3)
-- M12 (Learning Tools) can partially overlap with M11
-
-### 6.3 Finding Your Next SPEC
-
-```python
-# Algorithmic approach for agents:
-
-1. Read git log to find last completed SPEC-ID and milestone
-2. Open technical-ssot.md Section 8.1
-3. Find the milestone section containing that SPEC-ID
-4. Identify the next SPEC-ID in that milestone's "Included:" list
-5. Navigate to that SPEC's definition in Sections 4, 5, or 6
-6. Verify dependencies are satisfied
-7. Begin implementation
-```
-
----
-
-## 7. DEFINITION OF DONE (DoD) COMPLIANCE
-
-### 7.1 What is a Definition of Done?
-
-Each LEAF SPEC contains a "Definition of Done" section listing objective, verifiable criteria. The SPEC is NOT complete until ALL DoD items are satisfied.
-
-### 7.2 DoD Verification Checklist
-
-Before considering a SPEC complete, verify:
-
-- [ ] All DoD bullet points implemented
-- [ ] All "User-facing behavior" requirements met
-- [ ] All "Edge cases" handled with appropriate logic/errors
-- [ ] All "Failure modes + diagnostics" implemented with correct error codes
-- [ ] All "Tests required" written and passing
-- [ ] All "Examples" (positive and negative) work as documented
-- [ ] Code placed in files specified in "Implementation notes"
-- [ ] All dependencies listed in "Dependencies" are satisfied
-
-### 7.3 DoD Example (SPEC-LANG-0002: Identifier Tokens)
-
-**DoD states:**
-- Lexer recognizes identifiers matching pattern: `[a-zA-Z_][a-zA-Z0-9_]*`
-- Unicode letters supported (UTF-8)
-- Case-sensitive (foo != Foo)
-- Cannot start with digit
-- Reserved keywords cannot be identifiers
-
-**Agent must verify:**
-- ✅ Regex pattern implemented in lexer
-- ✅ UTF-8 decoding working
-- ✅ Case sensitivity test passes
-- ✅ Error generated for `123abc`
-- ✅ Error generated for `if` as identifier
-- ✅ Tests cover all these scenarios
-
----
-
-## 8. FILE AND ARTIFACT ORGANIZATION
-
-### 8.1 Agent-Generated Files
-
-**Rule:** All files generated by agents must be created within:
-```
-.agent-artifacts/
-```
-
-**Exceptions (Production Code):**
-- Implementation files in `forge/`, `pyrite/`, `quarry/` (production code)
-- Test files in `tests/` (project tests)
-- Documentation in `docs/` (when explicitly required)
-
-**Included in .agent-artifacts:**
-- Scratch files
-- Experimental code
-- Analysis reports (MUST use .txt format)
-- Temporary scripts
-- Planning documents
-- Debug outputs
-
-**MANDATORY FORMAT RULE:**
-- **All reporting artifacts MUST use .txt format**
-- **Markdown (.md) files are FORBIDDEN for agent-generated reports**
-- This includes: progress reports, analysis summaries, planning documents, status updates
-- Rationale: Plain text is more reliable for parsing and avoids formatting inconsistencies
-
-**Cleanup:** Temporary files in `.agent-artifacts/` should be cleaned up before final commit if they're no longer needed.
-
-### 8.2 Production Code Locations
-
-Follow "Implementation notes" in each SPEC:
-
-- **Lexer:** `forge/src/frontend/lexer.py`
-- **Parser:** `forge/src/frontend/parser.py`
-- **Type Checker:** `forge/src/middle/type_checker.py`
-- **Ownership:** `forge/src/middle/ownership.py`
-- **Codegen:** `forge/src/backend/codegen.py`
-- **Standard Library:** `pyrite/stdlib/src/`
-- **Quarry CLI:** `quarry/main.py`
-
----
-
-## 9. QUALITY GATES AND TESTING STRATEGY
-
-### 9.1 Three-Tier Testing Approach
-
-**Tier 1: Unit Tests**
-- Test individual functions/classes in isolation
-- Mock external dependencies
-- Fast execution (milliseconds)
-- Located in: `tests/unit/`
-
-**Tier 2: Integration Tests**
-- Test component interactions (e.g., Parser + Type Checker)
-- Use real dependencies
-- Medium execution time (seconds)
-- Located in: `tests/integration/`
-
-**Tier 3: Acceptance Tests**
-- Test complete end-to-end workflows
-- Compile and run real Pyrite programs
-- Slower execution (seconds to minutes)
-- Located in: `tests/acceptance/`
-
-### 9.2 Test Execution Strategy
-
-**During Development (Fast Iteration):**
-```powershell
-# Fast test suite (subset, ~457 tests, ~8 seconds)
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh python tools/testing/pytest_fast.py
-```
-
-**Before Commit (Full Verification):**
-```powershell
-# Full test suite (1813+ tests)
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/
-```
-
-**Test Selection by SPEC:**
-```powershell
-# Run tests related to specific component
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/unit/frontend/test_lexer.py
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/integration/test_type_checking.py
-```
-
-### 9.3 Test Failure Response Protocol
-
-```
-IF any test fails:
-  1. HALT all progress on current SPEC
-  2. ANALYZE failure:
-     - Read test output and error message
-     - Identify root cause (implementation bug vs test bug)
-     - Check if failure is in current SPEC or regression in other SPEC
-  3. FIX the issue:
-     - Modify implementation if DoD not met
-     - Fix test if test logic is wrong
-     - NEVER modify technical-ssot.md to bypass test
-  4. RE-RUN all tests
-  5. REPEAT until 100% pass
-ENDIF
-```
-
----
-
-## 10. ERROR HANDLING AND DIAGNOSTICS
-
-### 10.1 Error Code System
-
-All compiler errors use the format: `error[P####]`
-
-**Prefix meaning:**
-- `P` = Pyrite
-- `####` = 4-digit unique error number
-
-**Examples:**
-- `error[P0234]`: Specific type mismatch
-- `error[P1050]`: Heap allocation inside loop (performance warning)
-- `error[P1051]`: Large value copy (performance warning)
-
-### 10.2 Diagnostic Requirements (REQ-025, Section 2.1)
-
-Every compiler error MUST include:
-
-1. **WHAT happened:** Clear description of the error
-2. **WHY it's a problem:** Explanation of the safety/correctness issue
-3. **WHAT to do next:** Multiple actionable suggestions
-4. **LOCATION context:** Multi-line source code with highlighting
-
-**Example Format:**
-```
-error[P0123]: Cannot borrow `x` as mutable because it is already borrowed as immutable
+error[P0123]: Cannot borrow `x` as mutable (already borrowed immutable)
   --> src/main.pyrite:15:9
-   |
-14 |     let ref1 = &x;           // immutable borrow occurs here
-15 |     let ref2 = &mut x;       // mutable borrow attempted here
-   |                ^^^^^^ cannot borrow as mutable
-16 |     use_ref(ref1);           // immutable borrow still in use here
-   |
-help: Consider restructuring to avoid overlapping borrows
-help: Clone `x` if you need an independent mutable copy: `x.clone()`
+14 |     let ref1 = &x;           // immutable borrow
+15 |     let ref2 = &mut x;       // ^^^^^^ error here
+16 |     use_ref(ref1);
+help: Restructure to avoid overlapping borrows
+help: Clone `x`: `x.clone()`
 ```
 
-### 10.3 Implementing Diagnostics
+---
 
-When implementing error detection:
-- Assign a unique error code (check existing codes to avoid duplicates)
-- Generate structured error with all 4 required components
-- Include helpful suggestions (multiple options when possible)
-- Test that the error message is clear and actionable
+## 7. COMMIT PATTERNS
+
+**Format (MANDATORY):** `CHECKPOINT: M[num] SPEC-[COMP]-[ID] verified+complete`
+- [num]: M0..M15
+- [COMP]: LANG | FORGE | QUARRY
+- [ID]: 4-digit (e.g., 0110)
+
+**Good:** Atomic, tested, includes SPEC-ID+milestone
+**Bad:** Multiple SPECs, partial work, failing tests
+**Branches:** `spec/m[X]-[component]-[number]` for experimental work
 
 ---
 
-## 11. WORKFLOW PATTERNS
+## 8. WORKFLOWS (Quick Reference)
 
-**Single SPEC:** git log → Section 0 → Read SPEC → Verify deps → Implement → Test → CHECKPOINT → Update Section 0 → STATE → Report
-**Milestone:** git log → Section 0 → List SPECs → For each: implement+test+CHECKPOINT+Section 0+STATE → Report
-**Bug Fix:** Identify → Determine affected SPECs → Fix → Test → Commit "BUGFIX: [SPEC-ID] - [description]"
-**Missing Requirement:** Document gap (what, where, impact) → Notify user with proposal → Don't proceed without clarification
+| Pattern | Flow |
+|---------|------|
+| Single SPEC | git log → Sec 0 → Read SPEC → Verify deps → Impl → Test → CHECKPOINT → Update Sec 0 → STATE → Report |
+| Milestone | git log → Sec 0 → List SPECs → For each: impl+test+CHECKPOINT+Sec0+STATE → Report |
+| Bug Fix | Identify → Find SPEC → Fix → Test → Commit "BUGFIX: [SPEC-ID] - [desc]" |
+| Missing Req | Document gap → Notify user → Don't proceed without clarification |
 
 ---
 
-## 12. TECHNICAL-SSOT.MD
+## 9. FORBIDDEN ACTIONS (NEVER)
 
-**Key Sections:** 0 (Meta) | 2 (REQ→SPEC map) | 4-6 (SPEC definitions) | 7 (Testing) | 8.1 (Milestones) | 11 (Release) | 12 (Alignment)
+1. ❌ Modify technical-ssot.md to bypass tests (SSOT is frozen/authoritative)
+2. ❌ Commit with failing tests (100% pass required)
+3. ❌ Skip run_gates.sh prefix (quality gates mandatory)
+4. ❌ Work on SPEC with unsatisfied deps (dependency order architectural)
+5. ❌ Assume unclear requirements (ask user, check Section 10)
+6. ❌ Commit partial SPEC work (complete DoD or don't commit)
+7. ❌ Modify git config or force push (respect history)
+
+---
+
+## 10. CODE QUALITY
+
+**Style (REQ-173):** 4 spaces | 100 char max | `snake_case` (vars/funcs) | `CamelCase` (types) | `#` or `"""` comments
+
+---
+
+## 11. TECHNICAL-SSOT.MD REFERENCE
+
+**Key Sections:** 0 (Meta) | 2 (REQ→SPEC) | 4-6 (SPECs) | 7 (Testing) | 8.1 (Milestones) | 11 (Release) | 12 (Alignment)
+
 **SPEC Schema:** Kind (LEAF/NODE) | Source (REQs) | Status | Priority | DoD | Behavior | Semantics | Edge cases | Diagnostics | Examples | Implementation | Dependencies | Tests | (NODE: Children + Ordering)
-**May Update:** Status after completion | LEAF→NODE reclassification | New SPEC-IDs (with approval) | Verification results
-**Never Update:** DoD changes | Test removals | REQ modifications | Milestone reassignments
+
+**May Update:** Status after completion | LEAF→NODE reclassification | New SPEC-IDs (with approval)
+**Never Update:** DoD changes | Test removals | REQ mods | Milestone reassignments
 
 ---
 
-## 13. CODE QUALITY
+## 12. SPEC-ID NAMING
 
-**Linter:** Fix errors before commit. Don't commit with linter errors.
-**Style (REQ-173):** 4 spaces, 100 char max, `snake_case` (vars/funcs), `CamelCase` (types), `#` or `"""` comments
-
----
-
-## 14. ADVANCED PATTERNS
-
-**Parallel Work:** SPECs with no mutual dependencies can be done in parallel (separate branches)
-**Dependency Chains:** Build dependency graph, topologically sort, implement in order
-**Circular Dependencies:** Report immediately - this is a specification error, don't proceed
-
----
-
-## 15. REPORTING
-
-**Progress:** Report: Completed SPEC-ID, Milestone, Implementation summary, Files, Tests (X/Y), Commit hash, Next SPEC
-**Blockers:** Report: SPEC-ID, Reason, Unmet dependencies, Recommendation
-**Interaction:** Be proactive. Report after each SPEC. Ask when blocked. Suggest improvements.
+```
+SPEC-[COMPONENT]-[NUMBER]
+LANG: 0000-0099 Lexical | 0100-0199 Expressions | 0200-0299 Types | 0300-0399 Ownership
+      0400-0499 Advanced | 0500-0599 Closures | 0600-0699 SIMD | 0700-0799 GPU
+      0800-0899 Stdlib | 0900-0999 Memory | 1000-1099 Concurrency | 1100-1199 Observability
+      1200-1299 FFI | 1300-1399 Docs | 1500-1599 Formal
+FORGE: 0000-0099 Pipeline | 0100-0199 Diagnostics | 0200-0299 Passes | 0300-0399 Optimization
+QUARRY: 0000-0099 Build | 0100-0199 Perf | 0200-0299 Interactive | 0300-0399 Security
+        0400-0499 Ecosystem | 0500-0599 LSP
+```
 
 ---
 
-## 16. SPECIAL CONSIDERATIONS
+## 13. ADVANCED PATTERNS
 
-**Cross-Platform:** Use `pathlib`, cross-platform libraries. Targets: Windows (primary), Linux, macOS.
-**Bootstrap Stages:** Stage0 (Python, current) → Stage1 (Pyrite) → Stage2 (self-hosted). Work on Stage0.
-**SSOT Gap:** Check SPEC Status: EXISTS-TODAY (verify+extend) | PARTIAL (complete) | PLANNED (implement). See technical-ssot.md Section 12.
-
----
-
-## 17. FORBIDDEN ACTIONS
-
-### 17.1 Never Do These
-
-1. **NEVER modify technical-ssot.md to bypass test failures**
-   - The SSOT is frozen and authoritative
-   - Tests failing means implementation is wrong, not SSOT
-
-2. **NEVER commit with failing tests**
-   - 100% pass rate required
-   - No "TODO: fix test" commits
-
-3. **NEVER skip the run_gates.sh prefix**
-   - Quality gates are mandatory
-   - Direct command execution bypasses safety checks
-
-4. **NEVER work on a SPEC with unsatisfied dependencies**
-   - Dependency order is architectural, not optional
-   - Violating order causes integration failures
-
-5. **NEVER make assumptions about unclear requirements**
-   - Ask the user for clarification
-   - Refer to Section 10 (Open Items) for inferred defaults
-
-6. **NEVER commit partial SPEC work**
-   - Either complete the entire DoD or don't commit
-   - Use branches for experimental work
-
-7. **NEVER modify git config or force push**
-   - Respect repository history
-   - Standard collaborative git practices apply
+**Parallel Work:** SPECs without mutual deps → separate branches
+**Dep Chains:** Build graph → topological sort → implement in order
+**Circular Deps:** Report immediately (specification error, don't proceed)
+**LEAF→NODE:** If LEAF too complex → Stop → Relabel NODE → Decompose 2-7 sub-LEAFs → Commit "SPEC-REWORK: SPEC-[ID] relabeled"
 
 ---
 
-## 18. MILESTONE-SPECIFIC GUIDELINES
+## 14. FAILURE RECOVERY
 
-**M0-M1** (Lexical/Diagnostics): Focus on Unicode handling, indentation tracking, error codes
-**M2-M3** (Parsing/Types): Watch operator precedence, pattern matching, type unification
-**M6** (Ownership): Ensure field-level tracking, lifetime bounds, re-borrowing logic
-**M7** (Codegen): Verify IR generation, calling conventions, closure layouts
-**M9-M15** (Stdlib/Advanced): Follow borrow-by-default (REQ-268), bounds checking, error handling
-
----
-
-## 19. CONTEXT MANAGEMENT
-
-**1M Token Limit:** Auto-refresh occurs. TODOs + git history persist. Resume via `git log` + Section 0.
-**Optimize:** Don't re-read full technical-ssot.md. Use `grep` for SPEC-IDs. Cache milestone structure mentally.
+| Issue | Action |
+|-------|--------|
+| Test Fails | Read test → Compare DoD → Fix → Re-run → Repeat |
+| Blocked Dep | Find SPEC-ID → Check status → Implement (PLANNED) or complete (PARTIAL) |
+| Unclear SPEC | Check impl notes → Sec 10 → Similar SPECs → Ask user |
+| Regression | Git diff → Identify change → Fix interaction → Refactor if needed |
+| Corrupted Sec 0 | `git log --grep="CHECKPOINT:" -1` → Parse → Rebuild 0.1 → Commit "STATE: Rebuilt" |
 
 ---
 
-## 20. SUCCESS CRITERIA SUMMARY
+## 15. MILESTONE-SPECIFIC GUIDELINES
 
-### 20.1 Per-SPEC Success
-
-A SPEC is successfully complete when:
-- ✅ All DoD criteria met
-- ✅ All required tests written and passing
-- ✅ All edge cases and failure modes handled
-- ✅ Code follows style guidelines (4 spaces, 100 char lines)
-- ✅ No linter errors
-- ✅ All tests pass (1813+ in full suite)
-- ✅ Checkpoint commit made
-- ✅ **Section 0 (Agent Resume State) updated with completion info**
-- ✅ **State update committed with STATE: prefix**
-- ✅ No regressions introduced
-
-### 20.2 Per-Milestone Success
-
-A Milestone is successfully complete when:
-- ✅ All SPEC-IDs in the milestone's "Included:" list are complete
-- ✅ Milestone's "Acceptance checks" from Section 8.1 pass
-- ✅ Integration between milestone SPECs verified
-- ✅ All tests pass
-- ✅ Checkpoint commit made for final SPEC
-- ✅ Roadmap dependencies satisfied for dependent milestones
-
-### 20.3 Phase Success (Alpha/Beta Release)
-
-A Phase is ready for release when:
-- ✅ All milestones in the phase complete
-- ✅ Release checklist (Section 11.1 or 11.2) items satisfied
-- ✅ Cross-platform verification complete
-- ✅ No critical bugs
-- ✅ Documentation updated
-- ✅ Performance benchmarks meet targets (where applicable)
+**M0-M1:** Unicode handling, indentation tracking, error codes
+**M2-M3:** Operator precedence, pattern matching, type unification
+**M6:** Field-level tracking, lifetime bounds, re-borrowing logic
+**M7:** IR generation, calling conventions, closure layouts
+**M9-M15:** Borrow-by-default (REQ-268), bounds checking, error handling
 
 ---
 
-## 21. QUICK REFERENCE COMMANDS
+## 16. REPORTING
+
+**Progress:** Report SPEC-ID | Milestone | Impl summary | Files | Tests (X/Y) | Commit hash | Next SPEC
+**Blockers:** Report SPEC-ID | Reason | Unmet deps | Recommendation
+**Interaction:** Proactive | Report after each SPEC | Ask when blocked | Suggest improvements
+
+---
+
+## 17. CONTEXT OPTIMIZATION
+
+**1M Token Limit:** Auto-refresh → TODOs+git persist → Resume via `git log` + Section 0
+**Optimize:** Don't re-read full SSOT | Use `grep` for SPEC-IDs | Cache milestone structure
+
+---
+
+## 18. SUCCESS CRITERIA
+
+### Per-SPEC
+✅ All DoD met | ✅ Tests written+passing | ✅ Edge cases handled | ✅ Style compliant | ✅ 1813+ tests pass | ✅ CHECKPOINT commit | ✅ Section 0 updated | ✅ STATE commit | ✅ No regressions
+
+### Per-Milestone
+✅ All SPEC-IDs complete | ✅ Acceptance checks pass | ✅ Integration verified | ✅ All tests pass | ✅ CHECKPOINT final SPEC | ✅ Deps satisfied
+
+### Per-Phase (Release)
+✅ All milestones done | ✅ Release checklist (Sec 11.1/11.2) | ✅ Cross-platform verified | ✅ No critical bugs | ✅ Docs updated | ✅ Perf benchmarks met
+
+---
+
+## 19. QUICK COMMANDS
 
 ```powershell
-# ALWAYS START HERE: Check agent resume state
-# Read Section 0 of .cursor/rules/unified-workflow.mdc
+# Startup
+git log -1 --pretty=format:"%s"                                        # Verify state
 
-# Verify state with git
-git log -1 --pretty=format:"%s"
+# Testing
+& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh python tools/testing/pytest_fast.py  # Fast
+& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/                        # Full
 
-# Run fast tests (development iteration)
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh python tools/testing/pytest_fast.py
-
-# Run full tests (pre-commit verification)
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/
-
-# Dual-commit pattern after SPEC completion:
-
-# Commit 1: Checkpoint (implementation)
+# Commits (after tests pass)
 git add [files]
-git commit -m "CHECKPOINT: M[X] SPEC-[COMPONENT]-[NUMBER] verified+complete"
-
-# Commit 2: State update (navigation metadata)
-# (First: Edit Section 0 of .cursor/rules/unified-workflow.mdc)
+git commit -m "CHECKPOINT: M[X] SPEC-[COMP]-[NUM] verified+complete"
+# Edit Section 0.1
 git add .cursor/rules/unified-workflow.mdc
-git commit -m "STATE: Updated agent resume state after M[X] SPEC-[COMPONENT]-[NUMBER]"
+git commit -m "STATE: Updated agent resume state after M[X] SPEC-[COMP]-[NUM]"
 
-# Check for linter errors (if applicable)
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh flake8 forge/ quarry/ pyrite/
-
-# View current branch and status
-git status
-git branch
+# Utils
+git status && git branch                                              # Check status
 ```
 
 ---
 
-## 22. DECISION TREE FOR AGENTS
+## 20. DECISION TREE
 
 ```
 START: User assigns work
-
-│
-├─→ Is it a SPEC implementation?
-│   ├─→ YES: 
-│   │   ├─→ Read SPEC from technical-ssot.md
-│   │   ├─→ Check dependencies satisfied?
-│   │   │   ├─→ NO: Implement dependencies first
-│   │   │   └─→ YES: Continue
-│   │   ├─→ Is it a LEAF?
-│   │   │   ├─→ YES: Implement → Test → Commit
-│   │   │   └─→ NO (NODE): Implement all children in order
-│   │   └─→ DONE
-│   │
-│   └─→ NO: Is it a bug fix?
-│       ├─→ YES: Fix → Test → Commit with BUGFIX prefix
-│       └─→ NO: Is it a new feature request?
-│           ├─→ YES: 
-│           │   ├─→ Check if SPEC exists
-│           │   ├─→ NO: Ask user for guidance
-│           │   └─→ YES: Follow SPEC workflow
-│           └─→ CLARIFY with user
-│
+├─ SPEC impl? → YES → Read SPEC → Deps satisfied? → NO: Do deps first | YES: Continue
+│                  → LEAF? → YES: Impl→Test→Commit | NO (NODE): Children in order → DONE
+├─ Bug fix? → YES → Fix→Test→Commit "BUGFIX: [SPEC-ID] - [desc]"
+├─ New feature? → YES → SPEC exists? → YES: Follow SPEC | NO: Ask user
+└─ Else → CLARIFY with user
 END: Report completion or blocker
 ```
 
 ---
 
-## 23. FAILURE RECOVERY
+## 21. SPECIAL CONSIDERATIONS
 
-**Test Fails:** Read test → Compare with DoD → Fix to match → Re-run → Repeat
-**Blocked Dependency:** Find SPEC-ID → Check status → Implement if PLANNED, complete if PARTIAL
-**Unclear SPEC:** Check implementation notes → Section 10 → Similar SPECs → Ask user (don't guess)
-**Regression:** Git diff → Identify change → Fix interaction → May require refactoring
-
----
-
-## 24. OPTIMIZATION TIPS
-
-**Fast Iteration:** Use `pytest_fast.py` during development; full suite before commit
-**Focused Testing:** Run specific test files with `-v` flag; add `-s` for debug output
-**Incremental:** Verify each DoD criterion separately, then run full suite at end
+**Cross-Platform:** `pathlib`, cross-platform libs | Targets: Windows (primary), Linux, macOS
+**Bootstrap:** Stage0 (Python, current) → Stage1 (Pyrite) → Stage2 (self-hosted) | Work on Stage0
+**SSOT Gap:** Status: EXISTS-TODAY (verify+extend) | PARTIAL (complete) | PLANNED (implement) | See Sec 12
+**Agent Files:** `.agent-artifacts/` only | Reports: .txt (markdown .md FORBIDDEN) | Cleanup before commit
 
 ---
 
-## 25. WORKFLOW EXAMPLES
+## 22. COMMON ERROR PATTERNS
 
-### Single SPEC (LEAF)
-```powershell
-git log -1                     # Check state, read Section 0
-# Read SPEC from technical-ssot.md, implement DoD, write tests
-& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/
-git add [files]
-git commit -m "CHECKPOINT: M[X] SPEC-[COMPONENT]-[NUMBER] verified+complete"
-# Edit Section 0.5 with updated state
-git add .cursor/rules/unified-workflow.mdc
-git commit -m "STATE: Updated agent resume state after M[X] SPEC-[COMPONENT]-[NUMBER]"
-```
-
-### Multiple SPECs (Milestone)
-```powershell
-git log -1                     # Check state, read Section 0
-# For each SPEC in milestone: implement → test → CHECKPOINT → update Section 0 → STATE
-# Repeat until all SPECs complete
-```
+| Pattern | SPEC | Error | Fix |
+|---------|------|-------|-----|
+| Use-After-Move | SPEC-LANG-0301 | error[P0101] | Clone before move or use borrowing |
+| Borrow Conflict | SPEC-LANG-0307 | error[P0201] | Restructure scope, use split borrowing |
+| Type Inference Fail | SPEC-LANG-0201 | error[P0301] | Add explicit type annotation |
 
 ---
 
-## 26. AI OPTIMIZATION METADATA
+## 23. CRITICAL REMINDERS
 
-**Priority:** P0 (Alpha) > P1 (Beta) > P2 (Enhanced) > P3 (Future)
-**Status:** PLANNED (full work) | PARTIAL (complete) | EXISTS-TODAY (verify) | DONE (skip)
-**Effort (typical):** M0: 15-30min | M2: 30-60min | M3/M5: 45-90min | M6/M7: 60-120min | M9-M13: 30-120min
-**Batch Strategy:** Read all milestone SPECs first → Build dependency model → Implement in order → Commit each
+**Three Mandatory Actions Per SPEC:**
+1. ✅ CHECKPOINT commit (code+tests)
+2. ✅ STATE update (edit Section 0.1)
+3. ✅ STATE commit (persist metadata)
 
----
+**Unbreakable Rules:**
+1. NEVER commit without passing tests
+2. NEVER skip dual-commit pattern
+3. ALWAYS update Section 0 after each SPEC
+4. ALWAYS read Section 0 at session start
+5. ALWAYS prefix commands with run_gates.sh
 
-## 27. VERSION CONTROL
-
-**Good Commits:** Atomic, tested, CHECKPOINT prefix, includes SPEC-ID and milestone
-**Bad Commits:** Multiple SPECs, partial work, failing tests, missing format
-**Format:** `CHECKPOINT: M[X] SPEC-[COMPONENT]-[NUMBER] verified+complete`
-**Branches:** Use `spec/m[X]-[component]-[number]` for experimental work or parallel SPECs
-
----
-
-## 28. EMERGENCY PROTOCOLS
-
-**Stuck:** Check SPEC notes → Section 10 → similar code → Report to user (don't guess!)
-**Test Failures:** Don't commit. Analyze systematically. Fix root cause. Re-verify all tests.
-**SPEC Error:** Document (SPEC-ID, issue, interpretation) → Report immediately → Don't proceed
-**Corrupted Section 0:** Git log is authoritative. Run `git log --grep="CHECKPOINT:" --oneline -10` → Parse last checkpoint → Rebuild Section 0.5 from template → Commit with "STATE: Rebuilt" message
-
----
-
-## 29. CRITICAL REQUIREMENTS SUMMARY (DO NOT SKIP)
-
-### 29.1 The Three Mandatory Actions Per SPEC
-
-**For EVERY single SPEC you complete, you MUST do ALL THREE:**
-
-1. **✅ CHECKPOINT Commit**
-   ```
-   CHECKPOINT: M[X] SPEC-[COMPONENT]-[NUMBER] verified+complete
-   ```
-   - Contains: Implementation code + tests
-   - When: After all tests pass
-   - Purpose: Save implementation progress
-
-2. **✅ STATE Update**
-   - Edit Section 0.5 of `.cursor/rules/unified-workflow.mdc`
-   - Update ALL fields (last completed, next target, milestone, etc.)
-   - When: Immediately after CHECKPOINT commit
-   - Purpose: Save navigation metadata for next agent
-
-3. **✅ STATE Commit**
-   ```
-   STATE: Updated agent resume state after M[X] SPEC-[COMPONENT]-[NUMBER]
-   ```
-   - Contains: Updated rule file with new state
-   - When: Immediately after editing Section 0
-   - Purpose: Persist state update to git history
-
-**If you skip any of these, the next agent will be lost!**
-
-### 29.2 Agent Session Startup Checklist
-
-**Every agent MUST do this at session start:**
-
-- [ ] Read Section 0.5 (Current State)
-- [ ] Run `git log -1` to verify state matches reality
-- [ ] If mismatch: Follow Section 0.4 recovery procedure
-- [ ] Identify "Next SPEC Target" from Section 0
-- [ ] Read that SPEC's definition in technical-ssot.md
-- [ ] Verify all dependencies are satisfied
-- [ ] Begin implementation
-
-### 29.3 The Unbreakable Rules
-
-1. **NEVER commit without passing tests** (100% pass rate required)
-2. **NEVER skip the dual-commit pattern** (CHECKPOINT + STATE)
-3. **ALWAYS update Section 0 after each SPEC** (non-negotiable)
-4. **ALWAYS read Section 0 at session start** (know where you are)
-5. **ALWAYS prefix commands** with `& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh`
-
-**Violation of these rules breaks agent continuity and project integrity.**
-
----
-
-## APPENDIX A: SPEC-ID NAMING CONVENTION
-
-```
-SPEC-[COMPONENT]-[NUMBER]
-
-Components:
-- LANG: Language features (syntax, semantics, type system, stdlib)
-- FORGE: Compiler implementation (lexer, parser, type checker, codegen)
-- QUARRY: SDK and tooling (build system, package manager, CLI tools)
-
-Number ranges (rough guidance):
-LANG:
-  0000-0099: Lexical and parsing
-  0100-0199: Expression and statement parsing
-  0200-0299: Type system
-  0300-0399: Ownership and memory model
-  0400-0499: Advanced features (contracts, metaprogramming)
-  0500-0599: Closures
-  0600-0699: SIMD and vectorization
-  0700-0799: GPU programming
-  0800-0899: Standard library (core)
-  0900-0999: Memory management
-  1000-1099: Concurrency
-  1100-1199: Observability
-  1200-1299: FFI and interop
-  1300-1399: Documentation
-  1500-1599: Formal semantics
-
-FORGE:
-  0000-0099: Pipeline architecture
-  0100-0199: Diagnostics system
-  0200-0299: Advanced compiler passes
-  0300-0399: Optimization suite
-
-QUARRY:
-  0000-0099: Build system core
-  0100-0199: Performance tooling
-  0200-0299: Interactive tools (REPL, playground)
-  0300-0399: Security tooling
-  0400-0499: Ecosystem tools
-  0500-0599: LSP implementation
-```
-
----
-
-## APPENDIX B: MILESTONE-TO-SPEC QUICK MAP
-
-**Copy this into your working memory for fast reference:**
-
-- **M0:** SPEC-LANG-0002..0020, SPEC-FORGE-0002
-- **M1:** SPEC-FORGE-0001, 0101..0110
-- **M2:** SPEC-LANG-0101..0120, 0009..0015, SPEC-FORGE-0009..0018
-- **M3:** SPEC-LANG-0201..0247, SPEC-FORGE-0019..0023
-- **M4:** SPEC-QUARRY-0001, 0010..0018, 0021..0024, 0026
-- **M5:** SPEC-LANG-0204, 0205, SPEC-FORGE-0005
-- **M6:** SPEC-LANG-0300..0316, SPEC-FORGE-0006
-- **M7:** SPEC-FORGE-0024..0029, 0205, 0206, 0008, SPEC-LANG-0501..0508
-- **M8:** SPEC-QUARRY-0004..0006, 0014, 0019, 0020
-- **M9:** SPEC-LANG-0800, 0801, 0820..0838, 0815
-- **M10:** SPEC-LANG-0804, 0840, 0841, 0805, 0850, 0806, 0870..0873
-- **M11:** SPEC-LANG-0401..0409, 0510, 0511, 0807, 1101..1104, 1201, 1203, 1501, SPEC-FORGE-0201..0209
-- **M12:** SPEC-QUARRY-0201..0205, 0007, 0025, 0030, 0033..0035, 0401..0406, 0501..0505, SPEC-LANG-1301, 1302
-- **M13:** SPEC-QUARRY-0101..0115, 0036, SPEC-LANG-0601..0605, 0807, 0808..0810, 0901..0903, SPEC-FORGE-0305..0308
-- **M14:** SPEC-LANG-1000..1005
-- **M15:** SPEC-QUARRY-0300..0308
-
----
-
-## APPENDIX C: COMMON ERROR PATTERNS
-
-### Pattern 1: Use-After-Move
-**SPEC:** SPEC-LANG-0301
-**Error Code:** `error[P0101]` (example)
-**Fix:** Clone before move, or use borrowing
-
-### Pattern 2: Borrow Conflict
-**SPEC:** SPEC-LANG-0307
-**Error Code:** `error[P0201]` (example)
-**Fix:** Restructure borrow scope, use split borrowing
-
-### Pattern 3: Type Inference Failure
-**SPEC:** SPEC-LANG-0201
-**Error Code:** `error[P0301]` (example)
-**Fix:** Add explicit type annotation
-
----
-
-**END OF UNIFIED WORKFLOW**
-
-**Last Updated:** December 23, 2025
-**Spec Version:** Frozen Release Contract
-**Agent Optimization:** Maximum (v1.0)
+**Most Common Mistake:** Forgetting to update Section 0 after committing → breaks continuity!
