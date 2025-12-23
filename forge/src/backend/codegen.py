@@ -738,6 +738,8 @@ class LLVMCodeGen:
             self.gen_break(stmt)
         elif isinstance(stmt, ast.ContinueStmt):
             self.gen_continue(stmt)
+        elif isinstance(stmt, ast.PassStmt):
+            pass  # Nothing to generate
     
     def gen_var_decl(self, decl: ast.VarDecl):
         """Generate code for variable declaration"""

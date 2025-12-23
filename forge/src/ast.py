@@ -276,6 +276,12 @@ class ContinueStmt(ASTNode):
 
 
 @dataclass
+class PassStmt(ASTNode):
+    """Pass statement"""
+    pass
+
+
+@dataclass
 class IfStmt(ASTNode):
     """If statement with elif and else"""
     condition: 'Expression'

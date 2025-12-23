@@ -10,7 +10,9 @@ param(
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Split-Path -Parent $scriptDir
-$runSafe = Join-Path $repoRoot "tools" "run_safe.ps1"
+$toolsDir = Join-Path $repoRoot "tools"
+$utilsDir = Join-Path $toolsDir "utils"
+$runSafe = Join-Path $utilsDir "run_safe.ps1"
 
 if ($Gate -eq "fast") {
     Write-Host "Running FAST gate..." -ForegroundColor Cyan

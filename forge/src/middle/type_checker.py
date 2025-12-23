@@ -688,7 +688,7 @@ class TypeChecker:
             self.check_match(stmt)
         elif isinstance(stmt, ast.WithStmt):
             self.check_with(stmt)
-        elif isinstance(stmt, ast.BreakStmt) or isinstance(stmt, ast.ContinueStmt):
+        elif isinstance(stmt, ast.BreakStmt) or isinstance(stmt, ast.ContinueStmt) or isinstance(stmt, ast.PassStmt):
             pass  # No type checking needed
         elif isinstance(stmt, ast.UnsafeBlock):
             self.check_block(stmt.body)
@@ -1105,6 +1105,10 @@ class TypeChecker:
         
         # Range operator (for now, just return a generic type)
         elif binop.op == '..':
+            if not isinstance(left_type, IntType):
+                self.error(f"Left operand of .. must be integer, got {left_type}", binop.span)
+            if not isinstance(right_type, IntType):
+                self.error(f"Right operand of .. must be integer, got {right_type}", binop.span)
             return INT  # Simplified - should be Range[int]
         
         else:

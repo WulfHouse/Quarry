@@ -1153,6 +1153,8 @@ class Parser:
             return self.parse_with()
         elif self.match_token(TokenType.UNSAFE):
             return self.parse_unsafe_block()
+        elif self.match_token(TokenType.PASS):
+            return self.parse_pass()
         else:
             # Try to parse as assignment or expression statement
             return self.parse_assignment_or_expression()
@@ -1239,6 +1241,15 @@ class Parser:
         self.expect(TokenType.CONTINUE)
         self.expect(TokenType.NEWLINE)
         return ast.ContinueStmt(span=self.make_span(start_span))
+    
+    def parse_pass(self) -> ast.PassStmt:
+        """Parse pass statement"""
+        start_span = self.current().span
+        self.expect(TokenType.PASS)
+        # Pass can be followed by NEWLINE or DEDENT
+        if self.match_token(TokenType.NEWLINE):
+            self.advance()
+        return ast.PassStmt(span=self.make_span(start_span))
     
     def parse_if_expression(self) -> ast.Expression:
         """Parse if expression: if cond: expr elif cond: expr else: expr"""
