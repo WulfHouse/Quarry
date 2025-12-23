@@ -12,19 +12,24 @@ alwaysApply: true
 **Agents work in an INFINITE LOOP - never stop, never ask questions:**
 
 1. **Read memory.txt** → Get current SPEC
-2. **Implement SPEC** → Test → Update memory.txt
-3. **IMMEDIATELY proceed to next SPEC** (read memory.txt → get next → repeat)
-4. **REPEAT FOREVER** - Work continuously through all SPECs
+2. **Implement SPEC** → Write unit test → Run unit test → Debug if fails
+3. **Run full suite** → Debug if fails → Update memory.txt
+4. **IMMEDIATELY proceed to next SPEC** (read memory.txt → get next → repeat)
+5. **REPEAT FOREVER** - Work continuously through all SPECs
 
 **Rules:**
 - ❌ NEVER stop working or ask questions
 - ❌ NEVER wait for user input or clarification
+- ❌ NEVER skip unit test or full suite
+- ✅ ALWAYS write unit test after first implementation
+- ✅ ALWAYS run unit test before full suite
+- ✅ ALWAYS debug failed tests until 100% pass
 - ✅ ALWAYS use best judgment and continue
 - ✅ ALWAYS automatically implement dependencies if blocked
 - ✅ ALWAYS infer requirements from SSOT and similar SPECs
 - ✅ ALWAYS proceed to next SPEC immediately after completing current one
 
-**Workflow:** SPEC → Test → Update memory.txt → Next SPEC → Repeat (infinite loop)
+**Workflow:** SPEC → Impl → Unit test → Run → Debug → Full suite → Debug → Update memory.txt → Next SPEC → Repeat (infinite loop)
 
 ---
 
@@ -38,7 +43,8 @@ alwaysApply: true
 ```
 1. READ memory.txt → Note "Next" SPEC
 2. LOCATE SPEC in technical-ssot.md → Read DoD, deps, tests
-3. GO: Implement → Test → Update memory.txt → IMMEDIATELY proceed to next SPEC
+3. GO: Implement → Write unit test → Run unit test → Debug if fails
+       → Run full suite → Debug if fails → Update memory.txt → IMMEDIATELY proceed to next SPEC
 4. REPEAT: After each SPEC, automatically read memory.txt → Get next SPEC → Continue working
 ```
 
@@ -47,9 +53,12 @@ alwaysApply: true
 - After completing a SPEC → Update memory.txt → Immediately start next SPEC
 - Never ask questions → Use best judgment and continue
 - Never stop for clarification → Infer from SSOT and similar SPECs
+- Never skip tests → Always write unit test → Run unit test → Run full suite
+- If unit test fails → Debug and fix → Re-run until pass → Then run full suite
+- If full suite fails → Debug and fix → Re-run until 100% pass → Then continue
 - If blocked by dependencies → Automatically implement dependencies first, then continue
 - If unclear requirements → Use implementation notes, similar SPECs, and best practices
-- Work in infinite loop: SPEC → Test → Update → Next SPEC → Repeat
+- Work in infinite loop: SPEC → Impl → Unit test → Run → Debug → Full suite → Debug → Update → Next SPEC → Repeat
 
 ### 0.4 Memory File Format (memory.txt)
 ```yaml
@@ -76,10 +85,13 @@ State History (Last 5):
 ### 1.1 LEAF SPEC (Atomic Unit)
 ```
 Step 1: IMPLEMENT (satisfy all DoD criteria, handle edge cases, add diagnostics)
-Step 2: TEST (unit+integration+golden+perf per "Tests required")
-Step 3: VERIFY (run full suite, fix until 100% pass, never skip tests)
-Step 4: UPDATE STATE (edit memory.txt with new state)
-Step 5: CONTINUE (immediately read memory.txt → Get next SPEC → Start working on it)
+Step 2: WRITE UNIT TEST (for SPEC functionality, place in tests/)
+Step 3: RUN UNIT TEST (pytest tests/test_*.py -v)
+Step 4: IF unit test fails → Debug → Fix impl → Re-run unit test → Repeat until pass
+Step 5: IF unit test passes → RUN FULL SUITE (fast or full)
+Step 6: IF any test fails → Debug → Fix → Re-run full suite → Repeat until 100% pass
+Step 7: UPDATE STATE (edit memory.txt with new state)
+Step 8: CONTINUE (immediately read memory.txt → Get next SPEC → Start working on it)
 ```
 
 ### 1.2 NODE SPEC (Container)
@@ -94,11 +106,21 @@ Step 5: CONTINUE (immediately read memory.txt → Get next SPEC → Start workin
 
 ## 2. TESTING (NEVER SKIP)
 
-### 2.1 When to Test
-✅ Before marking todo complete | ✅ After SPEC done | ✅ After bug fix
+### 2.1 Test-Driven Workflow (MANDATORY)
+```
+1. Write unit test for SPEC → 2. Run unit test → 3. Debug if fails → 4. Repeat until pass
+5. Run full suite → 6. Debug if any fail → 7. Repeat until 100% pass → 8. Continue to next SPEC
+```
+**Critical:** ALWAYS write+run unit test FIRST, then run full suite. NEVER skip either step.
 
-### 2.2 Commands
+### 2.2 When to Test
+✅ After first impl attempt | ✅ After fixing unit test | ✅ Before marking SPEC complete | ✅ After bug fix
+
+### 2.3 Commands
 ```powershell
+# Unit test (single file): Test specific SPEC functionality
+& "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/test_specific.py -v
+
 # Fast (dev iteration): ~457 tests, ~8s
 & "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh python tools/testing/pytest_fast.py
 
@@ -106,10 +128,11 @@ Step 5: CONTINUE (immediately read memory.txt → Get next SPEC → Start workin
 & "C:\Program Files\Git\bin\bash.exe" scripts/run_gates.sh pytest tests/
 ```
 
-### 2.3 Failure Protocol
-IF test fails → Analyze (impl bug vs test bug) → Fix (never modify SSOT) → Re-run → Repeat until 100% pass → Continue to next SPEC
+### 2.4 Failure Protocol
+IF unit test fails → Analyze impl → Fix code → Re-run unit test → Repeat until pass
+IF full suite fails → Analyze (impl bug vs test bug) → Fix (never modify SSOT) → Re-run → Repeat until 100% pass → Continue to next SPEC
 
-### 2.4 Coverage Targets
+### 2.5 Coverage Targets
 Forge: 100% (critical paths) | Pyrite: 90%+ | Quarry: 80%+
 
 ---
@@ -202,10 +225,10 @@ help: Clone `x`: `x.clone()`
 
 | Pattern | Flow |
 |---------|------|
-| Single SPEC | Read memory.txt → Read SPEC → Verify deps → Impl → Test → Update memory.txt → IMMEDIATELY continue to next SPEC |
-| Milestone | Read memory.txt → List SPECs → For each: impl+test+Update memory.txt → Continue to next SPEC |
-| Bug Fix | Identify → Find SPEC → Fix → Test → Update memory.txt → Continue to next SPEC |
-| Missing Req | Infer from SSOT/context → Implement best guess → Continue working |
+| Single SPEC | Read memory.txt → Read SPEC → Verify deps → Impl → Write unit test → Run unit test → Debug if fails → Run full suite → Debug if fails → Update memory.txt → IMMEDIATELY continue to next SPEC |
+| Milestone | Read memory.txt → List SPECs → For each: impl+unit test+full suite+Update memory.txt → Continue to next SPEC |
+| Bug Fix | Identify → Find SPEC → Fix → Write/update test → Run test → Debug if fails → Run full suite → Update memory.txt → Continue to next SPEC |
+| Missing Req | Infer from SSOT/context → Implement best guess → Write test → Continue working |
 
 ---
 
@@ -263,10 +286,11 @@ QUARRY: 0000-0099 Build | 0100-0199 Perf | 0200-0299 Interactive | 0300-0399 Sec
 
 | Issue | Action |
 |-------|--------|
-| Test Fails | Read test → Compare DoD → Fix → Re-run → Repeat until pass → Continue to next SPEC |
-| Blocked Dep | Find SPEC-ID → Check status → Automatically implement dependency → Continue to original SPEC |
-| Unclear SPEC | Check impl notes → Similar SPECs → Use best judgment → Implement → Continue working |
-| Regression | Git diff → Identify change → Fix interaction → Refactor if needed → Continue working |
+| Unit Test Fails | Analyze impl vs SPEC DoD → Fix code (not test) → Re-run unit test → Repeat until pass → Continue to full suite |
+| Full Suite Fails | Read failing test → Compare DoD → Fix impl bug (or test bug if justified) → Re-run full suite → Repeat until 100% pass → Continue to next SPEC |
+| Blocked Dep | Find SPEC-ID → Check status → Automatically implement dependency → Test dependency → Continue to original SPEC |
+| Unclear SPEC | Check impl notes → Similar SPECs → Use best judgment → Implement → Write test → Continue working |
+| Regression | Git diff → Identify change → Fix interaction → Write regression test → Refactor if needed → Continue working |
 | Corrupted memory.txt | Review recent work → Rebuild memory.txt from current state → Continue working |
 
 ---
@@ -333,10 +357,14 @@ git status && git branch                                              # Check st
 ```
 START: Read memory.txt → Get current SPEC
 ├─ SPEC impl? → YES → Read SPEC → Deps satisfied? → NO: Auto-implement deps → YES: Continue
-│                  → LEAF? → YES: Impl→Test→Update memory.txt→Next SPEC | NO (NODE): Children in order → Next SPEC
-├─ Bug fix? → YES → Fix→Test→Update memory.txt → Next SPEC
-├─ New feature? → YES → SPEC exists? → YES: Follow SPEC | NO: Infer from SSOT → Implement → Next SPEC
-└─ Else → Use best judgment → Implement → Next SPEC
+│                  → LEAF? → YES: Impl→Write unit test→Run unit test→Debug if fails
+│                                 →Run full suite→Debug if fails→Update memory.txt→Next SPEC
+│                           NO (NODE): Children in order → Next SPEC
+├─ Bug fix? → YES → Fix→Write/update test→Run test→Debug if fails
+│                   →Run full suite→Debug if fails→Update memory.txt→Next SPEC
+├─ New feature? → YES → SPEC exists? → YES: Follow SPEC | NO: Infer from SSOT
+│                       → Implement→Write test→Run test→Next SPEC
+└─ Else → Use best judgment → Implement→Write test→Run test→Next SPEC
 LOOP: After each SPEC → Read memory.txt → Get next SPEC → Repeat from START
 END: Never ends (infinite loop)
 ```
@@ -364,16 +392,23 @@ END: Never ends (infinite loop)
 
 ## 23. CRITICAL REMINDERS
 
-**One Mandatory Action Per SPEC:**
-1. ✅ STATE update (edit memory.txt)
+**Two Mandatory Actions Per SPEC:**
+1. ✅ TESTING (write unit test → run → debug if fails → run full suite → debug if fails)
+2. ✅ STATE update (edit memory.txt)
 
 **Unbreakable Rules:**
-1. ALWAYS update memory.txt after each SPEC
-2. ALWAYS read memory.txt at session start
-3. ALWAYS prefix commands with run_gates.sh
-4. NEVER commit memory.txt to Git (state file only)
-5. NEVER stop working or ask questions (infinite loop: SPEC → Test → Update → Next SPEC)
-6. ALWAYS continue to next SPEC immediately after completing current one
+1. ALWAYS write unit test immediately after first implementation
+2. ALWAYS run unit test before running full suite
+3. ALWAYS debug and fix failed tests (never skip or ignore)
+4. ALWAYS run full suite after unit test passes
+5. ALWAYS update memory.txt after each SPEC
+6. ALWAYS read memory.txt at session start
+7. ALWAYS prefix commands with run_gates.sh
+8. NEVER commit memory.txt to Git (state file only)
+9. NEVER stop working or ask questions (infinite loop: SPEC → Test → Update → Next SPEC)
+10. ALWAYS continue to next SPEC immediately after completing current one
 
-**Most Common Mistake:** Forgetting to update memory.txt after completing work → breaks continuity!
+**Most Common Mistakes:**
+- Forgetting to write/run unit test before full suite → Skip to full suite causes confusion
+- Forgetting to update memory.txt after completing work → breaks continuity!
 **Critical:** Agents work in infinite loop - after each SPEC, automatically proceed to next SPEC without stopping
