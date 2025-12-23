@@ -65,27 +65,33 @@ class OwnershipState:
         
         # If whole value is moved, nothing is owned
         if var_id in self.moved:
+            # print(f"[DEBUG] is_owned({var_id}, {field_name}) -> False (whole moved)")
             return False
         
         # If checking a specific field
         if field_name:
-            return field_name not in self.values[var_id].moved_fields
+            result = field_name not in self.values[var_id].moved_fields
+            # print(f"[DEBUG] is_owned({var_id}, {field_name}) -> {result}")
+            return result
         
         # If checking the whole value, it must not have any moved fields (SPEC-LANG-0309)
-        return not self.values[var_id].moved_fields
-    
+        result = not self.values[var_id].moved_fields
+        # print(f"[DEBUG] is_owned({var_id}, None) -> {result}")
+        return result
+
     def is_owned_by_name(self, var_name: str, field_name: Optional[str] = None) -> bool:
         """Check if a variable still owns its value (or field)"""
         if var_name not in self.name_to_id:
             return False
         var_id = self.name_to_id[var_name]
         return self.is_owned(var_id, field_name)
-    
+
     def move_value(self, from_var: str, to_var: Optional[str], span: Span, field_name: Optional[str] = None):
         """Move ownership from one variable (or field) to another"""
+        # print(f"[DEBUG] move_value({from_var}, {to_var}, {field_name})")
         if from_var not in self.name_to_id:
             return  # Variable doesn't exist
-        
+
         from_id = self.name_to_id[from_var]
         
         if from_id in self.moved:
@@ -346,6 +352,9 @@ class OwnershipAnalyzer:
                 obj_name = decl.initializer.object.name
                 field_name = decl.initializer.field
                 
+                # Check if object itself is valid (whole move check)
+                self.check_field_use(obj_name, field_name, decl.initializer.span)
+                
                 # Infer field type (simplified)
                 obj_type = self.variable_types.get(obj_name)
                 field_type = UNKNOWN
@@ -353,9 +362,7 @@ class OwnershipAnalyzer:
                     field_type = obj_type.fields[field_name]
                 
                 if field_type and not is_copy_type(field_type):
-                    # Check if object or field already moved
-                    self.check_field_use(obj_name, field_name, decl.initializer.span)
-                    
+                    # This is a partial move of a non-Copy field
                     target_name = decl.name if hasattr(decl, 'name') else "<pattern>"
                     self.state.move_value(obj_name, target_name, decl.span, field_name=field_name)
                     self.add_timeline_event(obj_name, "move", f"field '{field_name}' of '{obj_name}' moved to '{target_name}'", decl.span)

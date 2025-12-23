@@ -88,13 +88,14 @@ class ReferenceType(Type):
     lifetime: Optional[str] = None  # Inferred or explicit lifetime
     
     def __eq__(self, other):
+        # Lifetimes are ignored for type equality in the core type system (SPEC-LANG-0205)
+        # They are checked separately by the borrow checker.
         return (isinstance(other, ReferenceType) and 
                 self.inner == other.inner and 
-                self.mutable == other.mutable and
-                self.lifetime == other.lifetime)
+                self.mutable == other.mutable)
     
     def __hash__(self):
-        return hash(("ref", self.inner, self.mutable, self.lifetime))
+        return hash(("ref", self.inner, self.mutable))
     
     def __str__(self):
         mut = "mut " if self.mutable else ""
