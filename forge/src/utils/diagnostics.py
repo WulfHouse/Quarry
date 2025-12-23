@@ -1,7 +1,7 @@
 """Enhanced error diagnostics for Pyrite"""
 
 import json
-from typing import List, Tuple, Optional, Dict, Any
+from typing import List, Tuple, Optional, Dict, Any, Set
 from dataclasses import dataclass
 from ..frontend.tokens import Span
 from colorama import init, Fore, Style
@@ -315,7 +315,49 @@ ERROR_CODES = {
     
     # Pattern matching
     "P0004": "non-exhaustive patterns",
+
+    # Performance and Allocation (SPEC-FORGE-0110)
+    "P1050": "heap allocation inside a loop",
+    "P1051": "implicit copy of a large value",
 }
+
+
+class DiagnosticManager:
+    """Manages compiler diagnostics, i18n, and suppression (SPEC-FORGE-0106, 0109)"""
+    
+    def __init__(self, language: str = "en"):
+        self.language = language
+        self.diagnostics: List[Diagnostic] = []
+        self.allowed_codes: Set[str] = set()
+        self.messages = {
+            "en": {
+                "P0234": "cannot use moved value '{var_name}'",
+                "P0308": "mismatched types: expected {expected}, found {found}",
+                "P1050": "heap allocation inside a loop",
+                "P1051": "implicit copy of a large value ({size} bytes)",
+            },
+            "es": {
+                "P0234": "no se puede usar el valor movido '{var_name}'",
+                "P0308": "tipos no coincidentes: se esperaba {expected}, se encontró {found}",
+                "P1050": "asignación de montón dentro de un bucle",
+                "P1051": "copia implícita de un valor grande ({size} bytes)",
+            }
+        }
+
+    def allow(self, code: str):
+        """Allow a specific diagnostic code (SPEC-FORGE-0109)"""
+        self.allowed_codes.add(code)
+
+    def report(self, diagnostic: Diagnostic):
+        """Report a diagnostic if not suppressed"""
+        if diagnostic.code not in self.allowed_codes:
+            self.diagnostics.append(diagnostic)
+
+    def get_message(self, code: str, **kwargs) -> str:
+        """Get internationalized message (SPEC-FORGE-0106)"""
+        lang_messages = self.messages.get(self.language, self.messages["en"])
+        message_template = lang_messages.get(code, ERROR_CODES.get(code, "Unknown error"))
+        return message_template.format(**kwargs)
 
 
 def create_ownership_error(var_name: str, moved_to: str, use_span: Span, move_span: Span, alloc_span: Span) -> Diagnostic:
