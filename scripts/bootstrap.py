@@ -30,7 +30,7 @@ def run_bootstrap():
     result = subprocess.run([sys.executable, str(stage1_script)], cwd=script_dir.parent)
     
     # Check if Stage1 executable exists (linking may fail if no main module, but object files should exist)
-    stage1_exe = script_dir.parent / "build" / "bootstrap" / "stage1" / ("pyritec.exe" if sys.platform == "win32" else "pyritec")
+    stage1_exe = script_dir.parent / "build" / "bootstrap" / "stage1" / ("forge.exe" if sys.platform == "win32" else "forge")
     if stage1_exe.exists():
         print("[OK] Stage1 executable created")
     elif result.returncode == 0:
@@ -75,8 +75,8 @@ def run_bootstrap():
     print("=" * 60)
     print()
     print("Next steps:")
-    print("  - Stage1 executable: build/bootstrap/stage1/pyritec")
-    print("  - Stage2 executable: build/bootstrap/stage2/pyritec")
+    print("  - Stage1 executable: build/bootstrap/stage1/forge")
+    print("  - Stage2 executable: build/bootstrap/stage2/forge")
     print()
     
     return True

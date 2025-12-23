@@ -322,6 +322,24 @@ class Lexer:
         """Handle escape sequences in strings"""
         char = self.advance()
         
+        if char == 'u' and self.peek() == '{':
+            # Unicode escape: \u{...}
+            self.advance()  # Consume {
+            code_str = ""
+            while self.peek() != '}' and self.peek() != '\0':
+                code_str += self.advance()
+            
+            if self.peek() == '}':
+                self.advance()  # Consume }
+            else:
+                raise LexerError("Unterminated Unicode escape sequence", self.make_span(self.line, self.column))
+            
+            try:
+                # Convert hex to integer and then to character
+                return chr(int(code_str, 16))
+            except ValueError:
+                raise LexerError(f"Invalid Unicode escape sequence: {code_str}", self.make_span(self.line, self.column))
+        
         escape_chars = {
             'n': '\n',
             't': '\t',
@@ -416,7 +434,7 @@ class Lexer:
         # Operators and delimiters
         self.advance()
         
-        # Two-character operators
+        # Two-character operators (maximal munch)
         next_char = self.peek()
         two_char = char + next_char
         
@@ -444,6 +462,30 @@ class Lexer:
                 self.advance()
                 return Token(TokenType.TRIPLE_DOT, None, self.make_span(start_line, start_col))
             return Token(TokenType.DOUBLE_DOT, None, self.make_span(start_line, start_col))
+        elif two_char == '+=':
+            self.advance()
+            return Token(TokenType.PLUS_EQ, None, self.make_span(start_line, start_col))
+        elif two_char == '-=':
+            self.advance()
+            return Token(TokenType.MINUS_EQ, None, self.make_span(start_line, start_col))
+        elif two_char == '*=':
+            self.advance()
+            return Token(TokenType.STAR_EQ, None, self.make_span(start_line, start_col))
+        elif two_char == '/=':
+            self.advance()
+            return Token(TokenType.SLASH_EQ, None, self.make_span(start_line, start_col))
+        elif two_char == '<<':
+            self.advance()
+            return Token(TokenType.SHL, None, self.make_span(start_line, start_col))
+        elif two_char == '>>':
+            self.advance()
+            return Token(TokenType.SHR, None, self.make_span(start_line, start_col))
+        elif two_char == '&&':
+            self.advance()
+            return Token(TokenType.AND_AND, None, self.make_span(start_line, start_col))
+        elif two_char == '||':
+            self.advance()
+            return Token(TokenType.PIPE_PIPE, None, self.make_span(start_line, start_col))
         
         # Single-character operators
         token_map = {
@@ -458,6 +500,8 @@ class Lexer:
             '&': TokenType.AMPERSAND,
             '|': TokenType.PIPE,
             '^': TokenType.CARET,
+            '~': TokenType.TILDE,
+            '!': TokenType.BANG,
             '@': TokenType.AT_SIGN,
             '.': TokenType.DOT,
             ',': TokenType.COMMA,

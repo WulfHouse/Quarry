@@ -489,7 +489,7 @@ def list_error_codes() -> str:
         parts.append(f"  {code}: {exp['title']}")
     
     parts.append("")
-    parts.append("Use 'pyritec --explain CODE' to see detailed explanation")
+    parts.append("Use 'forge --explain CODE' to see detailed explanation")
     
     return '\n'.join(parts)
 

@@ -82,9 +82,9 @@ def test_stage2_build_process():
     """Test Stage1→Stage2 build process (if Stage1 exists)"""
     # Handle Windows .exe extension
     if sys.platform == "win32":
-        stage1_exe = stage1_dir / "pyritec.exe"
+        stage1_exe = stage1_dir / "forge.exe"
     else:
-        stage1_exe = stage1_dir / "pyritec"
+        stage1_exe = stage1_dir / "forge"
     script = repo_root / "scripts" / "bootstrap" / "bootstrap_stage2.py"
     
     # Check if script exists
@@ -145,9 +145,9 @@ def test_stage2_build_process():
     # If Stage2 executable was created, verify it exists
     # Handle Windows .exe extension
     if sys.platform == "win32":
-        stage2_exe = stage2_dir / "pyritec.exe"
+        stage2_exe = stage2_dir / "forge.exe"
     else:
-        stage2_exe = stage2_dir / "pyritec"
+        stage2_exe = stage2_dir / "forge"
     
     # If Stage2 executable was created, verify it exists
     # If not created, that's okay - script may have run but not produced executable
@@ -186,16 +186,16 @@ def test_determinism_check():
     """Test determinism check (if both stages exist)"""
     # Handle Windows .exe extension
     if sys.platform == "win32":
-        stage1_exe = stage1_dir / "pyritec.exe"
-        stage2_exe = stage2_dir / "pyritec.exe"
+        stage1_exe = stage1_dir / "forge.exe"
+        stage2_exe = stage2_dir / "forge.exe"
     else:
-        stage1_exe = stage1_dir / "pyritec"
-        stage2_exe = stage2_dir / "pyritec"
+        stage1_exe = stage1_dir / "forge"
+        stage2_exe = stage2_dir / "forge"
     script = repo_root / "scripts" / "bootstrap" / "check_bootstrap_determinism.py"
     
     # Check if script exists
     if not script.exists():
-        pytest.skip("check_bootstrap_determinism.py script does not exist")
+        pytest.fail("check_bootstrap_determinism.py script does not exist")
     
     # Try to build missing stages
     if not stage1_exe.exists():
@@ -214,8 +214,8 @@ def test_determinism_check():
                 # Stage1 build may fail if src-pyrite/ doesn't exist or has no modules
                 error_msg = stage1_result.stderr or stage1_result.stdout or "Unknown error"
                 if "No Pyrite modules found" in error_msg or "src-pyrite" in error_msg:
-                    pytest.skip("No Pyrite modules available for Stage1 build (expected during migration)")
-                pytest.skip(f"Could not build Stage1: {error_msg}")
+                    pytest.fail("No Pyrite modules available for Stage1 build (expected during migration)")
+                pytest.fail(f"Could not build Stage1: {error_msg}")
     
     if not stage2_exe.exists():
         # Try to build Stage2
@@ -233,12 +233,17 @@ def test_determinism_check():
                 # Stage2 build may fail if Stage1 has issues or no Pyrite modules
                 error_msg = stage2_result.stderr or stage2_result.stdout or "Unknown error"
                 if "No Pyrite modules found" in error_msg or "src-pyrite" in error_msg:
-                    pytest.skip("No Pyrite modules available for Stage2 build (expected during migration)")
-                pytest.skip(f"Could not build Stage2: {error_msg}")
+                    pytest.fail("No Pyrite modules available for Stage2 build (expected during migration)")
+                pytest.fail(f"Could not build Stage2: {error_msg}")
     
     # Final check - both must exist
     if not stage1_exe.exists() or not stage2_exe.exists():
-        pytest.skip("Both Stage1 and Stage2 must exist for determinism check")
+        missing = []
+        if not stage1_exe.exists():
+            missing.append("Stage1")
+        if not stage2_exe.exists():
+            missing.append("Stage2")
+        pytest.fail(f"Both Stage1 and Stage2 must exist for determinism check. Missing: {', '.join(missing)}")
     
     # Run determinism check
     result = subprocess.run(

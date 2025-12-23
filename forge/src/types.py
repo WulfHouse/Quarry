@@ -82,11 +82,14 @@ class NoneType(Type):
 
 @dataclass
 class ReferenceType(Type):
-    """Reference type: &T or &mut T"""
+    """Reference type: &'a T or &'a mut T"""
     inner: Type
     mutable: bool = False
+    lifetime: Optional[str] = None  # Inferred or explicit lifetime
     
     def __eq__(self, other):
+        # Lifetimes are ignored for type equality in the core type system (SPEC-LANG-0205)
+        # They are checked separately by the borrow checker.
         return (isinstance(other, ReferenceType) and 
                 self.inner == other.inner and 
                 self.mutable == other.mutable)
@@ -96,7 +99,8 @@ class ReferenceType(Type):
     
     def __str__(self):
         mut = "mut " if self.mutable else ""
-        return f"&{mut}{self.inner}"
+        life = f"'{self.lifetime} " if self.lifetime else ""
+        return f"&{life}{mut}{self.inner}"
 
 
 @dataclass
@@ -401,8 +405,24 @@ def types_compatible(t1: Type, t2: Type) -> bool:
     if isinstance(t1, FloatType) and isinstance(t2, FloatType):
         return t1 == t2
     
+    # Unknown matches anything
+    if isinstance(t1, UnknownType) or isinstance(t2, UnknownType):
+        return True
+
     # Handle TypeVariables - they match any type (for generic parameters)
     if isinstance(t1, TypeVariable) or isinstance(t2, TypeVariable):
+        return True
+
+    # Handle GenericType compatibility
+    if isinstance(t1, GenericType) and isinstance(t2, GenericType):
+        if t1.name != t2.name:
+            return False
+        if len(t1.type_args) != len(t2.type_args):
+            return False
+        return all(types_compatible(a1, a2) for a1, a2 in zip(t1.type_args, t2.type_args))
+    
+    # Unknown matches anything
+    if isinstance(t1, UnknownType) or isinstance(t2, UnknownType):
         return True
     
     # Handle generic enum constructor return types
@@ -418,6 +438,13 @@ def types_compatible(t1: Type, t2: Type) -> bool:
         if t1.name == t2.name and t1.base_type == t2:
             return True
     
+    # Handle List to Array compatibility (for literals)
+    if isinstance(t1, ArrayType) and isinstance(t2, GenericType) and t2.name == "List":
+        return types_compatible(t1.element, t2.type_args[0])
+    
+    if isinstance(t1, GenericType) and t1.name == "List" and isinstance(t2, ArrayType):
+        return types_compatible(t1.type_args[0], t2.element)
+
     return False
 
 

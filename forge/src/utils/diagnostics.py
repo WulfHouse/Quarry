@@ -1,12 +1,47 @@
 """Enhanced error diagnostics for Pyrite"""
 
-from typing import List, Tuple, Optional
+import json
+from typing import List, Tuple, Optional, Dict, Any, Set
 from dataclasses import dataclass
 from ..frontend.tokens import Span
 from colorama import init, Fore, Style
 
 # Initialize colorama for Windows color support
 init()
+
+
+def levenshtein_distance(s1: str, s2: str) -> int:
+    """Calculate Levenshtein distance between two strings (SPEC-FORGE-0108)"""
+    if len(s1) < len(s2):
+        return levenshtein_distance(s2, s1)
+    
+    if len(s2) == 0:
+        return len(s1)
+    
+    previous_row = list(range(len(s2) + 1))
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+    
+    return previous_row[-1]
+
+
+def find_similar_names(target: str, candidates: List[str], max_distance: int = 3, max_results: int = 3) -> List[str]:
+    """Find similar names using Levenshtein distance (SPEC-FORGE-0108)"""
+    suggestions = []
+    for candidate in candidates:
+        distance = levenshtein_distance(target.lower(), candidate.lower())
+        if distance <= max_distance and distance > 0:
+            suggestions.append((candidate, distance))
+    
+    # Sort by distance and return top matches
+    suggestions.sort(key=lambda x: x[1])
+    return [name for name, _ in suggestions[:max_results]]
 
 
 @dataclass
@@ -105,6 +140,36 @@ class Diagnostic:
         lines.append(f"   = For more information, run: pyrite --explain {self.code}")
         
         return '\n'.join(lines)
+    
+    def to_json(self) -> Dict[str, Any]:
+        """Convert diagnostic to JSON format (SPEC-FORGE-0107)"""
+        return {
+            "code": self.code,
+            "message": self.message,
+            "severity": self.level,
+            "span": {
+                "file": self.span.filename,
+                "start_line": self.span.start_line,
+                "start_column": self.span.start_column,
+                "end_line": self.span.end_line,
+                "end_column": self.span.end_column,
+            },
+            "notes": self.notes,
+            "help": self.help_messages,
+            "related_spans": [
+                {
+                    "note": note,
+                    "span": {
+                        "file": span.filename,
+                        "start_line": span.start_line,
+                        "start_column": span.start_column,
+                        "end_line": span.end_line,
+                        "end_column": span.end_column,
+                    }
+                }
+                for note, span in self.related_spans
+            ]
+        }
     
     def suggest_fixes(self) -> List[FixSuggestion]:
         """Generate fix suggestions for this diagnostic"""
@@ -219,6 +284,14 @@ class Diagnostic:
             ))
         
         return suggestions
+    
+    def add_typo_suggestion(self, target_name: str, available_names: List[str]):
+        """Add typo suggestion using Levenshtein distance (SPEC-FORGE-0108)"""
+        suggestions = find_similar_names(target_name, available_names)
+        if suggestions:
+            self.help_messages.append(
+                f"Did you mean '{suggestions[0]}'? (available: {', '.join(suggestions[:3])})"
+            )
 
 
 # Common error codes
@@ -242,7 +315,49 @@ ERROR_CODES = {
     
     # Pattern matching
     "P0004": "non-exhaustive patterns",
+
+    # Performance and Allocation (SPEC-FORGE-0110)
+    "P1050": "heap allocation inside a loop",
+    "P1051": "implicit copy of a large value",
 }
+
+
+class DiagnosticManager:
+    """Manages compiler diagnostics, i18n, and suppression (SPEC-FORGE-0106, 0109)"""
+    
+    def __init__(self, language: str = "en"):
+        self.language = language
+        self.diagnostics: List[Diagnostic] = []
+        self.allowed_codes: Set[str] = set()
+        self.messages = {
+            "en": {
+                "P0234": "cannot use moved value '{var_name}'",
+                "P0308": "mismatched types: expected {expected}, found {found}",
+                "P1050": "heap allocation inside a loop",
+                "P1051": "implicit copy of a large value ({size} bytes)",
+            },
+            "es": {
+                "P0234": "no se puede usar el valor movido '{var_name}'",
+                "P0308": "tipos no coincidentes: se esperaba {expected}, se encontró {found}",
+                "P1050": "asignación de montón dentro de un bucle",
+                "P1051": "copia implícita de un valor grande ({size} bytes)",
+            }
+        }
+
+    def allow(self, code: str):
+        """Allow a specific diagnostic code (SPEC-FORGE-0109)"""
+        self.allowed_codes.add(code)
+
+    def report(self, diagnostic: Diagnostic):
+        """Report a diagnostic if not suppressed"""
+        if diagnostic.code not in self.allowed_codes:
+            self.diagnostics.append(diagnostic)
+
+    def get_message(self, code: str, **kwargs) -> str:
+        """Get internationalized message (SPEC-FORGE-0106)"""
+        lang_messages = self.messages.get(self.language, self.messages["en"])
+        message_template = lang_messages.get(code, ERROR_CODES.get(code, "Unknown error"))
+        return message_template.format(**kwargs)
 
 
 def create_ownership_error(var_name: str, moved_to: str, use_span: Span, move_span: Span, alloc_span: Span) -> Diagnostic:

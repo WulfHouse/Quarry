@@ -157,11 +157,11 @@ def test_parse_match_statement():
     """Test parsing match statement"""
     source = """fn main():
     match x:
-        0:
+        case 0:
             print("zero")
-        1 | 2:
+        case 1 | 2:
             print("one or two")
-        _:
+        case _:
             print("other")
 """
     tokens = lex(source)
@@ -804,7 +804,7 @@ def test_parse_match_with_or_pattern():
     """Test parsing match with or pattern"""
     source = """fn test():
     match x:
-        1 | 2 | 3:
+        case 1 | 2 | 3:
             pass
 """
     tokens = lex(source)
@@ -820,9 +820,9 @@ def test_parse_match_with_enum_pattern():
     """Test parsing match with enum pattern"""
     source = """fn test():
     match opt:
-        Some(x):
+        case Some(x):
             pass
-        None:
+        case None:
             pass
 """
     tokens = lex(source)
@@ -842,7 +842,7 @@ def test_parse_match_with_wildcard_pattern():
     """Test parsing match with wildcard pattern"""
     source = """fn test():
     match x:
-        _:
+        case _:
             pass
 """
     tokens = lex(source)
@@ -857,9 +857,9 @@ def test_parse_match_with_enum_variant_wildcard():
     """Test parsing match with enum variant pattern using wildcard: Some(_)"""
     source = """fn test():
     match opt:
-        Some(_):
+        case Some(_):
             return true
-        None:
+        case None:
             return false
 """
     tokens = lex(source)
@@ -910,6 +910,25 @@ def test_parse_import_with_alias():
     program = parse(tokens)
     assert len(program.imports) == 1
     assert program.imports[0].alias == "coll"
+
+
+def test_parse_ternary_expression():
+    """Test parsing ternary expression (SPEC-LANG-0115)"""
+    source = """fn main():
+    let x = 1 if y > 0 else 0
+"""
+    tokens = lex(source)
+    program = parse(tokens)
+    
+    func = program.items[0]
+    stmt = func.body.statements[0]
+    assert isinstance(stmt, ast.VarDecl)
+    assert isinstance(stmt.initializer, ast.TernaryExpr)
+    assert isinstance(stmt.initializer.true_expr, ast.IntLiteral)
+    assert stmt.initializer.true_expr.value == 1
+    assert isinstance(stmt.initializer.condition, ast.BinOp)
+    assert isinstance(stmt.initializer.false_expr, ast.IntLiteral)
+    assert stmt.initializer.false_expr.value == 0
 
 
 if __name__ == "__main__":

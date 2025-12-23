@@ -5,8 +5,9 @@ import sys
 import os
 from pathlib import Path
 
-# Add src directory to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+# Add forge directory to path for imports (so 'from src.frontend import ...' works)
+forge_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(forge_dir))
 
 
 @pytest.fixture

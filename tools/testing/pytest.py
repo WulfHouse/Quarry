@@ -4,10 +4,10 @@ Pyrite test runner wrapper - works from anywhere in the repo
 Auto-detects repo root and sets up paths correctly
 
 Usage:
-    python tools/pytest.py                    # Run all tests
-    python tools/pytest.py tests/test_lexer.py  # Run specific test file
-    python tools/pytest.py -v                 # Verbose output
-    python tools/pytest.py -k test_ownership  # Run tests matching pattern
+    python tools/testing/pytest.py                    # Run all tests
+    python tools/testing/pytest.py tests/test_lexer.py  # Run specific test file
+    python tools/testing/pytest.py -v                 # Verbose output
+    python tools/testing/pytest.py -k test_ownership  # Run tests matching pattern
 """
 
 import sys
@@ -43,11 +43,11 @@ def main():
         print("Pyrite Test Runner")
         print()
         print("Usage:")
-        print("  python tools/pytest.py                    # Run all tests")
-        print("  python tools/pytest.py tests/test_lexer.py  # Run specific test file")
-        print("  python tools/pytest.py -v                 # Verbose output")
-        print("  python tools/pytest.py -k test_ownership  # Run tests matching pattern")
-        print("  python tools/pytest.py --timing           # Generate test_timing.json")
+        print("  python tools/testing/pytest.py                    # Run all tests")
+        print("  python tools/testing/pytest.py tests/test_lexer.py  # Run specific test file")
+        print("  python tools/testing/pytest.py -v                 # Verbose output")
+        print("  python tools/testing/pytest.py -k test_ownership  # Run tests matching pattern")
+        print("  python tools/testing/pytest.py --timing           # Generate test_timing.json")
         print()
         print("Common pytest options:")
         print("  -v, --verbose          Verbose output")
@@ -58,10 +58,10 @@ def main():
         print("  --timing                Generate test_timing.json with test durations")
         print()
         print("Examples:")
-        print("  python tools/pytest.py tests/test_lexer.py -v")
-        print("  python tools/pytest.py -k ownership")
-        print("  python tools/pytest.py --cov=src --cov-report=html")
-        print("  python tools/pytest.py --timing")
+        print("  python tools/testing/pytest.py tests/test_lexer.py -v")
+        print("  python tools/testing/pytest.py -k ownership")
+        print("  python tools/testing/pytest.py --cov=src --cov-report=html")
+        print("  python tools/testing/pytest.py --timing")
         return 0
     
     repo_root = find_repo_root()

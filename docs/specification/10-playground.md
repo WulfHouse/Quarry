@@ -6,35 +6,30 @@ order: 10
 
 # Pyrite Playground and Learning Experience
 
-================================================================================
-
 The Pyrite Playground is a first-class component of the ecosystem, designed to 
 lower the barrier to entry and enable frictionless sharing of code examples.
 
-10.1 Browser-Based Playground
---------------------------------------------------------------------------------
+## 10.1 Browser-Based Playground
 
-Features
-~~~~~~~~
+### Features
 
 The Playground (aspirational: play.pyrite-lang.org) provides:
 
   • Zero-installation experimentation: Write and run Pyrite in the browser
-  • Real compiler: Uses WebAssembly-compiled pyritec for authentic experience
+  • Real compiler: Uses WebAssembly-compiled forge for authentic experience
   • Instant feedback: Compiler errors displayed inline as you type
   • Example library: Curated examples for common patterns and language features
   • Shareable links: Every playground session has a unique URL
   • Embedded mode: Playground can be embedded in documentation and tutorials
   • Output capture: Console output, compiler warnings, execution time
 
-Example Workflow
-~~~~~~~~~~~~~~~~
+### Example Workflow
 
 1. Visit (aspirational: play.pyrite-lang.org)
 2. Write code:
 
    fn main():
-       let numbers = List[int]([1, 2, 3, 4, 5])
+       let numbers = Vector[int]([1, 2, 3, 4, 5])
        let sum = numbers.iter().fold(0, fn(acc, x): acc + x)
        print("Sum:", sum)
 
@@ -42,8 +37,7 @@ Example Workflow
 4. Click "Share" → Get link: (aspirational: play.pyrite-lang.org/abc123)
 5. Paste link in forum post, documentation, or chat
 
-10.2 Integration with Documentation
---------------------------------------------------------------------------------
+## 10.2 Integration with Documentation
 
 Every code example in official documentation is a live Playground link:
 
@@ -62,8 +56,7 @@ Every code example in official documentation is a live Playground link:
 Readers can modify examples and see results instantly, dramatically improving 
 the learning experience.
 
-10.3 Compiler Error Teaching
---------------------------------------------------------------------------------
+## 10.3 Compiler Error Teaching
 
 The Playground is optimized for teaching through errors:
 
@@ -75,7 +68,7 @@ The Playground is optimized for teaching through errors:
 
 Example error in Playground:
 
-    let data = List[int]([1, 2, 3])
+    let data = Vector[int]([1, 2, 3])
     process(data)
     print(data[0])  # ← Error highlighted here
 
@@ -85,11 +78,9 @@ Example error in Playground:
     
     [Explain P0234] [Suggest fix] [Share this error]
 
-10.4 Why Playground Matters for Adoption
---------------------------------------------------------------------------------
+## 10.4 Why Playground Matters for Adoption
 
-Learning Curve Reduction
-~~~~~~~~~~~~~~~~~~~~~~~~
+### Learning Curve Reduction
 
 Playground eliminates friction for newcomers:
 
@@ -98,8 +89,7 @@ Playground eliminates friction for newcomers:
   • Low stakes (experiment without breaking local environment)
   • Social proof (easily share working examples)
 
-Advocacy Amplification
-~~~~~~~~~~~~~~~~~~~~~~
+### Advocacy Amplification
 
 When developers discover something cool in Pyrite, they share it:
 
@@ -110,8 +100,7 @@ When developers discover something cool in Pyrite, they share it:
 This creates a flywheel: better playground → more sharing → more discovery → 
 more adoption.
 
-Community Support
-~~~~~~~~~~~~~~~~~
+### Community Support
 
 Playground links are invaluable for support forums:
 

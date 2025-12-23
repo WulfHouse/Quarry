@@ -27,6 +27,16 @@ The standard library is organized into modules:
 - `string.pyrite` / `string.c` - String operations
 - `format.pyrite` - String formatting
 
+### Serialization (`serialize/`)
+- `json.pyrite` / `json.c` - JSON parsing and serialization
+- `toml.pyrite` / `toml.c` - TOML parsing
+
+### Numerics (`num/`)
+- `tensor.pyrite` / `tensor.c` - Tensor operations and numerical computing
+
+### Networking (`net/`)
+- `tcp.pyrite` / `socket.c` - TCP socket networking
+
 ### Utilities
 
 - `build_graph/` - Build graph utilities

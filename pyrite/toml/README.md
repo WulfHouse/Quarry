@@ -18,7 +18,8 @@ The C library should be compiled to a shared library:
 ### Manual Compilation (For Testing)
 
 **Windows (MSVC):**
-```powershell
+```bash
+# Use Git Bash
 cl /LD toml.c /Fe:../target/toml.dll
 ```
 
@@ -32,8 +33,9 @@ gcc -shared -fPIC toml.c -o ../target/libtoml.so
 ## Enable FFI
 
 Set environment variable:
-```powershell
-$env:PYRITE_USE_TOML_FFI="true"
+```bash
+# Git Bash
+export PYRITE_USE_TOML_FFI="true"
 ```
 
 The Python bridge (`quarry/toml_bridge.py`) will automatically:

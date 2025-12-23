@@ -118,12 +118,27 @@ def test_lex_operators():
         '-': TokenType.MINUS,
         '*': TokenType.STAR,
         '/': TokenType.SLASH,
+        '%': TokenType.PERCENT,
         '==': TokenType.EQ,
         '!=': TokenType.NE,
         '<': TokenType.LT,
         '<=': TokenType.LE,
         '>': TokenType.GT,
         '>=': TokenType.GE,
+        '=': TokenType.ASSIGN,
+        '+=': TokenType.PLUS_EQ,
+        '-=': TokenType.MINUS_EQ,
+        '*=': TokenType.STAR_EQ,
+        '/=': TokenType.SLASH_EQ,
+        '&': TokenType.AMPERSAND,
+        '|': TokenType.PIPE,
+        '^': TokenType.CARET,
+        '~': TokenType.TILDE,
+        '<<': TokenType.SHL,
+        '>>': TokenType.SHR,
+        '&&': TokenType.AND_AND,
+        '||': TokenType.PIPE_PIPE,
+        '!': TokenType.BANG,
         '->': TokenType.ARROW,
         '::': TokenType.DOUBLE_COLON,
     }
@@ -528,6 +543,102 @@ def test_lex_triple_dot():
     tokens = lex("...")
     # Should tokenize as TRIPLE_DOT
     assert tokens[0].type == TokenType.TRIPLE_DOT
+
+
+def test_lex_maximal_munch():
+    """Test maximal munch for operators (SPEC-LANG-0006 requirement)"""
+    # == should be one token, not two =
+    tokens = lex("==")
+    assert len(tokens) == 2  # EQ token + EOF
+    assert tokens[0].type == TokenType.EQ
+    
+    # != should be one token, not ! followed by =
+    tokens = lex("!=")
+    assert len(tokens) == 2
+    assert tokens[0].type == TokenType.NE
+    
+    # += should be one token
+    tokens = lex("+=")
+    assert len(tokens) == 2
+    assert tokens[0].type == TokenType.PLUS_EQ
+    
+    # << should be one token, not two <
+    tokens = lex("<<")
+    assert len(tokens) == 2
+    assert tokens[0].type == TokenType.SHL
+    
+    # >> should be one token, not two >
+    tokens = lex(">>")
+    assert len(tokens) == 2
+    assert tokens[0].type == TokenType.SHR
+
+
+def test_lex_punctuation():
+    """Test punctuation tokens (SPEC-LANG-0007 requirement)"""
+    punctuation = {
+        '(': TokenType.LPAREN,
+        ')': TokenType.RPAREN,
+        '[': TokenType.LBRACKET,
+        ']': TokenType.RBRACKET,
+        '{': TokenType.LBRACE,
+        '}': TokenType.RBRACE,
+        ':': TokenType.COLON,
+        '.': TokenType.DOT,
+        ',': TokenType.COMMA,
+        ';': TokenType.SEMICOLON,
+        '->': TokenType.ARROW,
+        '?': TokenType.QUESTION_MARK,
+    }
+    
+    for punct, expected_type in punctuation.items():
+        tokens = lex(punct)
+        assert tokens[0].type == expected_type
+
+
+def test_lex_comments():
+    """Test comment handling (SPEC-LANG-0007 requirement)"""
+    # Single-line comment
+    tokens = lex("# This is a comment\nlet x = 5")
+    token_types = [t.type for t in tokens]
+    assert TokenType.LET in token_types
+    assert TokenType.HASH not in token_types  # Comments should be stripped
+    
+    # Inline comment
+    tokens = lex("let x = 5  # inline comment")
+    token_types = [t.type for t in tokens]
+    assert TokenType.LET in token_types
+    assert TokenType.INTEGER in token_types
+    
+    # Multi-line string (docstring) - should be preserved as STRING token
+    tokens = lex('"""This is a docstring\nwith multiple lines"""')
+    assert tokens[0].type == TokenType.STRING
+    assert "docstring" in tokens[0].value
+
+
+def test_lex_boolean_and_none():
+    """Test boolean and none literal recognition (SPEC-LANG-0019)"""
+    tokens = lex("true")
+    assert tokens[0].type == TokenType.TRUE
+    
+    tokens = lex("false")
+    assert tokens[0].type == TokenType.FALSE
+    
+    tokens = lex("None")
+    assert tokens[0].type == TokenType.NONE
+
+
+def test_lex_char_unicode_escape():
+    """Test character literal with unicode escape (SPEC-LANG-0020)"""
+    tokens = lex(r"'\u{1F600}'")
+    assert tokens[0].type == TokenType.CHAR
+    assert tokens[0].value == "\U0001F600"
+
+
+def test_lex_string_unicode_escape():
+    """Test string literal with unicode escape (SPEC-LANG-0020)"""
+    tokens = lex(r'"\u{1F600} emoji"')
+    assert tokens[0].type == TokenType.STRING
+    assert tokens[0].value == "\U0001F600 emoji"
 
 
 if __name__ == "__main__":

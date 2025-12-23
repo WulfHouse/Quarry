@@ -6,8 +6,6 @@ order: 2
 
 # Compiler Diagnostics and Error Messages
 
-================================================================================
-
 One of Pyrite's highest-priority design goals is to make the compiler a teacher, 
 not just an error reporter. Exceptional compiler diagnostics are the primary 
 mechanism for delivering on Pyrite's promise of transparency and approachability.
@@ -17,14 +15,16 @@ among the top factors in language satisfaction. Rust's success is strongly tied
 to rustc's famous diagnostics, which teach ownership and borrowing through clear, 
 actionable error messages.
 
-2.1 Error Message Design Principles
---------------------------------------------------------------------------------
+## 2.1 Error Message Design Principles
 
 Every Pyrite compiler error follows a structured format:
 
 1. WHAT HAPPENED: Clear statement of the error
+
 2. WHY IT'S A PROBLEM: Explanation of the underlying issue
+
 3. WHAT TO DO NEXT: Concrete suggestions for fixes (often multiple options)
+
 4. LOCATION CONTEXT: Precise source highlighting with multi-line context
 
 Example error format:
@@ -45,10 +45,9 @@ Example error format:
                1. Pass a reference instead: process(&data)
                2. Clone the data: process(data.clone())
                3. Have 'process' return ownership after using it
-       = explain: Run 'pyritec --explain P0234' for detailed explanation
+       = explain: Run 'forge --explain P0234' for detailed explanation
 
-2.2 Ownership and Borrowing Diagnostics
---------------------------------------------------------------------------------
+## 2.2 Ownership and Borrowing Diagnostics
 
 Because ownership and borrowing are novel concepts for many programmers, Pyrite 
 provides specialized diagnostics with timeline visualizations:
@@ -96,11 +95,10 @@ Borrow conflict example:
                
                2. Restructure to avoid overlapping borrows
        
-       = explain: Run 'pyritec --explain P0502' for borrowing rules
-       = visual: Run 'pyritec --explain P0502 --visual' for interactive diagram
+       = explain: Run 'forge --explain P0502' for borrowing rules
+       = visual: Run 'forge --explain P0502 --visual' for interactive diagram
 
-2.3 Memory and Performance Diagnostics
---------------------------------------------------------------------------------
+## 2.3 Memory and Performance Diagnostics
 
 Pyrite's cost-transparency philosophy extends to compiler warnings about 
 expensive operations:
@@ -149,38 +147,43 @@ Copy warning example:
                
                fn process(img: &mut ImageBuffer):
 
-2.4 Explain System
---------------------------------------------------------------------------------
+## 2.4 Explain System
 
 Every compiler error and warning has a unique error code (e.g., P0234, P1050) 
 that maps to detailed explanations accessible via:
 
-    pyritec --explain P0234
+    forge --explain P0234
 
 This displays:
 
 • Full conceptual explanation of the issue
+
 • Multiple code examples (both incorrect and correct versions)
+
 • Link to relevant language documentation chapter
+
 • Common pitfalls and patterns
+
 • Performance implications (if applicable)
 
 The explain system serves as interactive documentation, teaching language 
 concepts at the moment developers encounter problems.
 
-Enhanced Visual Mode
-~~~~~~~~~~~~~~~~~~~~~
+### Enhanced Visual Mode
 
 For ownership and borrowing errors, which are the hardest concepts for 
 newcomers, Pyrite offers enhanced visualizations:
 
-    pyritec --explain P0502 --visual
+    forge --explain P0502 --visual
 
 This generates an interactive diagram showing:
 
 1. **Ownership timeline:** When values are created, moved, borrowed, and dropped
+
 2. **Borrow scope visualization:** Start and end points of each borrow
+
 3. **Conflict points:** Exactly where and why incompatible accesses occur
+
 4. **Data flow graph:** How ownership flows through function calls
 
 Example visual output (ASCII art in terminal, interactive in IDE):
@@ -271,24 +274,26 @@ For complex scenarios with multiple borrows:
       config.update(...)     ← Now safe to mutate
 
 IDE Integration:
+
   • VSCode/IntelliJ plugins render interactive visualizations
+
   • Hover over variables to see lifetime spans
+
   • Click error codes to open visual explain mode
+
   • Animated flow for move/borrow operations
 
 This visual enhancement transforms the hardest part of Pyrite (ownership) from 
 "read text and imagine" to "see the flow directly." It's the difference between 
 reading about chess moves vs. seeing the board.
 
-2.5 IDE Hover: Ownership and Performance Metadata
---------------------------------------------------------------------------------
+## 2.5 IDE Hover: Ownership and Performance Metadata
 
 To make memory management and performance characteristics immediately visible, 
 Pyrite's Language Server Protocol (LSP) implementation provides rich hover 
 tooltips that show ownership state, memory layout, and cost implications.
 
-Variable Hover Information
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Variable Hover Information
 
 Hovering over any variable shows:
 
@@ -332,8 +337,7 @@ After a move:
            • Option 2: Clone: process(data.clone())
            • Run 'quarry fix' for automatic correction
 
-Function Parameter Hover
-~~~~~~~~~~~~~~~~~~~~~~~~~
+### Function Parameter Hover
 
 Hovering over function signatures shows parameter behavior:
 
@@ -364,8 +368,7 @@ For reference parameters:
                     ✓  No allocation or copy
                     ✓  Zero-cost abstraction
 
-Performance Cost Hover
-~~~~~~~~~~~~~~~~~~~~~~
+### Performance Cost Hover
 
 Hovering over operations shows their performance characteristics:
 
@@ -396,8 +399,7 @@ For allocations:
                💡 Tip: Use with_capacity(n) to avoid reallocation
                Example: List[int].with_capacity(10)
 
-Borrow Conflict Context
-~~~~~~~~~~~~~~~~~~~~~~~
+### Borrow Conflict Context
 
 When hovering in a borrow conflict scenario:
 
@@ -421,8 +423,7 @@ When hovering in a borrow conflict scenario:
       • End 'reader' borrow before mutating
       • Use drop(reader) or let it go out of scope
 
-Type Information Hover
-~~~~~~~~~~~~~~~~~~~~~~
+### Type Information Hover
 
 Hovering over type names shows memory characteristics:
 
@@ -449,8 +450,7 @@ Hovering over type names shows memory characteristics:
            
            Run 'quarry explain-type Point' for details
 
-Integration with Cost Analysis
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Integration with Cost Analysis
 
 IDE hover information integrates with static cost analysis:
 
@@ -474,8 +474,7 @@ IDE hover information integrates with static cost analysis:
                       v.clear()
                       # use v...
 
-Configuration
-~~~~~~~~~~~~~
+### Configuration
 
 IDE hover detail levels are configurable:
 
@@ -488,18 +487,23 @@ IDE hover detail levels are configurable:
     }
 
 Levels:
+
   • Beginner: Simple ownership state, basic warnings
+
   • Intermediate: Memory layout, costs, suggestions (default)
+
   • Advanced: Full call chains, assembly hints, cache implications
 
-Why This Matters
-~~~~~~~~~~~~~~~~~
+### Why This Matters
 
 IDE hover transforms abstract concepts into visible reality:
 
   • **Ownership becomes tangible:** See when values move, when borrows conflict
+
   • **Performance becomes predictable:** See costs before profiling
+
   • **Learning becomes interactive:** Immediate feedback while coding
+
   • **Debugging becomes faster:** Understand state without println debugging
 
 Research suggests that visual feedback can accelerate learning of ownership concepts 
@@ -511,16 +515,20 @@ programming.
 Implementation: Beta Release, integrated with pyrite-lsp server. Requires coordination 
 with static analyzer and quarry cost system to provide accurate information.
 
-2.6 Diagnostic Quality Standards
---------------------------------------------------------------------------------
+## 2.6 Diagnostic Quality Standards
 
 All compiler messages must meet these standards:
 
 • Actionable: Suggest concrete fixes, not just describe the problem
+
 • Contextual: Show enough source code to understand the issue
+
 • Beginner-friendly: Avoid jargon or explain it inline
+
 • Multi-solution: Present multiple approaches when applicable
+
 • Consistent: Use uniform formatting and terminology
+
 • Precise: Highlight exact problematic code spans
 
 The compiler team maintains diagnostic quality as a first-class requirement, with 
@@ -533,16 +541,15 @@ To achieve truly global adoption, Pyrite provides compiler
 diagnostics in multiple languages, making systems programming accessible to 
 non-native English speakers worldwide.
 
-Command Usage
-~~~~~~~~~~~~~
+### Command Usage
 
-    pyritec --language=zh            # Chinese error messages
-    pyritec --language=es            # Spanish error messages  
-    pyritec --language=ja            # Japanese error messages
-    pyritec --language=ko            # Korean error messages
-    pyritec --language=pt            # Portuguese error messages
-    pyritec --language=de            # German error messages
-    pyritec --language=fr            # French error messages
+    forge --language=zh            # Chinese error messages
+    forge --language=es            # Spanish error messages  
+    forge --language=ja            # Japanese error messages
+    forge --language=ko            # Korean error messages
+    forge --language=pt            # Portuguese error messages
+    forge --language=de            # German error messages
+    forge --language=fr            # French error messages
 
 Configuration:
 
@@ -601,36 +608,47 @@ Example Error Message (Spanish):
                1. Pasar una referencia: process(&data)
                2. Clonar los datos: process(data.clone())
 
-Translation Quality Standards
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Translation Quality Standards
 
 Pyrite enforces high translation quality through:
 
 1. **Native speaker translators:** Professional translations, not machine translation
+
 2. **Technical accuracy:** Preserve precise technical meanings
+
 3. **Consistency:** Shared terminology across all error messages
+
 4. **Community review:** Open process for translation improvements
+
 5. **Maintainability:** Translation infrastructure integrated with compiler
 
-Supported Languages (Priority Order)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Supported Languages (Priority Order)
 
 Stable Release (Initial Internationalization):
+
   • English (en) - Default
-  • Chinese (zh) - 1.4B speakers, huge developer population
-  • Spanish (es) - 500M speakers, Latin America growing
-  • Hindi (hi) - 600M speakers, India's massive dev community
+
+  • Chinese (zh) - ~1.1B total speakers (native + L2), huge developer population
+
+  • Spanish (es) - ~500M total speakers, Latin America growing
+  
+  • Hindi (hi) - ~600M total speakers (including Hindustani), India's massive dev community
 
 Stable Release Expansion:
+
   • Japanese (ja) - Major tech economy
+
   • Portuguese (pt) - Brazil's growing tech sector
+
   • Korean (ko) - Strong programming culture
+
   • German (de) - European tech hub
+
   • French (fr) - Francophone Africa + Europe
+
   • Russian (ru) - Eastern Europe tech community
 
-Translation Infrastructure
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Translation Infrastructure
 
 Messages stored in structured format:
 
@@ -652,8 +670,7 @@ Community contribution workflow:
     quarry translate --validate          # Verify translation quality
     quarry translate --submit            # Submit translation PR
 
-IDE Integration
-~~~~~~~~~~~~~~~
+### IDE Integration
 
 Language selection respects IDE/OS settings:
 
@@ -663,33 +680,47 @@ Language selection respects IDE/OS settings:
     "pyrite.diagnostics.language": "en"    # Force English
     "pyrite.diagnostics.language": "zh"    # Force Chinese
 
-Why This Matters
-~~~~~~~~~~~~~~~~~
+### Why This Matters
 
 Internationalized error messages address a critical adoption barrier:
 
 **Global reach:**
+
   • 60% of programmers are non-native English speakers
+
   • Educational institutions in non-English countries
+
   • Open source contributors worldwide
+
   • Government contracts requiring local language support
 
 **Accessibility:**
+
   • Language barriers prevent understanding complex concepts (ownership)
+
   • Error messages are WHERE learning happens
+
   • Native language reduces cognitive load for hard concepts
+
   • Enables instructors to teach in students' first language
 
 **Differentiation:**
+
   • Almost NO compilers do this well (GCC/Clang have minimal translations)
+
   • Rust has basic translation but inconsistent
+
   • Go, Zig, Mojo: English only
+
   • Pyrite: First-class multilingual support from day one
 
 **Evidence:**
+
   • Microsoft DevTools survey: 78% prefer native language errors
+  
   • Educational research suggests faster concept mastery in first language (specific 
     studies show approximately 2x improvement, though results vary)
+    
   • Adoption data: Python's success partly due to global accessibility
 
 **Achieving widespread developer adoption requires global reach, not just 

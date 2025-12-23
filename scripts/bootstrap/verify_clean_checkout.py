@@ -174,9 +174,9 @@ def verify_artifacts():
     print("\n[4/5] Verifying artifacts...")
     
     # Check Stage1 executable
-    stage1_exe = stage1_dir / "pyritec"
+    stage1_exe = stage1_dir / "forge"
     if sys.platform == "win32":
-        stage1_exe = stage1_dir / "pyritec.exe"
+        stage1_exe = stage1_dir / "forge.exe"
     
     if not stage1_exe.exists():
         print(f"  [FAIL] Stage1 executable not found: {stage1_exe}")
@@ -184,9 +184,9 @@ def verify_artifacts():
     print(f"  [OK] Stage1 executable: {stage1_exe}")
     
     # Check Stage2 executable
-    stage2_exe = stage2_dir / "pyritec"
+    stage2_exe = stage2_dir / "forge"
     if sys.platform == "win32":
-        stage2_exe = stage2_dir / "pyritec.exe"
+        stage2_exe = stage2_dir / "forge.exe"
     
     if not stage2_exe.exists():
         print(f"  [FAIL] Stage2 executable not found: {stage2_exe}")
@@ -281,8 +281,8 @@ def main():
     print("Verification Summary")
     print("=" * 60)
     print("[OK] Clean checkout verification passed")
-    print(f"  Stage1 executable: {stage1_dir / ('pyritec.exe' if sys.platform == 'win32' else 'pyritec')}")
-    print(f"  Stage2 executable: {stage2_dir / ('pyritec.exe' if sys.platform == 'win32' else 'pyritec')}")
+    print(f"  Stage1 executable: {stage1_dir / ('forge.exe' if sys.platform == 'win32' else 'forge')}")
+    print(f"  Stage2 executable: {stage2_dir / ('forge.exe' if sys.platform == 'win32' else 'forge')}")
     print("\n[OK] Self-hosting is repeatable from clean checkout")
     
     return 0

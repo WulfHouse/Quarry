@@ -42,6 +42,9 @@ def is_compiler_mode() -> bool:
     # Check if first argument (after script name) is a flag
     if len(sys.argv) > 1:
         first_arg = sys.argv[1]
+        # --no-run is handled by script mode
+        if first_arg == '--no-run':
+            return False
         compiler_flags = ['-o', '--emit-llvm', '--deterministic', '--explain', '--help', '-h']
         if first_arg.startswith('-') or any(flag in sys.argv for flag in compiler_flags):
             return True

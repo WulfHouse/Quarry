@@ -23,6 +23,6 @@ See Also:
     quarry: Build system and package manager
     stdlib: Standard library
 """
-# Forge - Pyrite Compiler - Alpha v1.0
-__version__ = "1.0.0-alpha"
+# Forge - Pyrite Compiler - Alpha v1.1
+__version__ = "1.1.0-alpha"
 

@@ -1,0 +1,5 @@
+fn main(argc: int, argv: *const *const u8) -> int:
+    print("argc")
+    print(argc)
+    return 0
+

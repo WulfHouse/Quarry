@@ -6,15 +6,12 @@ order: 9
 
 # Standard Library and Ecosystem
 
-================================================================================
-
 To be a true "do-anything" language, Pyrite is bundled with a comprehensive 
 standard library that makes it productive out of the box. The standard library 
 is designed with the same philosophy as the language: performance, safety, and 
 simplicity by default, with no hidden costs.
 
-9.1 Standard Library Design Philosophy
---------------------------------------------------------------------------------
+## 9.1 Standard Library Design Philosophy
 
 Pyrite's standard library is "batteries included" - shipping with everything 
 needed to build real applications without pulling in dozens of dependencies. The 
@@ -275,8 +272,7 @@ makes mistakes hard and good practices easy.
 
 Key aspects of the standard library design:
 
-9.2 Core Collections
---------------------------------------------------------------------------------
+## 9.2 Core Collections
 
 List[T] - Dynamic Array
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -560,8 +556,7 @@ By including these in stdlib, Pyrite makes the fast path easy:
 This is the "pit of success" in action: the ergonomic choice becomes the 
 performant choice for the 90% case.
 
-9.3 String Handling
---------------------------------------------------------------------------------
+## 9.3 String Handling
 
 String Type
 ~~~~~~~~~~~
@@ -607,8 +602,7 @@ Type-safe formatting without allocations in hot paths:
     let mut buf = [u8; 256]
     let written = format_to_slice(&mut buf, "x = {}", x)
 
-9.4 File and I/O Operations
---------------------------------------------------------------------------------
+## 9.4 File and I/O Operations
 
 File Operations
 ~~~~~~~~~~~~~~~
@@ -653,8 +647,7 @@ Cross-platform path handling:
         for entry in path.read_dir():
             print(entry.name())
 
-9.5 Serialization (JSON, TOML)
---------------------------------------------------------------------------------
+## 9.5 Serialization (JSON, TOML)
 
 JSON Support
 ~~~~~~~~~~~~
@@ -701,8 +694,7 @@ Automatic serialization for structs:
     let config = Config { host: "localhost", port: 8080, debug: true }
     let json = json.to_string(config)
 
-9.6 Networking
---------------------------------------------------------------------------------
+## 9.6 Networking
 
 TCP Client/Server
 ~~~~~~~~~~~~~~~~~
@@ -752,8 +744,7 @@ Lightweight HTTP server for simple applications:
     let server = HttpServer.new("127.0.0.1:3000", handle_request)
     server.run()?
 
-9.7 Time and Dates
---------------------------------------------------------------------------------
+## 9.7 Time and Dates
 
 Duration and Instant
 ~~~~~~~~~~~~~~~~~~~~
@@ -775,8 +766,7 @@ DateTime
     let christmas = DateTime.parse("2025-12-25", "%Y-%m-%d")?
     let days_until = christmas.duration_since(now).as_days()
 
-9.8 Command-Line Argument Parsing
---------------------------------------------------------------------------------
+## 9.8 Command-Line Argument Parsing
 
 Args Parser
 ~~~~~~~~~~~
@@ -808,8 +798,7 @@ Or with structured parsing:
     if args.verbose:
         print("Verbose mode enabled")
 
-9.9 Regular Expressions
---------------------------------------------------------------------------------
+## 9.9 Regular Expressions
 
 Regex Support
 ~~~~~~~~~~~~~
@@ -826,8 +815,7 @@ Regex Support
         None:
             print("No match")
 
-9.10 Mathematics
---------------------------------------------------------------------------------
+## 9.10 Mathematics
 
 Common Math Functions
 ~~~~~~~~~~~~~~~~~~~~~
@@ -849,8 +837,7 @@ Random Numbers
     let dice = r.gen_range(1..=6)
     let coin = r.gen_bool(0.5)
 
-9.11 Numerical Computing: Tensor Type (Stable Release)
---------------------------------------------------------------------------------
+## 9.11 Numerical Computing: Tensor Type (Stable Release)
 
 For numerical computing, scientific computing, and machine learning applications, 
 Pyrite provides a first-class Tensor type that combines compile-time shape 
@@ -994,8 +981,7 @@ ML framework." Provide the foundation; let libraries build on top.
 
 Implementation: Stable Release (after SIMD and algorithmic helpers are stable)
 
-9.12 SIMD and Vectorization (Stable Release)
---------------------------------------------------------------------------------
+## 9.12 SIMD and Vectorization (Stable Release)
 
 For performance-critical numerical code, Pyrite provides explicit SIMD 
 (Single Instruction, Multiple Data) support through the std::simd module. 
@@ -2485,8 +2471,7 @@ performance-oriented languages. They provide:
 Pyrite adopts this proven approach while maintaining its core philosophy: 
 explicit is better than implicit, but ergonomic is better than tedious.
 
-9.13 GPU Computing (Stable Release)
---------------------------------------------------------------------------------
+## 9.13 GPU Computing (Stable Release)
 
 For GPU-accelerated computing, Pyrite extends its performance contract system 
 to heterogeneous computing with a kernel programming model that maintains the 
@@ -2685,7 +2670,7 @@ rock-solid before adding GPU complexity.
 This positions Pyrite as: "The systems language that scales from embedded to 
 GPU, with the same safety guarantees everywhere."
 
-9.14 Why "Batteries Included" Matters
+## 9.14 Why "Batteries Included" Matters
 --------------------------------------------------------------------------------
 
 Developer Adoption Barrier
@@ -2814,7 +2799,7 @@ Concurrency Primitives
 
 (Expanding on this important part of the stdlib in its own subsection below.)
 
-9.15 Concurrency and Multithreading
+## 9.15 Concurrency and Multithreading
 --------------------------------------------------------------------------------
 
 Pyrite is built to support concurrent and multi-threaded programming, as these 
@@ -3064,7 +3049,7 @@ multithreading safely:
     fearless concurrency (developers can spawn threads and not worry about memory 
     corruption or data races, as long as they stick to safe code).
 
-9.16 Concurrency Primitives (Standard Library)
+## 9.16 Concurrency Primitives (Standard Library)
 --------------------------------------------------------------------------------
 
 (Expanding on the concurrency section previously outlined in section 9.2, now 
@@ -3084,7 +3069,7 @@ All concurrency primitives leverage the type system to prevent data races at
 compile time. See section 5 (Memory Management) for details on how Send/Sync 
 traits enforce thread safety.
 
-9.17 Built-In Observability (Stable Release)
+## 9.17 Built-In Observability (Stable Release)
 --------------------------------------------------------------------------------
 
 Production systems require visibility into runtime behavior. Pyrite's standard 

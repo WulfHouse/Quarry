@@ -181,11 +181,11 @@ def parse_args():
     # If command starts with 'pytest', convert to use pytest wrapper
     if command[0] == 'pytest':
         repo_root = find_repo_root()
-        pytest_wrapper = repo_root / "tools" / "pytest.py"
+        pytest_wrapper = repo_root / "tools" / "testing" / "pytest.py"
         command = [sys.executable, str(pytest_wrapper)] + command[1:]
     elif not Path(command[0]).is_absolute() and not command[0].startswith('-'):
         # If first arg is not absolute and not a flag, try to find it
-        # This handles cases like "python tools/pytest.py"
+        # This handles cases like "python tools/testing/pytest.py"
         pass  # Let subprocess handle it
     
     if metrics_file is None:
@@ -261,7 +261,7 @@ def main():
     # Add progress options for long runs if not already specified
     if is_likely_long_run and '-v' not in command and '--verbose' not in command and '-q' not in command:
         # Find where to insert (after python executable and pytest script, before other args)
-        # Command format: [python, 'tools/pytest.py', ...args]
+        # Command format: [python, 'tools/testing/pytest.py', ...args]
         insert_idx = 2  # After python and pytest.py
         if insert_idx < len(command):
             command.insert(insert_idx, '-v')

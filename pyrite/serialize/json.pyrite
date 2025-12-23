@@ -1,0 +1,41 @@
+# JSON Serialization and Parsing
+
+import std.string
+import std.collections.list
+import std.collections.map
+
+enum JsonValue:
+    Null
+    Bool(value: bool)
+    Number(value: f64)
+    String(value: String)
+    Array(values: List[JsonValue])
+    Object(entries: Map[String, JsonValue])
+
+# FFI declaration for JSON string escaping (implemented in json.c)
+extern "C" fn json_escape_string(s: *const String) -> String
+
+impl JsonValue:
+    fn to_string(&self) -> String:
+        match self:
+            Null:
+                return "null"
+            Bool(v):
+                if v.value:
+                    return "true"
+                else:
+                    return "false"
+            Number(v):
+                return string_from_float(v.value)
+            String(v):
+                # Use C function to properly escape JSON string
+                return json_escape_string(v)
+            Array(l):
+                return "[...]" # Placeholder for now
+            Object(m):
+                return "{...}" # Placeholder for now
+        return ""
+
+# Public API
+fn to_string(v: &JsonValue) -> String:
+    return v.to_string()

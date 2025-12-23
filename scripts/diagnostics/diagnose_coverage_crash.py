@@ -152,7 +152,7 @@ def main():
     print("TEST 1: pytest WITHOUT coverage")
     print("="*70)
     result1 = run_safe_command(
-        [sys.executable, "tools/pytest.py", "-q"],
+        [sys.executable, "tools/testing/pytest.py", "-q"],
         "pytest without coverage",
         max_seconds=300,
         max_rss_mb=2048
@@ -164,7 +164,7 @@ def main():
     print("TEST 2: pytest WITH coverage")
     print("="*70)
     result2 = run_safe_command(
-        [sys.executable, "tools/pytest.py", "--cov=forge/src", "--cov-report=term", "-q"],
+        [sys.executable, "tools/testing/pytest.py", "--cov=forge/src", "--cov-report=term", "-q"],
         "pytest with coverage (term report only)",
         max_seconds=600,
         max_rss_mb=4096
@@ -198,7 +198,7 @@ def main():
     print("TEST 4: pytest collection only")
     print("="*70)
     result4 = run_safe_command(
-        [sys.executable, "tools/pytest.py", "--collect-only", "-q"],
+        [sys.executable, "tools/testing/pytest.py", "--collect-only", "-q"],
         "pytest collection only",
         max_seconds=120,
         max_rss_mb=2048

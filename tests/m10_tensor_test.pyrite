@@ -1,0 +1,25 @@
+# M10 Tensor Test
+
+import std.num.tensor
+
+fn main() -> int:
+    # Use top-level extern functions for cross-module reliability
+    var t = tensor_new(2, 2)
+    
+    unsafe:
+        tensor_set(&mut t, 0, 0, 1.0)
+        tensor_set(&mut t, 1, 1, 2.0)
+        
+        let v1 = tensor_get(&t, 0, 0)
+        let v2 = tensor_get(&t, 1, 1)
+        
+        # Simple verification
+        if v1 > 0.9 and v1 < 1.1:
+            if v2 > 1.9 and v2 < 2.1:
+                print("Tensor test passed!")
+                tensor_drop(&mut t)
+                return 0
+        
+        print("Tensor test failed")
+        tensor_drop(&mut t)
+    return 1

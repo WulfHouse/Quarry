@@ -6,8 +6,6 @@ order: 17
 
 # Conclusion
 
-================================================================================
-
 Pyrite is the amalgamation of the best ideas from decades of programming language 
 development. From Python, it inherits approachability and readability - the 
 philosophy that code should be intuitive and clear. A beginner can read Pyrite 
@@ -63,7 +61,7 @@ developer experience:
   Every error becomes a teaching moment. The compiler doesn't just reject code -
   it explains what happened, why it's a problem, and how to fix it. Ownership 
   errors include timeline visualizations. Every error code has detailed 
-  explanations accessible via pyritec --explain. Internationalized error 
+  explanations accessible via forge --explain. Internationalized error 
   messages in 10+ languages make systems programming accessible globally, 
   removing the language barrier that prevents 60% of developers from fully 
   grasping complex concepts like ownership.

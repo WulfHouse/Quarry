@@ -26,7 +26,7 @@ def compute_hash(source: str, compiler_version: str = "1.0.0-alpha") -> str:
     return hashlib.sha256(content.encode()).hexdigest()[:16]
 
 
-def run_script(script_path: str, args: list = None):
+def run_script(script_path: str, args: list = None, no_run: bool = False):
     """Run a Pyrite script with caching"""
     if args is None:
         args = []
@@ -49,12 +49,14 @@ def run_script(script_path: str, args: list = None):
     cached_exe = cache_entry / "output.exe" if os.name == 'nt' else cache_entry / "output"
     
     # Check if cached and fresh
-    if cached_ll.exists():
+    if cached_ll.exists() and cached_exe.exists():
         # Use cached version
-        print(f"[Cached] Running {script_path}")
+        if not no_run:
+            print(f"[Cached] Running {script_path}")
     else:
         # Compile
-        print(f"[Compiling] {script_path}")
+        if not no_run:
+            print(f"[Compiling] {script_path}")
         cache_entry.mkdir(parents=True, exist_ok=True)
         
         # Compile to executable
@@ -68,6 +70,10 @@ def run_script(script_path: str, args: list = None):
         if not success:
             return 1
     
+    if no_run:
+        print(str(cached_exe.resolve()))
+        return 0
+
     # Execute the program
     if cached_exe.exists():
         # Run cached executable
@@ -86,6 +92,8 @@ def show_help():
     print()
     print("Usage:")
     print("  pyrite <file.pyrite>       Compile and run a Pyrite file")
+    print("  pyrite --no-run <file>     Compile and print exe path without running")
+    print("  pyrite <file> -- [args]    Forward args to program")
     print("  pyrite --help              Show this help message")
     print("  pyrite --version           Show version information")
     print()
@@ -115,10 +123,31 @@ def main():
         print("Memory-safe systems programming with Python syntax")
         return 0
     
-    script_path = sys.argv[1]
-    script_args = sys.argv[2:]
+    no_run = False
+    args = sys.argv[1:]
     
-    return run_script(script_path, script_args)
+    if "--no-run" in args:
+        no_run = True
+        args.remove("--no-run")
+    
+    if not args:
+        show_help()
+        return 1
+
+    script_path = args[0]
+    script_args = []
+    
+    # Handle -- for args forwarding
+    if "--" in args:
+        idx = args.index("--")
+        script_args = args[idx+1:]
+        # File is before -- or after flags
+        if idx > 0:
+            script_path = args[0] if args[0] != "--" else args[1]
+    else:
+        script_args = args[1:]
+    
+    return run_script(script_path, script_args, no_run=no_run)
 
 
 if __name__ == "__main__":

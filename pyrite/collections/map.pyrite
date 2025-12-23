@@ -1,106 +1,39 @@
-# Map[K, V] - Hash map
-#
-# This is a wrapper for the C implementation in map.c
-# For MVP, this documents the API. Full FFI integration coming in Phase 2.
+# Map[K, V] - Hash map implementation
+# This module provides a wrapper for the C implementation in map.c
 
-# API Documentation:
-#
-# Map[K, V] - Generic hash map (key-value store)
-#
-# Methods:
-#   new() -> Map[K, V]
-#     Create empty map. O(1)
-#
-#   with_capacity(n: int) -> Map[K, V]
-#     Create map with pre-allocated capacity. O(n)
-#
-#   insert(&mut self, key: K, value: V)
-#     Insert or update key-value pair. O(1) amortized
-#
-#   get(&self, key: &K) -> Option[&V]
-#     Get reference to value for key. O(1) average
-#
-#   contains(&self, key: &K) -> bool
-#     Check if key exists. O(1) average
-#
-#   remove(&mut self, key: &K) -> Option[V]
-#     Remove and return value for key. O(1) average
-#
-#   length(&self) -> int
-#     Get number of entries. O(1)
-#
-#   is_empty(&self) -> bool
-#     Check if map is empty. O(1)
-#
-#   clear(&mut self)
-#     Remove all entries. O(n)
-#
-#   clone(&self) -> Map[K, V]
-#     Create deep copy. O(n)
+# Map struct
+struct Map[K, V]:
+    buckets: *u8  # void** in C
+    len: i64
+    cap: i64
+    key_size: i64
+    value_size: i64
 
-# Example usage (when FFI is implemented):
-#
-# fn main():
-#     var scores = Map[String, int].new()
-#     scores.insert("Alice", 100)
-#     scores.insert("Bob", 85)
-#     
-#     match scores.get("Alice"):
-#         Some(score):
-#             print("Alice scored:", score)
-#         None:
-#             print("Not found")
-#     
-#     print("Contains Bob:", scores.contains("Bob"))
-#     print("Map size:", scores.length())
+# FFI declarations for C functions
+extern "C" fn map_new(key_size: i64, value_size: i64) -> Map[K, V]
+extern "C" fn map_insert(map: *mut Map[K, V], key: *const u8, value: *const u8)
+extern "C" fn map_get(map: *const Map[K, V], key: *const u8) -> *const u8
+extern "C" fn map_contains(map: *const Map[K, V], key: *const u8) -> i32
+extern "C" fn map_length(map: *const Map[K, V]) -> i64
+extern "C" fn map_drop(map: *mut Map[K, V])
 
-# Memory layout:
-# struct Map {
-#     buckets: *Bucket,  // Hash table buckets
-#     len: int,          // Number of entries
-#     cap: int           // Number of buckets
-# }
-
-# FFI declarations for C implementation
-extern "C" fn map_new(key_size: i64, value_size: i64) -> Map
-extern "C" fn map_insert(map: *mut Map, key: *const void, value: *const void)
-extern "C" fn map_get(map: *const Map, key: *const void) -> *const void
-extern "C" fn map_contains(map: *const Map, key: *const void) -> i8
-extern "C" fn map_length(map: *const Map) -> i64
-extern "C" fn map_drop(map: *mut Map)
-
-# Pyrite wrapper struct (to be implemented):
-# struct Map[K, V]:
-#     _c_map: *mut void  # Opaque pointer to C Map
-#
-# impl Map[K, V]:
-#     fn new() -> Map[K, V]:
-#         # Call map_new with key and value sizes
-#         # Store C map pointer in _c_map
-#         pass
-#
-#     fn insert(&mut self, key: K, value: V):
-#         # Convert key/value to pointers, call map_insert
-#         pass
-#
-#     fn get(&self, key: &K) -> Option[&V]:
-#         # Call map_get, convert result to Option
-#         pass
-#
-#     fn contains(&self, key: &K) -> bool:
-#         # Call map_contains
-#         pass
-#
-#     fn length(&self) -> int:
-#         # Call map_length
-#         pass
-#
-#     fn drop(&mut self):
-#         # Call map_drop
-#         pass
-
-# Ownership:
-# - Map owns its heap allocation
-# - Dropping a Map frees all entries
-# - Move-only (not Copy)
-
+# Map implementation
+# Note: Codegen intercepts these calls for generic collections
+impl Map[K, V]:
+    fn new() -> Map[K, V]:
+        pass
+    
+    fn insert(&mut self, key: K, value: V):
+        pass
+    
+    fn get(&self, key: K) -> Option[V]:
+        pass
+    
+    fn contains(&self, key: K) -> bool:
+        pass
+    
+    fn length(&self) -> i64:
+        pass
+    
+    fn drop(&mut self):
+        pass

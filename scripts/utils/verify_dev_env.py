@@ -68,10 +68,10 @@ def check_test_infrastructure() -> Tuple[bool, str]:
     try:
         script_dir = Path(__file__).parent
         repo_root = script_dir.parent
-        pytest_script = repo_root / "tools" / "pytest.py"
+        pytest_script = repo_root / "tools" / "testing" / "pytest.py"
         
         if not pytest_script.exists():
-            return False, "tools/pytest.py not found"
+            return False, "tools/testing/pytest.py not found"
         
         # Try to run pytest --version
         result = subprocess.run(
@@ -246,8 +246,8 @@ def main():
         print(f"\n{YELLOW}Next steps:{RESET}")
         print("  1. Review SELF_HOSTING_PLAN_DELTA.md for execution plan")
         print("  2. Start with Milestone A: Make Coverage a Real Gate (SH-A-T1)")
-        print("  3. Run tests: python tools/pytest.py")
-        print("  4. Check coverage: python tools/pytest.py --cov=forge/src --cov-report=term")
+        print("  3. Run tests: python tools/testing/pytest.py")
+        print("  4. Check coverage: python tools/testing/pytest.py --cov=forge/src --cov-report=term")
         print(f"\n{YELLOW}Note on coverage commands:{RESET}")
         print("  - Full coverage with JSON report takes ~3-4 minutes (1108 tests)")
         print("  - For quick local checks, skip JSON: --cov-report=term only")

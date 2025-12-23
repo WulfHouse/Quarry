@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 r"""
 Pyrite test runner - repo root entry point
-Delegates to tools/pytest.py wrapper
+Delegates to tools/testing/pytest.py wrapper
 
 Usage:
     python scripts/pyrite_test                    # From repo root
@@ -17,17 +17,17 @@ from pathlib import Path
 # Find tools directory relative to this script (now in scripts/, so go up one level)
 script_dir = Path(__file__).parent.resolve()
 repo_root = script_dir.parent
-tools_pytest = repo_root / "tools" / "pytest.py"
+tools_pytest = repo_root / "tools" / "testing" / "pytest.py"
 
 if not tools_pytest.exists():
-    print("Error: Could not find tools/pytest.py")
+    print("Error: Could not find tools/testing/pytest.py")
     print("Please run this script from the Pyrite repository root.")
     sys.exit(1)
 
 # Import and execute the tools wrapper
 spec = importlib.util.spec_from_file_location("pytest_wrapper", tools_pytest)
 if spec is None or spec.loader is None:
-    print("Error: Could not load tools/pytest.py")
+    print("Error: Could not load tools/testing/pytest.py")
     sys.exit(1)
 
 module = importlib.util.module_from_spec(spec)

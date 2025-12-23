@@ -22,9 +22,9 @@ examples_dir = compiler_dir / "examples"
 
 def find_stage2_executable():
     """Find Stage2 executable"""
-    stage2_exe = stage2_dir / "pyritec"
+    stage2_exe = stage2_dir / "forge"
     if sys.platform == "win32":
-        stage2_exe = stage2_dir / "pyritec.exe"
+        stage2_exe = stage2_dir / "forge.exe"
     
     if not stage2_exe.exists():
         return None
@@ -146,7 +146,7 @@ def main():
     stage2_exe = find_stage2_executable()
     if not stage2_exe:
         print("\n[ERROR] Stage2 executable not found")
-        print(f"  Expected: {stage2_dir / 'pyritec.exe' if sys.platform == 'win32' else stage2_dir / 'pyritec'}")
+        print(f"  Expected: {stage2_dir / 'forge.exe' if sys.platform == 'win32' else stage2_dir / 'forge'}")
         print("  Run bootstrap_stage2.py first")
         return 1
     

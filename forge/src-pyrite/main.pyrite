@@ -1,4 +1,4 @@
-# Main entry point for pyritec compiler
+# Main entry point for forge compiler
 # Minimal stub for MVP - allows linking to succeed
 
 fn main() -> int:

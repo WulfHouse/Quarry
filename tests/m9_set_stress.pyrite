@@ -1,0 +1,29 @@
+# M9 Set Stress Test
+# Testing Set collection stress
+
+import std.collections.set
+
+fn main():
+    print("Starting Set stress test...")
+    var s: Set[int] = Set.new()
+    let iterations: i64 = 100
+    
+    for i in 0..iterations:
+        s.insert(i)
+    
+    var success = true
+    if s.length() != iterations:
+        print("Error: Length mismatch")
+        success = false
+    
+    for i in 0..iterations:
+        if not s.contains(i):
+            print("Error: Element not found:", i)
+            success = false
+    
+    if success:
+        print("Set stress test passed!")
+    else:
+        print("Set stress test failed.")
+    
+    s.drop()

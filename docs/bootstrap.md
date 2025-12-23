@@ -1,8 +1,8 @@
 # Forge Bootstrap Guide
 
-> **⚠️ ALPHA v1.0 STATUS**
+> **⚠️ ALPHA v1.1 STATUS**
 > 
-> This project is currently in **Alpha v1.0**. All repository content, including code, documentation, APIs, and specifications, is subject to change and may contain inconsistencies as development progresses toward Beta v1.0.
+> This project is currently in **Alpha v1.1**. All repository content, including code, documentation, APIs, and specifications, is subject to change and may contain inconsistencies as development progresses toward Beta v1.0.
 
 This guide explains how to bootstrap **Forge** (the Pyrite compiler) from a clean checkout.
 
@@ -52,7 +52,7 @@ python scripts/bootstrap/bootstrap_stage1.py
 
 This compiles Forge source code using the Python implementation (Stage0), producing the Stage1 executable.
 
-**Output**: `build/bootstrap/stage1/pyritec` (or `pyritec.exe` on Windows)
+**Output**: `build/bootstrap/stage1/forge` (or `forge.exe` on Windows)
 
 ### Step 2: Build Stage2
 
@@ -62,7 +62,7 @@ python scripts/bootstrap/bootstrap_stage2.py
 
 This compiles Forge source code using Stage1, producing the Stage2 executable.
 
-**Output**: `build/bootstrap/stage2/pyritec` (or `pyritec.exe` on Windows)
+**Output**: `build/bootstrap/stage2/forge` (or `forge.exe` on Windows)
 
 ### Step 3: Validate Self-Hosting
 
@@ -103,8 +103,8 @@ This script:
 
 After successful bootstrap, you'll find:
 
-- **Stage1 executable**: `build/bootstrap/stage1/pyritec` (or `.exe` on Windows)
-- **Stage2 executable**: `build/bootstrap/stage2/pyritec` (or `.exe` on Windows)
+- **Stage1 executable**: `build/bootstrap/stage1/forge` (or `.exe` on Windows)
+- **Stage2 executable**: `build/bootstrap/stage2/forge` (or `.exe` on Windows)
 - **Stage1 object files**: `build/bootstrap/stage1/*.o`
 - **Stage2 object files**: `build/bootstrap/stage2/*.o`
 - **Runtime library**: `forge/runtime/libpyrite.a` (if built)
@@ -115,10 +115,10 @@ Once built, you can use the bootstrapped Forge compilers:
 
 ```bash
 # Use Stage1 to compile Pyrite code
-./build/bootstrap/stage1/pyritec hello.pyrite -o hello
+./build/bootstrap/stage1/forge hello.pyrite -o hello
 
 # Use Stage2 to compile Pyrite code
-./build/bootstrap/stage2/pyritec hello.pyrite -o hello
+./build/bootstrap/stage2/forge hello.pyrite -o hello
 ```
 
 ## Troubleshooting

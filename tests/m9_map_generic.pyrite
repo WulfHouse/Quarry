@@ -1,0 +1,15 @@
+# M9 Map Generic Test
+
+import std.collections.map
+
+fn main():
+    # Use generic Map - should trigger built-in support in codegen
+    var my_map: Map[int, int] = Map.new()
+    my_map.insert(1, 2)
+    let val_opt = my_map.get(1)
+    match val_opt:
+        Some(val):
+            print("Value:", val)
+        None:
+            print("Key not found")
+    print("Success")

@@ -6,8 +6,6 @@ order: 13
 
 # Security and Reliability
 
-================================================================================
-
 Because Pyrite emphasizes memory safety and simplicity by default, it is 
 inherently a secure-by-design language. Many classes of vulnerabilities that 
 plague C/C++ programs - buffer overflows, dangling pointer dereferences, double 

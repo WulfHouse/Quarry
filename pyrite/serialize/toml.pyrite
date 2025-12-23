@@ -1,0 +1,19 @@
+# TOML Serialization and Parsing
+
+import std.string
+
+# Re-use the C implementation used by Quarry
+extern "C" fn parse_dependencies_simple_c(toml_text: *const u8, text_len: i64, result: *mut u8, result_cap: i64, result_len: *mut i64) -> i32
+
+fn parse_simple(text: &String) -> String:
+    # Buffer-based FFI call
+    var result_buf = [u8; 4096]
+    var result_len: i64 = 0
+    let status = parse_dependencies_simple_c(text.data, text.len(), &mut result_buf[0], 4096, &mut result_len)
+    
+    if status == 0:
+        # Convert buffer to string
+        # For now, return empty as placeholder
+        return "parsed"
+    return ""
+

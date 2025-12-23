@@ -79,6 +79,57 @@ except ImportError:
 # _compare_versions is now imported from version_bridge (or defined above as fallback)
 
 
+def cmd_init():
+    """Initialize a Pyrite project in current directory (SPEC-QUARRY-0013)"""
+    print(f"Initializing Pyrite project in current directory...")
+    
+    project_name = Path.cwd().name
+    
+    # Create src directory
+    Path("src").mkdir(exist_ok=True)
+    Path("tests").mkdir(exist_ok=True)
+    
+    # Create Quarry.toml
+    toml_path = Path("Quarry.toml")
+    if not toml_path.exists():
+        toml_content = f"""[package]
+name = "{project_name}"
+version = "0.1.0"
+edition = "2025"
+
+[dependencies]
+"""
+        toml_path.write_text(toml_content)
+        print("  Created Quarry.toml")
+    else:
+        print("  Quarry.toml already exists, skipping")
+    
+    # Create main.pyrite
+    main_path = Path("src/main.pyrite")
+    if not main_path.exists():
+        main_content = """fn main():
+    print("Hello, world!")
+"""
+        main_path.write_text(main_content)
+        print("  Created src/main.pyrite")
+    else:
+        print("  src/main.pyrite already exists, skipping")
+    
+    # Create .gitignore
+    gitignore_path = Path(".gitignore")
+    if not gitignore_path.exists():
+        gitignore_content = """target/
+*.ll
+*.o
+*.out
+"""
+        gitignore_path.write_text(gitignore_content)
+        print("  Created .gitignore")
+    
+    print("\nProject initialized successfully!")
+    return 0
+
+
 def cmd_new(project_name: str):
     """Create a new Pyrite project"""
     print(f"Creating binary project `{project_name}`...")
@@ -181,8 +232,9 @@ def cmd_build(release: bool = False, incremental: bool = True, deterministic: bo
             if locked:
                 cmd.append("--locked")
             
-            # Run from workspace directory, but Python path should include forge
-            result = subprocess.run(cmd, cwd=str(workspace_path), env={**os.environ, "PYTHONPATH": str(project_root / "forge")})
+            # Run from workspace directory, but Python path should include forge and quarry root
+            pythonpath = f"{project_root / 'forge'}{os.pathsep}{project_root}"
+            result = subprocess.run(cmd, cwd=str(workspace_path), env={**os.environ, "PYTHONPATH": pythonpath})
             if result.returncode != 0:
                 failed.append(workspace_name)
                 print(f"  [FAILED] {workspace_name}")
@@ -287,16 +339,39 @@ def cmd_build(release: bool = False, incremental: bool = True, deterministic: bo
                 print(f"Warning: Failed to auto-resolve dependencies: {e}")
                 # Continue with build anyway
     
+    # Read package info from Quarry.toml
+    try:
+        import tomllib
+        with open("Quarry.toml", 'rb') as f:
+            toml_data = tomllib.load(f)
+    except ImportError:
+        try:
+            import tomli as tomllib
+            with open("Quarry.toml", 'rb') as f:
+                toml_data = tomllib.load(f)
+        except ImportError:
+            toml_data = {}
+
+    is_lib = "lib" in toml_data
+    project_name = toml_data.get("package", {}).get("name", "main")
+    
+    # Find entry file (SPEC-QUARRY-0020)
+    if is_lib:
+        entry_file = Path("src/lib.pyrite").resolve()
+        if not entry_file.exists():
+            print("Error: src/lib.pyrite not found for library project")
+            return 1
+        output_name = f"lib{project_name}.a" # Static library for now
+    else:
+        entry_file = Path("src/main.pyrite").resolve()
+        if not entry_file.exists():
+            print("Error: src/main.pyrite not found")
+            return 1
+        output_name = project_name
+
     build_type = "release" if release else "debug"
-    
-    # Find main.pyrite (use absolute path)
-    main_file = Path("src/main.pyrite").resolve()
-    if not main_file.exists():
-        print("Error: src/main.pyrite not found")
-        return 1
-    
-    # Try incremental build with build graph (enabled by default, can be disabled with --no-incremental)
-    # Note: Incremental builds are currently only for debug mode
+
+    # Try incremental build with build graph
     if incremental and not release:
         try:
             sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -336,15 +411,15 @@ def cmd_build(release: bool = False, incremental: bool = True, deterministic: bo
                                 print(f"   Checking {package_name} [cached]")
                 
                 # Check main package
-                should_compile, reason = inc_compiler.should_recompile(str(main_file))
+                should_compile, reason = inc_compiler.should_recompile(str(entry_file))
                 
                 if not should_compile and all_cached:
-                    print(f"   Checking src/main.pyrite")
+                    print(f"   Checking {entry_file.name}")
                     print(f"    Finished {build_type} [cached] in 0.1s")
                     return 0
                 else:
                     if should_compile:
-                        print(f"   Compiling src/main.pyrite ({reason})")
+                        print(f"   Compiling {entry_file.name} ({reason})")
             except Exception as e:
                 # If build graph fails, fall back to single-package incremental
                 cache_dir = Path(".pyrite/cache")
@@ -353,14 +428,14 @@ def cmd_build(release: bool = False, incremental: bool = True, deterministic: bo
                 inc_compiler = IncrementalCompiler(cache_dir)
                 inc_compiler.load_cache_metadata()
                 
-                should_compile, reason = inc_compiler.should_recompile(str(main_file))
+                should_compile, reason = inc_compiler.should_recompile(str(entry_file))
                 
                 if not should_compile:
-                    print(f"   Checking src/main.pyrite")
+                    print(f"   Checking {entry_file.name}")
                     print(f"    Finished {build_type} [cached] in 0.1s")
                     return 0
                 else:
-                    print(f"   Compiling src/main.pyrite ({reason})")
+                    print(f"   Compiling {entry_file.name} ({reason})")
         except Exception as e:
             # If incremental fails, fall back to full compilation
             print(f"   Compiling project ({build_type})...")
@@ -376,7 +451,7 @@ def cmd_build(release: bool = False, incremental: bool = True, deterministic: bo
     target_dir.mkdir(parents=True, exist_ok=True)
     
     # Compile using pyrite compiler
-    output = target_dir / "main"
+    output = target_dir / output_name
     
     # Get project root (parent of quarry directory)
     compiler_root = Path(__file__).parent.parent
@@ -384,14 +459,16 @@ def cmd_build(release: bool = False, incremental: bool = True, deterministic: bo
     # Build compiler command
     cmd = [
         sys.executable, "-m", "src.compiler",
-        str(main_file),
+        str(entry_file),
         "-o", str(output),
         "--emit-llvm"
     ]
     if deterministic:
         cmd.append("--deterministic")
     
-    result = subprocess.run(cmd, cwd=compiler_root, capture_output=True, text=True)
+    # Run from compiler root, but include forge in path for src.compiler
+    env = {**os.environ, "PYTHONPATH": str(compiler_root / "forge")}
+    result = subprocess.run(cmd, cwd=compiler_root, capture_output=True, text=True, env=env)
     
     if result.returncode != 0:
         print("Compilation failed:")
@@ -457,8 +534,8 @@ def cmd_build(release: bool = False, incremental: bool = True, deterministic: bo
             
             # Create cache entry
             entry = CacheEntry(
-                module_path=str(main_file),
-                source_hash=inc_compiler.compute_file_hash(main_file),
+                module_path=str(entry_file),
+                source_hash=inc_compiler.compute_file_hash(entry_file),
                 dependencies=[],
                 dependency_hashes={},
                 compiled_at=time.time(),
@@ -466,7 +543,7 @@ def cmd_build(release: bool = False, incremental: bool = True, deterministic: bo
                 object_file_path=str(output.with_suffix('.o'))
             )
             
-            inc_compiler.save_cache_entry(str(main_file), entry)
+            inc_compiler.save_cache_entry(str(entry_file), entry)
             inc_compiler.save_cache_metadata()
         except Exception as e:
             pass  # Cache save is optional
@@ -1249,7 +1326,10 @@ def main():
     
     command = sys.argv[1]
     
-    if command == "new":
+    if command == "init":
+        return cmd_init()
+    
+    elif command == "new":
         if len(sys.argv) < 3:
             print("Error: Project name required")
             print("Usage: quarry new <name>")

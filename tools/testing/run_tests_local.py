@@ -38,7 +38,7 @@ def main():
     use_parallel = "-n" in args or "--numprocesses" in args
     
     # Build command
-    cmd = [sys.executable, "tools/pytest.py"]
+    cmd = [sys.executable, "tools/testing/pytest.py"]
     
     # Add coverage if requested
     if use_coverage:

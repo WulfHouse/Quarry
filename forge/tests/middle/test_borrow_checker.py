@@ -299,9 +299,9 @@ def test_collect_variable_types_in_match():
     source = """fn test():
     let x = 1
     match x:
-        1:
+        case 1:
             let y = 42
-        2:
+        case 2:
             let z = 43
 """
     checker = compile_and_check_borrows(source)
@@ -376,9 +376,9 @@ def test_check_match_with_guard():
     source = """fn test():
     let x = 5
     match x:
-        n if n > 0:
+        case n if n > 0:
             let y = n
-        _:
+        case _:
             let z = 0
 """
     checker = compile_and_check_borrows(source)

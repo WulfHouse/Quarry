@@ -1,0 +1,12 @@
+extern "C" fn strcmp(s1: *const u8, s2: *const u8) -> i32
+
+fn main(argc: int, argv: *const *const u8) -> int:
+    print("argc =", argc)
+    if argc > 1:
+        unsafe:
+            let arg = argv[1]
+            print("argv[1] pointer =", arg)
+            # We can't safely print the string without knowing if it's null terminated, 
+            # but strcmp should handle it if it is.
+    return 0
+

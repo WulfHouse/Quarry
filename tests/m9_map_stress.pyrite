@@ -1,0 +1,55 @@
+# M9 Map Stress Test
+
+import std.collections.map
+
+extern "C" fn atoi(s: *const u8) -> i32
+extern "C" fn strcmp(s1: *const u8, s2: *const u8) -> i32
+
+fn main(argc: i32, argv: *const *const u8) -> i32:
+    var iterations: i32 = 1000  # Default smoke scale
+    
+    print("argc=", argc)
+    # Simple argument parsing for --scale
+    if argc > 2:
+        iterations = atoi(argv[2])
+    
+    print("m9_map_stress: scale=", iterations)
+    
+    var my_map: Map[int, int] = Map[int, int].new()
+    
+    print("[MARKER 1] STARTING INSERTS")
+    # Insert values
+    var j = 0
+    while j < iterations:
+        my_map.insert(j, j * 2)
+        j = j + 1
+    
+    print("[MARKER 2] STARTING VERIFY")
+    # Verify values
+    var success = true
+    var k = 0
+    while k < iterations:
+        let expected = k * 2
+        let val_opt = my_map.get(k)
+        
+        match val_opt:
+            Some(val):
+                if val != expected:
+                    print("Error: Value mismatch for key", k, ": expected", expected, "got", val)
+                    success = false
+                    break # Exit on first error for stress test
+            None:
+                print("Error: Key", k, "not found in map")
+                success = false
+                break # Exit on first error for stress test
+        k = k + 1
+    
+    print("[MARKER 3] CLEANUP")
+    my_map.drop()
+    
+    if success:
+        print("Map stress test passed!")
+        return 0
+    else:
+        print("Map stress test failed!")
+        return 1

@@ -187,7 +187,7 @@ def test_main_with_output_flag():
                 mock_compile.return_value = True
                 result = main()
                 assert result == 0
-                mock_compile.assert_called_once_with(temp_path, output_path, False, False, False, False, True)
+                mock_compile.assert_called_once_with(temp_path, output_path, False, False, False, False, True, "text")
     finally:
         if os.path.exists(temp_path):
             os.unlink(temp_path)

@@ -72,6 +72,31 @@ int set_contains(Set* set, void* elem) {
     return 0;  /* Not found */
 }
 
+/* Remove element */
+void set_remove(Set* set, void* elem) {
+    uint64_t hash = hash_bytes(elem, set->elem_size);
+    int64_t index = hash % set->cap;
+    
+    SetEntry* entry = set->buckets[index];
+    SetEntry* prev = NULL;
+    
+    while (entry) {
+        if (entry->hash == hash && memcmp(entry->value, elem, set->elem_size) == 0) {
+            if (prev) {
+                prev->next = entry->next;
+            } else {
+                set->buckets[index] = entry->next;
+            }
+            free(entry->value);
+            free(entry);
+            set->len--;
+            return;
+        }
+        prev = entry;
+        entry = entry->next;
+    }
+}
+
 /* Get set length */
 int64_t set_length(Set* set) {
     return set->len;

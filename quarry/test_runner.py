@@ -28,7 +28,7 @@ class TestRunner:
             return []
         
         # Find all .pyrite files in tests/
-        test_files = list(self.tests_dir.rglob("*.pyrite"))
+        test_files = [f for f in self.tests_dir.rglob("*.pyrite") if f.is_file()]
         return test_files
     
     def extract_test_functions(self, source: str) -> List[str]:
@@ -78,7 +78,7 @@ class TestRunner:
             binary_path = Path(tmpdir) / binary_name
             
             # Compile test file
-            compiler_root = self.project_root.parent if self.project_root.name == "forge" else Path(__file__).parent.parent.parent
+            compiler_root = self.project_root
             compiler_path = compiler_root / "forge" / "src" / "compiler.py"
             
             if not compiler_path.exists():
@@ -87,7 +87,7 @@ class TestRunner:
             
             compile_cmd = [
                 sys.executable,
-                str(compiler_path),
+                "-m", "src.compiler",
                 str(test_file),
                 "-o", str(binary_path),
                 "--emit-llvm"
@@ -99,7 +99,8 @@ class TestRunner:
                     cwd=str(compiler_root / "forge") if (compiler_root / "forge").exists() else str(compiler_root),
                     capture_output=True,
                     text=True,
-                    timeout=30
+                    timeout=30,
+                    env={**os.environ, "PYTHONPATH": str(compiler_root / "forge")}
                 )
                 
                 if compile_result.returncode != 0:

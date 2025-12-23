@@ -29,7 +29,7 @@ def test_coverage_command():
     print("[1/4] Counting tests...")
     try:
         result = subprocess.run(
-            [sys.executable, "tools/pytest.py", "--collect-only", "-q"],
+            [sys.executable, "tools/testing/pytest.py", "--collect-only", "-q"],
             cwd=repo_root,
             capture_output=True,
             text=True,
@@ -52,7 +52,7 @@ def test_coverage_command():
     start = time.time()
     try:
         result = subprocess.run(
-            [sys.executable, "tools/pytest.py", "forge/tests/frontend/test_lexer.py", 
+            [sys.executable, "tools/testing/pytest.py", "forge/tests/frontend/test_lexer.py", 
              "--cov=forge/src", "--cov-report=term", "-q"],
             cwd=repo_root,
             capture_output=True,
@@ -75,7 +75,7 @@ def test_coverage_command():
     start = time.time()
     try:
         result = subprocess.run(
-            [sys.executable, "tools/pytest.py", "forge/tests/frontend/test_lexer.py", 
+            [sys.executable, "tools/testing/pytest.py", "forge/tests/frontend/test_lexer.py", 
              "--cov=forge/src", "--cov-report=term", "--cov-report=json", "-q"],
             cwd=repo_root,
             capture_output=True,
@@ -98,7 +98,7 @@ def test_coverage_command():
     start = time.time()
     try:
         result = subprocess.run(
-            [sys.executable, "tools/pytest.py", 
+            [sys.executable, "tools/testing/pytest.py", 
              "--cov=forge/src", "--cov-report=term", "-q", "-k", "test_lex"],
             cwd=repo_root,
             capture_output=True,
@@ -113,7 +113,7 @@ def test_coverage_command():
         if elapsed * 110.8 > 300:
             print("  - Full coverage run takes too long (>5 minutes)")
             print("  - Consider running coverage only when needed")
-            print("  - For local dev, use: python tools/pytest.py --cov=forge/src --cov-report=term")
+            print("  - For local dev, use: python tools/testing/pytest.py --cov=forge/src --cov-report=term")
             print("  - Skip JSON report locally: --cov-report=json is slow")
     except subprocess.TimeoutExpired:
         print("  ERROR: Even 10 tests timed out - coverage is very slow")
@@ -131,10 +131,10 @@ def test_coverage_command():
     print("  3. The findstr filter waits for buffered output")
     print()
     print("  For local development, use:")
-    print("    python tools/pytest.py --cov=forge/src --cov-report=term")
+    print("    python tools/testing/pytest.py --cov=forge/src --cov-report=term")
     print()
     print("  For CI (where it's OK to wait), use:")
-    print("    python tools/pytest.py --cov=forge/src --cov-report=term --cov-report=json")
+    print("    python tools/testing/pytest.py --cov=forge/src --cov-report=term --cov-report=json")
 
 if __name__ == "__main__":
     test_coverage_command()

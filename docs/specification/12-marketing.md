@@ -6,13 +6,10 @@ order: 12
 
 # Marketing and Positioning
 
-================================================================================
-
 While technical excellence is necessary, it's not sufficient for achieving "most 
 admired" status. Pyrite needs clear positioning and messaging.
 
-12.1 The Core Pitch
---------------------------------------------------------------------------------
+## 12.1 The Core Pitch
 
 30-Second Elevator Pitch
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,8 +38,7 @@ Who should use Pyrite?
   • Educators teaching systems programming without the C footguns
   • Anyone who wants Rust's guarantees with an easier learning curve
 
-12.2 Differentiation Matrix
---------------------------------------------------------------------------------
+## 12.2 Differentiation Matrix
 
 vs C/C++
 ~~~~~~~~
@@ -148,8 +144,7 @@ algorithmic helpers, compile-time params) while avoiding their mistakes (runtime
 autotuning, hidden allocations, narrow ML focus). Pyrite positions as the 
 general-purpose systems language; Mojo positions as Python's performance layer.
 
-12.3 Target Audiences and Use Cases
---------------------------------------------------------------------------------
+## 12.3 Target Audiences and Use Cases
 
 Primary Audiences
 ~~~~~~~~~~~~~~~~~
@@ -333,8 +328,7 @@ Priority 3 (Future Release): **GPU/Numerical Computing**
 This strategy maximizes early differentiation while building toward broad 
 adoption. Win embedded → gain trust → expand to all domains.
 
-12.4 The Complete Feature Integration Story
---------------------------------------------------------------------------------
+## 12.4 The Complete Feature Integration Story
 
 Pyrite's design represents a comprehensive approach to developer experience by
 addressing every critical gap identified through competitive analysis. Here's how 
@@ -448,8 +442,7 @@ language into a complete developer platform with no gaps.
 This is the difference between "admired by systems programmers" and "admired by 
 everyone from beginners to aerospace engineers to sustainability advocates."
 
-12.5 Messaging Principles
---------------------------------------------------------------------------------
+## 12.5 Messaging Principles
 
 Avoid Overpromising
 ~~~~~~~~~~~~~~~~~~~

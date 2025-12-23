@@ -14,7 +14,7 @@ See Also:
     type_checker: Type checks the parsed AST
 """
 
-from typing import List, Optional
+from typing import Any, List, Optional
 from .tokens import Token, TokenType, Span
 from .. import ast
 
@@ -675,6 +675,12 @@ class Parser:
         self.expect(TokenType.FN)
         name = self.expect(TokenType.IDENTIFIER).value
         
+        # Generic and compile-time parameters
+        generic_params = []
+        compile_time_params = []
+        if self.match_token(TokenType.LBRACKET):
+            generic_params, compile_time_params = self.parse_generic_params()
+        
         # Parameters
         self.expect(TokenType.LPAREN)
         params = self.parse_param_list()
@@ -698,6 +704,8 @@ class Parser:
         
         return ast.TraitMethod(
             name=name,
+            generic_params=generic_params,
+            compile_time_params=compile_time_params,
             params=params,
             return_type=return_type,
             default_body=default_body,
@@ -1145,6 +1153,8 @@ class Parser:
             return self.parse_with()
         elif self.match_token(TokenType.UNSAFE):
             return self.parse_unsafe_block()
+        elif self.match_token(TokenType.PASS):
+            return self.parse_pass()
         else:
             # Try to parse as assignment or expression statement
             return self.parse_assignment_or_expression()
@@ -1231,6 +1241,15 @@ class Parser:
         self.expect(TokenType.CONTINUE)
         self.expect(TokenType.NEWLINE)
         return ast.ContinueStmt(span=self.make_span(start_span))
+    
+    def parse_pass(self) -> ast.PassStmt:
+        """Parse pass statement"""
+        start_span = self.current().span
+        self.expect(TokenType.PASS)
+        # Pass can be followed by NEWLINE or DEDENT
+        if self.match_token(TokenType.NEWLINE):
+            self.advance()
+        return ast.PassStmt(span=self.make_span(start_span))
     
     def parse_if_expression(self) -> ast.Expression:
         """Parse if expression: if cond: expr elif cond: expr else: expr"""
@@ -1415,6 +1434,7 @@ class Parser:
                 break
             
             arm_start = self.current().span
+            self.expect(TokenType.CASE)
             pattern = self.parse_pattern()
             
             # Optional guard
@@ -1777,7 +1797,22 @@ class Parser:
                 span=self.make_span(start_span)
             )
         
-        return self.parse_postfix()
+        return self.parse_cast()
+    
+    def parse_cast(self) -> ast.Expression:
+        """Parse cast expression (expr as Type)"""
+        expr = self.parse_postfix()
+        
+        while self.match_token(TokenType.AS):
+            self.advance()
+            target_type = self.parse_type()
+            expr = ast.AsExpression(
+                expression=expr,
+                target_type=target_type,
+                span=self.make_span(expr.span)
+            )
+            
+        return expr
     
     def parse_postfix(self) -> ast.Expression:
         """Parse postfix expression (calls, field access, indexing)"""
@@ -1998,7 +2033,14 @@ class Parser:
         if self.match_token(TokenType.IF):
             return self.parse_if_expression()
         
-        # Closure expression: fn[...] or fn(...)
+        # Closure expression: move fn[...] or fn(...) or move fn(...)
+        is_move = False
+        if self.match_token(TokenType.MOVE):
+            is_move = True
+            self.advance()
+            self.expect(TokenType.FN)
+            return self.parse_closure(is_move=True)
+        
         if self.match_token(TokenType.FN):
             return self.parse_closure()
         
@@ -2039,11 +2081,41 @@ class Parser:
             if self.match_token(TokenType.LBRACE):
                 return self.parse_struct_literal(name, start_span)
             
-            # Return identifier - parse_postfix() will handle array indexing [expr],
-            # method calls, field access, etc.
-            # Generic type expressions like Type[Args] should be handled in type
-            # contexts, not expression contexts. For now, we don't support them
-            # in expression contexts to avoid ambiguity with array indexing.
+            # Check for generic type instantiation: Map[int, int].new()
+            if self.match_token(TokenType.LBRACKET):
+                # Peek ahead to see if it's followed by '.' after closing ']'
+                # If so, it's a static method call on a generic type
+                depth = 0
+                look_pos = self.pos
+                found_generic = False
+                while look_pos < len(self.tokens):
+                    tok = self.tokens[look_pos]
+                    if tok.type == TokenType.LBRACKET:
+                        depth += 1
+                    elif tok.type == TokenType.RBRACKET:
+                        depth -= 1
+                        if depth == 0:
+                            # Found matching closing ], check if next is '.'
+                            if look_pos + 1 < len(self.tokens) and self.tokens[look_pos + 1].type == TokenType.DOT:
+                                found_generic = True
+                            break
+                    look_pos += 1
+                
+                if found_generic:
+                    self.advance() # consume [
+                    type_args = []
+                    while not self.match_token(TokenType.RBRACKET):
+                        type_args.append(self.parse_type())
+                        if not self.match_token(TokenType.RBRACKET):
+                            self.expect(TokenType.COMMA)
+                    self.expect(TokenType.RBRACKET)
+                    
+                    return ast.GenericType(
+                        name=name,
+                        type_args=type_args,
+                        span=self.make_span(start_span)
+                    )
+            
             return ast.Identifier(name=name, span=self.make_span(start_span))
         
         raise ParseError(
@@ -2051,22 +2123,23 @@ class Parser:
             self.current().span
         )
     
-    def parse_closure(self) -> ast.Expression:
+    def parse_closure(self, is_move: bool = False) -> ast.Expression:
         """
         Parse closure expression: fn[...] or fn(...)
         fn[...] = parameter closure (compile-time, zero-cost)
         fn(...) = runtime closure (first-class, may allocate)
         """
         start_span = self.current().span
-        self.expect(TokenType.FN)
+        if not is_move:
+            self.expect(TokenType.FN)
         
         # Check if it's a parameter closure or runtime closure
         if self.match_token(TokenType.LBRACKET):
             # Parameter closure: fn[i: int]: body
-            return self.parse_parameter_closure(start_span)
+            return self.parse_parameter_closure(start_span, is_move=is_move)
         elif self.match_token(TokenType.LPAREN):
             # Runtime closure: fn(x: int) -> bool: body
-            return self.parse_runtime_closure(start_span)
+            return self.parse_runtime_closure(start_span, is_move=is_move)
         elif self.match_token(TokenType.IDENTIFIER):
             # This looks like a function declaration (fn name(...)), not a closure
             # If we're here, the parser is in the wrong context (should be in parse_item, not parse_expression)
@@ -2081,7 +2154,7 @@ class Parser:
                 self.current().span
             )
     
-    def parse_parameter_closure(self, start_span: Span) -> ast.ParameterClosure:
+    def parse_parameter_closure(self, start_span: Span, is_move: bool = False) -> ast.ParameterClosure:
         """Parse parameter closure: fn[i: int]: body"""
         self.expect(TokenType.LBRACKET)
         
@@ -2126,14 +2199,14 @@ class Parser:
             params=params,
             return_type=return_type,
             body=body,
+            is_move=is_move,
             span=self.make_span(start_span)
         )
     
-    def parse_runtime_closure(self, start_span: Span) -> ast.RuntimeClosure:
+    def parse_runtime_closure(self, start_span: Span, is_move: bool = False) -> ast.RuntimeClosure:
         """Parse runtime closure: fn(x: int) -> bool: body"""
         # Check for 'move' keyword
-        is_move = False
-        # (move keyword would be before 'fn', handled in caller)
+        # (is_move already set from caller)
         
         self.expect(TokenType.LPAREN)
         

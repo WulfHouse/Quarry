@@ -6,17 +6,13 @@ order: 3
 
 # Syntax Overview
 
-================================================================================
-
 Pyrite's syntax is designed to be familiar to Python users while operating in a 
 compiled, statically-typed setting. This section describes the basic lexical 
 structure and grammar of Pyrite code.
 
-3.1 Lexical Elements and Formatting
---------------------------------------------------------------------------------
+## 3.1 Lexical Elements and Formatting
 
-Whitespace and Indentation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Whitespace and Indentation
 
 Pyrite uses indentation-based block structure, similar to Python. Blocks of code 
 (such as the body of a function, loop, or conditional) are defined by their 
@@ -40,8 +36,7 @@ indentation. The layout makes the flow obvious. (If the indentation were
 misaligned, the compiler would reject it.) This contributes to code that is easy 
 to read and reason about.
 
-End-of-Line Termination
-~~~~~~~~~~~~~~~~~~~~~~~
+### End-of-Line Termination
 
 Statements are terminated by newline characters. Pyrite does not require a 
 semicolon at the end of each statement. You typically put one statement per line. 
@@ -53,8 +48,7 @@ This follows Python's convention and avoids cluttering code with unnecessary
 punctuation. Long expressions can be continued across lines either by using a 
 backslash or (more commonly) by open parentheses/brackets, similar to Python.
 
-Comments
-~~~~~~~~
+### Comments
 
 Pyrite supports both single-line and multi-line comments. Single-line comments 
 start with # and continue to the end of the line (just like Python). 
@@ -72,8 +66,7 @@ By convention, a triple-quoted string literal that is not assigned to any
 variable (placed standalone in code) can serve as a documentation comment for the 
 following code element.
 
-Identifiers
-~~~~~~~~~~~
+### Identifiers
 
 Identifiers (names for variables, functions, types, etc.) may consist of letters 
 (including Unicode letters), digits, and underscores, but must not begin with a 
@@ -86,8 +79,7 @@ similar to Rust and Zig naming conventions). Identifiers cannot clash with
 reserved keywords (the compiler will error if you try to name a variable if or 
 while, for instance).
 
-Keywords
-~~~~~~~~
+### Keywords
 
 Pyrite reserves certain keywords for language constructs. Many keywords are 
 borrowed from Python for familiarity. For example: fn (for function definition), 
@@ -113,8 +105,7 @@ Overall, the goal is a light syntax reminiscent of Python, but with some tweaks 
 suit a compiled language. The `fn` keyword is one of those intentional distinctions 
 that helps set expectations about Pyrite's nature as a systems programming language.
 
-Literals
-~~~~~~~~
+### Literals
 
 Pyrite supports various literal forms:
 
@@ -177,11 +168,9 @@ Pyrite supports various literal forms:
   code - you can only get a "null" if you explicitly use an optional, and you 
   must check for None before using the value.
 
-3.2 Code Structure
---------------------------------------------------------------------------------
+## 3.2 Code Structure
 
-Modules and Imports
-~~~~~~~~~~~~~~~~~~~
+### Modules and Imports
 
 Pyrite source code is organized into modules, typically one module per file. 
 Every source file is a module, and modules can import other modules. The syntax 
@@ -224,8 +213,7 @@ default.
 re-exports, wildcards) will be finalized during implementation. The syntax shown 
 above represents the intended design.
 
-Entry Point
-~~~~~~~~~~~
+### Entry Point
 
 Like C (and Rust), Pyrite programs start execution from a special main function. 
 A Pyrite program must have exactly one function defined as fn main(): ... which 
@@ -246,8 +234,7 @@ begins at main. There is no requirement for a runtime library to start up (unlik
 languages that need a VM initialization); Pyrite's startup is as minimal as C's - 
   it just calls main.
 
-File Extension and Compilation Units
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### File Extension and Compilation Units
 
 (By convention, assume Pyrite source files use a .pyrite extension, though 
 this is not a language rule per se.) Each file can be compiled as part of a 

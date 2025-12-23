@@ -78,14 +78,7 @@ class TypeChecker:
         fail_type = FunctionType([STRING], VOID)
         self.resolver.define_function("fail", fail_type)
         
-        # Register builtin generic types (List, Map, Set, Result, Box)
-        # These are registered as placeholder types - they'll be instantiated as GenericType
-        # when used with type arguments like List[int]
-        # Use UNKNOWN as a placeholder - the actual type will be GenericType when instantiated
-        # This allows lookup_type("List") to succeed, then we create GenericType("List", None, type_args)
-        self.resolver.define_type("List", UNKNOWN)
-        self.resolver.define_type("Map", UNKNOWN)
-        self.resolver.define_type("Set", UNKNOWN)
+        # Register builtin generic types (Result, Box)
         self.resolver.define_type("Result", UNKNOWN)
         self.resolver.define_type("Box", UNKNOWN)  # Box type for heap allocation
         self.resolver.define_type("String", STRING)  # String is a builtin type (not generic)
@@ -195,24 +188,9 @@ class TypeChecker:
                 # Register enum - need to process it to create EnumType
                 self.register_enum(item)
             elif isinstance(item, ast.FunctionDef):
-                # Register function signature
-                # For MVP, we'll register the function but full type checking happens later
-                # This allows the function to be callable
-                param_types = []
-                for param in item.params:
-                    # Resolve parameter types if possible
-                    if param.type_annotation:
-                        param_type = self.resolve_type(param.type_annotation)
-                        param_types.append(param_type)
-                    else:
-                        param_types.append(UNKNOWN)
-                
-                return_type = None
-                if item.return_type:
-                    return_type = self.resolve_type(item.return_type)
-                
-                func_type = FunctionType(param_types, return_type)
-                self.resolver.define_function(item.name, func_type, span=item.span, is_extern=item.is_extern)
+                # Register function signature properly using register_function
+                # This ensures the function is callable and handles FFI detection
+                self.register_function(item)
             elif isinstance(item, ast.ImplBlock):
                 # Register impl blocks so methods can be resolved
                 self.register_impl(item)
@@ -277,6 +255,26 @@ class TypeChecker:
                         span
                     )
     
+    def apply_lifetime_elision(self, param_types: List[Type], return_type: Optional[Type]):
+        """Apply basic lifetime elision rules (SPEC-LANG-0205)"""
+        # Find all input references
+        input_refs = []
+        for t in param_types:
+            if isinstance(t, ReferenceType):
+                input_refs.append(t)
+        
+        # Rule 1: If there is exactly one input reference, 
+        # its lifetime is assigned to all output references.
+        if len(input_refs) == 1:
+            in_ref = input_refs[0]
+            if not in_ref.lifetime:
+                in_ref.lifetime = "a"
+            
+            # Apply to return type
+            if isinstance(return_type, ReferenceType):
+                if not return_type.lifetime:
+                    return_type.lifetime = in_ref.lifetime
+
     def register_function(self, func: ast.FunctionDef):
         # Store function definition for FFI detection
         self.function_defs[func.name] = func
@@ -323,6 +321,9 @@ class TypeChecker:
         
         # Exit the temporary scope
         self.resolver.exit_scope()
+        
+        # Apply lifetime elision (SPEC-LANG-0205)
+        self.apply_lifetime_elision(param_types, return_type)
         
         func_type = FunctionType(param_types, return_type)
         self.resolver.define_function(func.name, func_type, func.span, is_extern=func.is_extern)
@@ -710,7 +711,7 @@ class TypeChecker:
             self.check_match(stmt)
         elif isinstance(stmt, ast.WithStmt):
             self.check_with(stmt)
-        elif isinstance(stmt, ast.BreakStmt) or isinstance(stmt, ast.ContinueStmt):
+        elif isinstance(stmt, ast.BreakStmt) or isinstance(stmt, ast.ContinueStmt) or isinstance(stmt, ast.PassStmt):
             pass  # No type checking needed
         elif isinstance(stmt, ast.UnsafeBlock):
             self.check_block(stmt.body)
@@ -1052,10 +1053,14 @@ class TypeChecker:
             return self.check_field_access(expr)
         elif isinstance(expr, ast.IndexAccess):
             return self.check_index_access(expr)
+        elif isinstance(expr, ast.AsExpression):
+            return self.check_as_expression(expr)
         elif isinstance(expr, ast.StructLiteral):
             return self.check_struct_literal(expr)
         elif isinstance(expr, ast.ListLiteral):
             return self.check_list_literal(expr)
+        elif isinstance(expr, ast.GenericType):
+            return self.resolve_type(expr)
         elif isinstance(expr, ast.TupleLiteral):
             element_types = [self.check_expression(elem) for elem in expr.elements]
             return TupleType(element_types)
@@ -1127,6 +1132,10 @@ class TypeChecker:
         
         # Range operator (for now, just return a generic type)
         elif binop.op == '..':
+            if not isinstance(left_type, IntType):
+                self.error(f"Left operand of .. must be integer, got {left_type}", binop.span)
+            if not isinstance(right_type, IntType):
+                self.error(f"Right operand of .. must be integer, got {right_type}", binop.span)
             return INT  # Simplified - should be Range[int]
         
         else:
@@ -1614,6 +1623,10 @@ class TypeChecker:
                                         return expected_type
                                     # Otherwise, return a GenericType with unknown type parameters
                                     # Type inference will fill in the parameters later
+                                    type_decl = self.resolver.global_scope.lookup_type(type_name)
+                                    if isinstance(type_decl, StructType) and type_decl.generic_params:
+                                        num_params = len(type_decl.generic_params)
+                                        return GenericType(name=type_name, base_type=type_decl, type_args=[UNKNOWN] * num_params)
                                     return GenericType(name=type_name, base_type=None, type_args=[UNKNOWN])
                             # If return type is a StructType with the same name, return it
                             elif isinstance(return_type, StructType) and return_type.name == type_name:
@@ -1943,10 +1956,33 @@ class TypeChecker:
             if object_type.type_args:
                 return object_type.type_args[0]
             return UNKNOWN
+        elif isinstance(object_type, PointerType):
+            return object_type.inner
         else:
             # Type is not indexable
             self.error(f"Cannot index type {object_type}", access.span)
             return UNKNOWN
+    
+    def check_as_expression(self, cast: ast.AsExpression) -> Type:
+        """Check cast expression"""
+        expr_type = self.check_expression(cast.expression)
+        target_type = self.resolve_type(cast.target_type)
+        
+        # In unsafe mode, allow more casts
+        # For now, allow any pointer cast
+        if isinstance(expr_type, (PointerType, ReferenceType)) and isinstance(target_type, (PointerType, ReferenceType)):
+            return target_type
+        
+        # Allow casting String to *u8 in unsafe mode (extract data pointer)
+        if isinstance(expr_type, StringType) and isinstance(target_type, PointerType) and isinstance(target_type.inner, IntType) and target_type.inner.width == 8:
+            return target_type
+
+        # Default compatibility check
+        if types_compatible(expr_type, target_type):
+            return target_type
+            
+        self.error(f"Cannot cast {expr_type} to {target_type}", cast.span)
+        return target_type
     
     def check_struct_literal(self, literal: ast.StructLiteral) -> Type:
         """Check struct literal"""
@@ -2040,6 +2076,36 @@ class TypeChecker:
             )
             return UNKNOWN
     
+    def evaluate_constant_int(self, expr: ast.Expression) -> Optional[int]:
+        """Evaluate a constant integer expression (SPEC-LANG-0216)"""
+        if isinstance(expr, ast.IntLiteral):
+            return expr.value
+        elif isinstance(expr, ast.BinOp):
+            left = self.evaluate_constant_int(expr.left)
+            right = self.evaluate_constant_int(expr.right)
+            
+            if left is not None and right is not None:
+                if expr.op == "+": return left + right
+                if expr.op == "-": return left - right
+                if expr.op == "*": return left * right
+                if expr.op == "/":
+                    if right == 0:
+                        self.error("Division by zero in constant expression", expr.span)
+                        return None
+                    return left // right
+                if expr.op == "%":
+                    if right == 0:
+                        self.error("Modulo by zero in constant expression", expr.span)
+                        return None
+                    return left % right
+        elif isinstance(expr, ast.UnaryOp):
+            operand = self.evaluate_constant_int(expr.operand)
+            if operand is not None:
+                if expr.op == "-": return -operand
+                if expr.op == "+": return operand
+        
+        return None
+
     def resolve_type(self, type_annotation: ast.Type) -> Type:
         """Resolve a type annotation to a Type"""
         if isinstance(type_annotation, ast.PrimitiveType):
@@ -2088,9 +2154,13 @@ class TypeChecker:
         
         elif isinstance(type_annotation, ast.ArrayType):
             element = self.resolve_type(type_annotation.element_type)
-            # For MVP, assume size is an integer literal
-            if isinstance(type_annotation.size, ast.IntLiteral):
-                return ArrayType(element, type_annotation.size.value)
+            # Evaluate constant expression for size (SPEC-LANG-0216)
+            size = self.evaluate_constant_int(type_annotation.size)
+            if size is not None:
+                if size < 0:
+                    self.error("Array size cannot be negative", type_annotation.span)
+                    return ArrayType(element, 0)
+                return ArrayType(element, size)
             else:
                 self.error("Array size must be constant integer", type_annotation.span)
                 return ArrayType(element, 0)

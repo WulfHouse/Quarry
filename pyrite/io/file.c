@@ -19,6 +19,7 @@ typedef struct {
 } String;
 
 extern String string_new(const char* cstr);
+extern String string_empty();
 extern void string_drop(String* s);
 
 /* Result type for file operations */
