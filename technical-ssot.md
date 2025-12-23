@@ -4026,30 +4026,30 @@ This section lists every atomic requirement extracted from the SSOT, each with a
 - REQ-099 -> SPEC-LANG-0231
 - REQ-100 -> SPEC-LANG-0114
 - REQ-101 -> SPEC-LANG-0104
-- REQ-102 -> SPEC-LANG-0100
-- REQ-103 -> SPEC-LANG-0100
-- REQ-104 -> SPEC-LANG-0200
-- REQ-105 -> SPEC-LANG-0100
-- REQ-106 -> SPEC-FORGE-0001
-- REQ-107 -> SPEC-LANG-0100
-- REQ-108 -> SPEC-LANG-0100
-- REQ-109 -> SPEC-QUARRY-0100
-- REQ-110 -> SPEC-QUARRY-0100
-- REQ-111 -> SPEC-QUARRY-0100
-- REQ-112 -> SPEC-QUARRY-0100
-- REQ-113 -> SPEC-QUARRY-0100
-- REQ-114 -> SPEC-LANG-0200
-- REQ-115 -> SPEC-LANG-0200
-- REQ-116 -> SPEC-LANG-0200
-- REQ-117 -> SPEC-LANG-0200
-- REQ-118 -> SPEC-LANG-0200
-- REQ-119 -> SPEC-LANG-0200
-- REQ-120 -> SPEC-LANG-0200
-- REQ-121 -> SPEC-LANG-0200
-- REQ-122 -> SPEC-LANG-0200
-- REQ-123 -> SPEC-LANG-0400
-- REQ-124 -> SPEC-LANG-0400
-- REQ-125 -> SPEC-LANG-0400
+- REQ-102 -> SPEC-LANG-0103
+- REQ-103 -> SPEC-LANG-0118
+- REQ-104 -> SPEC-LANG-0232
+- REQ-105 -> SPEC-LANG-0108
+- REQ-106 -> SPEC-FORGE-0206
+- REQ-107 -> SPEC-LANG-0116
+- REQ-108 -> SPEC-LANG-0117
+- REQ-109 -> SPEC-QUARRY-0110
+- REQ-110 -> SPEC-QUARRY-0110
+- REQ-111 -> SPEC-QUARRY-0111
+- REQ-112 -> SPEC-QUARRY-0111
+- REQ-113 -> SPEC-QUARRY-0112
+- REQ-114 -> SPEC-LANG-0204
+- REQ-115 -> SPEC-LANG-0203
+- REQ-116 -> SPEC-FORGE-0205
+- REQ-117 -> SPEC-LANG-0233
+- REQ-118 -> SPEC-LANG-0234
+- REQ-119 -> SPEC-LANG-0235
+- REQ-120 -> SPEC-LANG-0236
+- REQ-121 -> SPEC-LANG-0238
+- REQ-122 -> SPEC-LANG-0237
+- REQ-123 -> SPEC-LANG-0401
+- REQ-124 -> SPEC-LANG-0403
+- REQ-125 -> SPEC-LANG-0403
 - REQ-126 -> SPEC-LANG-0400
 - REQ-127 -> SPEC-LANG-0400
 - REQ-128 -> SPEC-LANG-0400
@@ -5815,6 +5815,8 @@ string"""
 
 - SPEC-LANG-0107: Field access parsing
 
+- SPEC-LANG-0108: Try operator parsing
+
 - SPEC-LANG-0115: Ternary expression parsing
 
 #### SPEC-LANG-0101: Primary Expression Parsing
@@ -5956,6 +5958,8 @@ let zeros = [0; 100]        # Repeat syntax
 
 - Supports arithmetic, comparison, logical, and assignment operators.
 
+- Enforces that operator overloading is reserved for built-in and standard library types; user-defined overloading is not permitted (REQ-102).
+
 **User-facing behavior:**
 
 - Expressions like `a + b * c == d` parse according to mathematical rules.
@@ -6021,6 +6025,8 @@ let zeros = [0; 100]        # Repeat syntax
 - Supports zero or more arguments, separated by commas.
 
 - Supports trailing commas in argument list.
+
+- Supports keyword arguments: `f(arg1, key=val)` (REQ-101).
 
 **User-facing behavior:**
 
@@ -6284,6 +6290,70 @@ let zeros = [0; 100]        # Repeat syntax
 
 - SPEC-LANG-0101
 
+#### SPEC-LANG-0108: Try Operator Parsing
+
+**Kind:** LEAF
+
+**Source:** REQ-105, SSOT Section 6.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Parser handles `try expression` syntax (e.g., `let x = try foo()`).
+
+- Desugars to a result check: if the expression returns an `Err`, the current function returns that error immediately.
+
+- Ensures the calling function's return type is compatible with the error being propagated.
+
+**User-facing behavior:**
+
+- Ergonomic error propagation without verbose `if` checks.
+
+**Semantics:**
+
+- Early return on error; continues on success with the unwrapped value.
+
+**Failure modes + diagnostics:**
+
+- `ERR-TYPE-050`: Return type of function is not `Result`, but `try` is used.
+
+**Examples:**
+
+- Positive: `let data = try read_file("test.txt")`
+
+- Negative: `try foo()` in a function returning `void`.
+
+#### SPEC-LANG-0118: Deterministic Evaluation Order
+
+**Kind:** LEAF
+
+**Source:** REQ-103, SSOT Section 6.4
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Parser and Codegen guarantee left-to-right evaluation for all expressions and function arguments.
+
+- Side effects occur in the order they appear in the source code.
+
+**User-facing behavior:**
+
+- Predictable execution flow even when expressions have side effects.
+
+**Semantics:**
+
+- Strictly left-to-right evaluation order.
+
+**Tests required:**
+
+- Integration: Verify order of side effects in complex expressions.
+
 #### SPEC-LANG-0110: Statement Parsing
 
 **Kind:** NODE
@@ -6305,6 +6375,12 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0113: Control flow statement parsing
 
 - SPEC-LANG-0114: Pattern match parsing
+
+- SPEC-LANG-0116: Defer statement parsing
+
+- SPEC-LANG-0117: Context managers (with) parsing
+
+- SPEC-LANG-0118: Deterministic evaluation order parsing
 
 #### SPEC-LANG-0111: Conditional Statement Parsing
 
@@ -6558,6 +6634,66 @@ let zeros = [0; 100]        # Repeat syntax
 
 - Unit: `match` with complex structural patterns and guards.
 
+#### SPEC-LANG-0116: Defer Statement Parsing
+
+**Kind:** LEAF
+
+**Source:** REQ-107, SSOT Section 6.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Parser handles `defer statement` and `defer: block` syntax.
+
+- Schedules the deferred code to execute at scope exit.
+
+- Supports multiple `defer` statements in LIFO (Last-In, First-Out) order.
+
+**User-facing behavior:**
+
+- Guaranteed cleanup/finalization logic.
+
+**Semantics:**
+
+- Deferred blocks run regardless of how the scope is exited (normal return or `try` propagation).
+
+**Examples:**
+
+- `let f = open(); defer f.close();`
+
+#### SPEC-LANG-0117: Context Managers (with) Parsing
+
+**Kind:** LEAF
+
+**Source:** REQ-108, SSOT Section 6.5
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Parser handles `with expression [as name]: block` syntax.
+
+- Desugars to a combination of `try` and `defer` at compile time.
+
+- Calls `__enter__` and `__exit__` (or equivalent trait methods) on the resource.
+
+**User-facing behavior:**
+
+- Familiar resource management pattern.
+
+**Semantics:**
+
+- Resource is automatically closed at the end of the block.
+
+**Examples:**
+
+- `with open("file.txt") as f: data = f.read()`
+
 [... Continue with parsing SPEC items ...]
 
 ### 4.3 Type System
@@ -6573,6 +6709,8 @@ let zeros = [0; 100]        # Repeat syntax
 **Priority:** P0  
 
 **Ordering rationale:** Type inference must precede compatibility checks.
+
+- Enforce composition over inheritance: Pyrite does not support class inheritance or subclassing (REQ-121).
 
 **Children:**
 
@@ -6627,6 +6765,20 @@ let zeros = [0; 100]        # Repeat syntax
 - SPEC-LANG-0230: Constant declaration and inlining
 
 - SPEC-LANG-0231: Match exhaustiveness checking
+
+- SPEC-LANG-0232: Result type semantics
+
+- SPEC-LANG-0233: Opt-in dynamic dispatch (dyn Trait)
+
+- SPEC-LANG-0234: Implementation blocks (impl)
+
+- SPEC-LANG-0235: Instance methods and self
+
+- SPEC-LANG-0236: Associated functions
+
+- SPEC-LANG-0237: Module-level privacy and visibility
+
+- SPEC-LANG-0238: Composition-based type architecture (No inheritance)
 
 #### SPEC-LANG-0201: Type Inference Algorithm
 
@@ -8005,6 +8157,158 @@ let zeros = [0; 100]        # Repeat syntax
 **User-facing behavior:**
 
 - High-performance memory overlays when safety can be manually verified.
+
+#### SPEC-LANG-0232: Result Type Semantics
+
+**Kind:** LEAF
+
+**Source:** REQ-104, SSOT Section 6.5
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Define the standard `Result[T, E]` enum with `Ok(T)` and `Err(E)` variants.
+
+- Ensure integration with the `try` operator for ergonomic error handling.
+
+- Support type-based error handling without runtime exceptions.
+
+**User-facing behavior:**
+
+- Explicit and safe error handling: `fn foo() -> Result[int, Error]`.
+
+**Semantics:**
+
+- `Result` is a standard sum type (enum).
+
+#### SPEC-LANG-0233: Opt-in Dynamic Dispatch (dyn Trait)
+
+**Kind:** LEAF
+
+**Source:** REQ-117, SSOT Section 7.1
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Support `dyn Trait` syntax for trait objects.
+
+- Implement vtable generation and runtime method dispatch.
+
+- Ensure trait objects incur a small runtime cost compared to monomorphized generics.
+
+**User-facing behavior:**
+
+- Runtime polymorphism when the concrete type is unknown at compile time.
+
+#### SPEC-LANG-0234: Implementation Blocks (impl)
+
+**Kind:** LEAF
+
+**Source:** REQ-118, SSOT Section 7.2
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Support `impl TypeName` blocks for inherent methods.
+
+- Support `impl TraitName for TypeName` blocks for trait implementations.
+
+- Enforce that implementations occur in the same module as the type or the trait.
+
+**User-facing behavior:**
+
+- Associate behavior (methods) with data (structs/enums).
+
+#### SPEC-LANG-0235: Instance Methods and Self
+
+**Kind:** LEAF
+
+**Source:** REQ-119, SSOT Section 7.2
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Support `self`, `&self`, and `&mut self` as the first parameter in `impl` methods.
+
+- Correctly resolve access to instance fields via `self`.
+
+**User-facing behavior:**
+
+- Methods can access and modify the instance they are called on.
+
+#### SPEC-LANG-0236: Associated Functions
+
+**Kind:** LEAF
+
+**Source:** REQ-120, SSOT Section 7.2
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Support functions in `impl` blocks that do not take a `self` parameter.
+
+- Support calling associated functions via the type name: `Type::func()`.
+
+**User-facing behavior:**
+
+- Constructors and utility functions tied to a type namespace.
+
+#### SPEC-LANG-0237: Module-level Privacy and Visibility
+
+**Kind:** LEAF
+
+**Source:** REQ-122, SSOT Section 7.2
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Support the `pub` keyword for making fields, functions, and types visible outside the module.
+
+- Default visibility is private to the module.
+
+- Enforce visibility rules during name resolution and type checking.
+
+**User-facing behavior:**
+
+- Encapsulation and modularity.
+
+#### SPEC-LANG-0238: Composition-based Type Architecture (No Inheritance)
+
+**Kind:** LEAF
+
+**Source:** REQ-121, SSOT Section 7.2
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- The type system specifically excludes class inheritance, subclassing, and virtual methods.
+
+- Polymorphism is achieved exclusively through traits and generics.
+
+**User-facing behavior:**
+
+- Favor composition and interface-based design.
 
 ### 4.4 Ownership and Borrowing
 
@@ -11148,6 +11452,10 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-FORGE-0204: Bounds checking control attributes
 
+- SPEC-FORGE-0205: Monomorphization and Static Dispatch
+
+- SPEC-FORGE-0206: Zero-cost Error Handling (No Unwinding)
+
 #### SPEC-FORGE-0201: Allocation Tracking Pass
 
 **Kind:** LEAF
@@ -11291,6 +11599,48 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Examples:**
 
 - `@bounds_check(off) fn fast_sum(data: []f32) -> f32: ...`
+
+#### SPEC-FORGE-0205: Monomorphization and Static Dispatch
+
+**Kind:** LEAF
+
+**Source:** REQ-116, SSOT Section 7.1
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Implement monomorphization for generic functions and types.
+
+- Generate specialized IR/code for each unique set of type parameters.
+
+- Ensure static dispatch for all generic calls.
+
+**User-facing behavior:**
+
+- Zero-cost generics with performance equivalent to manual specialization.
+
+#### SPEC-FORGE-0206: Zero-cost Error Handling (No Unwinding)
+
+**Kind:** LEAF
+
+**Source:** REQ-106, SSOT Section 6.5
+
+**Status:** PLANNED
+
+**Priority:** P0
+
+**Definition of Done:**
+
+- Codegen for error handling uses simple integer checks and branch/return instructions.
+
+- No runtime stack unwinding machinery (landing pads, EH tables) is generated.
+
+**User-facing behavior:**
+
+- Zero-cost errors when they do not occur; predictable performance.
 
 #### SPEC-FORGE-0300: Advanced Optimization Suite
 
@@ -12032,6 +12382,12 @@ let b = a              # Copy: both a and b valid (int is Copy)
 
 - SPEC-QUARRY-0108: Built-in Stdlib Benchmarking (quarry bench std::*)
 
+- SPEC-QUARRY-0110: Type Introspection (quarry explain-type)
+
+- SPEC-QUARRY-0111: Memory Layout Analysis (quarry layout)
+
+- SPEC-QUARRY-0112: Aliasing and Optimization Insights
+
 #### SPEC-QUARRY-0107: Machine Autotuning (quarry autotune)
 
 **Kind:** LEAF
@@ -12217,6 +12573,70 @@ let b = a              # Copy: both a and b valid (int is Copy)
 **Dependencies:**
 
 - SPEC-LANG-0800
+
+#### SPEC-QUARRY-0110: Type Introspection (quarry explain-type)
+
+**Kind:** LEAF
+
+**Source:** REQ-109, REQ-110, SSOT Section 7.0
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `quarry explain-type [TypeName]` command.
+
+- Display memory layout (size, alignment) and standardized "type badges" ([Stack], [Heap], [Copy], [Move], [MayAlloc], [ThreadSafe]).
+
+- Provide plain language descriptions of type characteristics.
+
+**User-facing behavior:**
+
+- Improved understanding of memory behavior and type constraints.
+
+#### SPEC-QUARRY-0111: Memory Layout Analysis (quarry layout)
+
+**Kind:** LEAF
+
+**Source:** REQ-111, REQ-112, SSOT Section 7.0
+
+**Status:** PLANNED
+
+**Priority:** P1
+
+**Definition of Done:**
+
+- Implement `quarry layout [TypeName]` command.
+
+- Display exact field offsets and padding overhead.
+
+- Provide suggestions for optimizing layout (e.g., reordering fields to eliminate padding or improve cache-line utilization).
+
+**User-facing behavior:**
+
+- Actionable insights for data structure optimization.
+
+#### SPEC-QUARRY-0112: Aliasing and Optimization Insights
+
+**Kind:** LEAF
+
+**Source:** REQ-113, SSOT Section 7.0
+
+**Status:** PLANNED
+
+**Priority:** P2
+
+**Definition of Done:**
+
+- Provide tooling insights into `noalias` assumptions and vectorization potential.
+
+- Correlate compiler optimization decisions with source code lines.
+
+**User-facing behavior:**
+
+- Visibility into low-level compiler optimizations.
 
 #### SPEC-QUARRY-0200: Interactive Learning and Exploration
 
@@ -13292,7 +13712,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: AST construction and symbol table management.
 
-    - Included: SPEC-LANG-0101, SPEC-LANG-0102, SPEC-LANG-0103, SPEC-LANG-0104, SPEC-LANG-0105, SPEC-LANG-0106, SPEC-LANG-0107, SPEC-LANG-0111, SPEC-LANG-0112, SPEC-LANG-0113, SPEC-LANG-0114, SPEC-LANG-0115, SPEC-FORGE-0009, SPEC-FORGE-0010, SPEC-FORGE-0011, SPEC-FORGE-0012, SPEC-FORGE-0013, SPEC-FORGE-0014, SPEC-FORGE-0015, SPEC-FORGE-0016, SPEC-FORGE-0017, SPEC-FORGE-0018, SPEC-LANG-0009, SPEC-LANG-0010, SPEC-LANG-0011, SPEC-LANG-0012, SPEC-LANG-0013, SPEC-LANG-0014, SPEC-LANG-0015.
+    - Included: SPEC-LANG-0101, SPEC-LANG-0102, SPEC-LANG-0103, SPEC-LANG-0104, SPEC-LANG-0105, SPEC-LANG-0106, SPEC-LANG-0107, SPEC-LANG-0111, SPEC-LANG-0112, SPEC-LANG-0113, SPEC-LANG-0114, SPEC-LANG-0115, SPEC-LANG-0108, SPEC-LANG-0116, SPEC-LANG-0117, SPEC-LANG-0118, SPEC-FORGE-0009, SPEC-FORGE-0010, SPEC-FORGE-0011, SPEC-FORGE-0012, SPEC-FORGE-0013, SPEC-FORGE-0014, SPEC-FORGE-0015, SPEC-FORGE-0016, SPEC-FORGE-0017, SPEC-FORGE-0018, SPEC-LANG-0009, SPEC-LANG-0010, SPEC-LANG-0011, SPEC-LANG-0012, SPEC-LANG-0013, SPEC-LANG-0014, SPEC-LANG-0015.
 
     - Dependencies: M1.
 
@@ -13302,7 +13722,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Infer and check types for basic expressions.
 
-    - Included: SPEC-LANG-0201, SPEC-LANG-0202, SPEC-LANG-0203, SPEC-LANG-0206, SPEC-LANG-0211, SPEC-LANG-0212, SPEC-LANG-0213, SPEC-LANG-0214, SPEC-LANG-0215, SPEC-LANG-0216, SPEC-LANG-0217, SPEC-LANG-0218, SPEC-LANG-0219, SPEC-LANG-0220, SPEC-LANG-0221, SPEC-LANG-0222, SPEC-LANG-0223, SPEC-LANG-0224, SPEC-LANG-0225, SPEC-LANG-0226, SPEC-LANG-0227, SPEC-LANG-0228, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0208, SPEC-LANG-0209, SPEC-LANG-0210, SPEC-FORGE-0019, SPEC-FORGE-0020, SPEC-FORGE-0021, SPEC-FORGE-0022, SPEC-FORGE-0023.
+    - Included: SPEC-LANG-0201, SPEC-LANG-0202, SPEC-LANG-0203, SPEC-LANG-0206, SPEC-LANG-0211, SPEC-LANG-0212, SPEC-LANG-0213, SPEC-LANG-0214, SPEC-LANG-0215, SPEC-LANG-0216, SPEC-LANG-0217, SPEC-LANG-0218, SPEC-LANG-0219, SPEC-LANG-0220, SPEC-LANG-0221, SPEC-LANG-0222, SPEC-LANG-0223, SPEC-LANG-0224, SPEC-LANG-0225, SPEC-LANG-0226, SPEC-LANG-0227, SPEC-LANG-0228, SPEC-LANG-0230, SPEC-LANG-0231, SPEC-LANG-0232, SPEC-LANG-0233, SPEC-LANG-0234, SPEC-LANG-0235, SPEC-LANG-0236, SPEC-LANG-0237, SPEC-LANG-0238, SPEC-LANG-0208, SPEC-LANG-0209, SPEC-LANG-0210, SPEC-FORGE-0019, SPEC-FORGE-0020, SPEC-FORGE-0021, SPEC-FORGE-0022, SPEC-FORGE-0023.
 
     - Dependencies: M2.
 
@@ -13351,7 +13771,7 @@ Total new P1 LEAFs: 25.
 
     - Goal: Native binary production.
 
-    - Included: SPEC-FORGE-0024, SPEC-FORGE-0025, SPEC-FORGE-0026, SPEC-FORGE-0027, SPEC-FORGE-0028, SPEC-FORGE-0008, SPEC-LANG-0501, SPEC-LANG-0502, SPEC-LANG-0503, SPEC-LANG-0504, SPEC-LANG-0505, SPEC-LANG-0506, SPEC-LANG-0507, SPEC-LANG-0508.
+    - Included: SPEC-FORGE-0024, SPEC-FORGE-0025, SPEC-FORGE-0026, SPEC-FORGE-0027, SPEC-FORGE-0028, SPEC-FORGE-0205, SPEC-FORGE-0206, SPEC-FORGE-0008, SPEC-LANG-0501, SPEC-LANG-0502, SPEC-LANG-0503, SPEC-LANG-0504, SPEC-LANG-0505, SPEC-LANG-0506, SPEC-LANG-0507, SPEC-LANG-0508.
 
     - Dependencies: M6.
 
@@ -13431,7 +13851,7 @@ Total new P1 LEAFs: 25.
   
     - Goal: Tooling for static and runtime performance analysis.
     
-    - Included: SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903.
+    - Included: SPEC-QUARRY-0101, SPEC-QUARRY-0102, SPEC-QUARRY-0103, SPEC-QUARRY-0104, SPEC-QUARRY-0108, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-LANG-0601, SPEC-LANG-0602, SPEC-LANG-0603, SPEC-LANG-0901, SPEC-LANG-0902, SPEC-LANG-0903.
     
     - Dependency satisfaction note: Depends on M10 (for benchmarking) and M11 (for allocation tracking).
     
@@ -13875,6 +14295,14 @@ Total new P1 LEAFs: 25.
 - **Mapping coverage delta:** +25 REQs mapped to LEAFs
 - **Roadmap placement:** Consistent (M2, M3, M6, M11)
 - **New dependencies:** SPEC-LANG-0216 (for 0230), SPEC-LANG-0114 (for 0231)
+
+### Verification (Scoped): REQ-101..REQ-125 Mapping (This Run)
+
+- **REQ Range:** REQ-101..REQ-125
+- **New LEAFs:** 16 (SPEC-LANG-0108, SPEC-LANG-0116, SPEC-LANG-0117, SPEC-LANG-0118, SPEC-LANG-0232, SPEC-LANG-0233, SPEC-LANG-0234, SPEC-LANG-0235, SPEC-LANG-0236, SPEC-LANG-0237, SPEC-LANG-0238, SPEC-QUARRY-0110, SPEC-QUARRY-0111, SPEC-QUARRY-0112, SPEC-FORGE-0205, SPEC-FORGE-0206)
+- **Mapping coverage delta:** +25 REQs mapped to LEAFs
+- **Roadmap placement:** Consistent (M2, M3, M7, M13)
+- **New dependencies:** None (self-contained parser/type/tooling additions)
 
 ---
 
