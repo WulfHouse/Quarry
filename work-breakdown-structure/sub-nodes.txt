@@ -1,0 +1,606 @@
+# SUB-NODE Decomposition
+# Created: December 24, 2025
+# Purpose: Decompose complex NODEs into finer-grained SUB-NODEs for better organization
+# Rationale: Some NODEs bundle multiple distinct concerns - decompose for clarity
+# 
+# Hierarchy: REQ → [SUB-REQ] → NODE → SUB-NODE → LEAF → ATOM → QUARK
+# 
+# Format Guidelines:
+# - SUB-NODEs use format: SPEC-XXX-YYYY-Z (e.g., SPEC-LANG-0100-1, SPEC-LANG-0100-2)
+# - Each SUB-NODE has clear scope and focused children
+# - Parent NODE is now organized through SUB-NODEs
+# - SUB-NODEs enable better hierarchical organization
+
+================================================================================
+SUB-NODE Decomposition: SPEC-LANG-0100 (Expression Parsing)
+================================================================================
+
+**Parent NODE:** SPEC-LANG-0100: Expression Parsing
+**Source:** REQ-063, SSOT Section 3.3
+**Decomposition Rationale:** Expression parsing is a broad NODE covering many expression types. Create SUB-NODEs to organize by category.
+
+**SUB-NODE-LANG-0100-1: Primary Expressions**
+- **Parent:** SPEC-LANG-0100
+- **Source:** REQ-063, SSOT Section 3.3
+- **Type:** SUB-NODE
+- **Scope:** Parser - Primary Expressions
+- **Statement:** Parse atomic/primary expressions that don't involve operators.
+- **Children:**
+  - SPEC-LANG-0101: Primary Expression Parsing (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-LANG-0100-2: Operator Expressions**
+- **Parent:** SPEC-LANG-0100
+- **Source:** REQ-063, SSOT Section 3.3
+- **Type:** SUB-NODE
+- **Scope:** Parser - Operator Expressions
+- **Statement:** Parse expressions involving unary and binary operators with precedence.
+- **Children:**
+  - SPEC-LANG-0102: Unary Operator Parsing (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0103: Binary Operator Parsing (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0115: Ternary Expression Parsing (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-LANG-0100-3: Call and Access Expressions**
+- **Parent:** SPEC-LANG-0100
+- **Source:** REQ-063, SSOT Section 3.3
+- **Type:** SUB-NODE
+- **Scope:** Parser - Call/Access
+- **Statement:** Parse function calls, method calls, field access, and indexing.
+- **Children:**
+  - SPEC-LANG-0104: Function Call Parsing (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0105: Method Call Parsing (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0106: Index and Slice Expression Parsing (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0107: Field Access Parsing (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-LANG-0100-4: Special Expressions**
+- **Parent:** SPEC-LANG-0100
+- **Source:** REQ-063, SSOT Section 3.3
+- **Type:** SUB-NODE
+- **Scope:** Parser - Special Syntax
+- **Statement:** Parse special expression forms (try operator, etc.).
+- **Children:**
+  - SPEC-LANG-0108: Try Operator Parsing (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+================================================================================
+SUB-NODE Decomposition: SPEC-LANG-0110 (Statement Parsing)
+================================================================================
+
+**Parent NODE:** SPEC-LANG-0110: Statement Parsing
+**Source:** REQ-070, SSOT Section 3.4
+**Decomposition Rationale:** Statement parsing covers many statement types. Organize by category for clarity.
+
+**SUB-NODE-LANG-0110-1: Conditional Statements**
+- **Parent:** SPEC-LANG-0110
+- **Source:** REQ-070, SSOT Section 3.4
+- **Type:** SUB-NODE
+- **Scope:** Parser - Conditionals
+- **Statement:** Parse conditional control flow statements.
+- **Children:**
+  - SPEC-LANG-0111: Conditional Statement Parsing (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0114: Pattern Match Parsing (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-LANG-0110-2: Loop Statements**
+- **Parent:** SPEC-LANG-0110
+- **Source:** REQ-071, SSOT Section 3.4
+- **Type:** SUB-NODE
+- **Scope:** Parser - Loops
+- **Statement:** Parse loop control flow statements.
+- **Children:**
+  - SPEC-LANG-0112: Loop Statement Parsing (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0113: Control Flow Statement Parsing (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-LANG-0110-3: Resource Management Statements**
+- **Parent:** SPEC-LANG-0110
+- **Source:** REQ-074, REQ-075, SSOT Section 3.4
+- **Type:** SUB-NODE
+- **Scope:** Parser - Resource Management
+- **Statement:** Parse statements for resource management and cleanup.
+- **Children:**
+  - SPEC-LANG-0116: Defer Statement Parsing (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0117: Context Managers (with) Parsing (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+================================================================================
+SUB-NODE Decomposition: SPEC-LANG-0200 (Type System)
+================================================================================
+
+**Parent NODE:** SPEC-LANG-0200: Type System
+**Source:** REQ-085-090, SSOT Section 4
+**Decomposition Rationale:** Type system is massive. Create focused SUB-NODEs for different aspects.
+
+**SUB-NODE-LANG-0200-1: Type Inference and Checking**
+- **Parent:** SPEC-LANG-0200
+- **Source:** REQ-085, REQ-086, SSOT Section 4.1
+- **Type:** SUB-NODE
+- **Scope:** Type System - Inference
+- **Statement:** Infer types from context and check type compatibility.
+- **Children:**
+  - SPEC-LANG-0201: Type Inference Algorithm (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0202: Type Compatibility Checking (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-LANG-0200-2: Generics and Traits**
+- **Parent:** SPEC-LANG-0200
+- **Source:** REQ-087, REQ-088, SSOT Section 4.2, 4.3
+- **Type:** SUB-NODE
+- **Scope:** Type System - Generics
+- **Statement:** Handle generic types, instantiation, and trait bounds.
+- **Children:**
+  - SPEC-LANG-0203: Generic Type Instantiation (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0204: Trait Bound Checking (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-LANG-0200-3: Lifetimes and Coercion**
+- **Parent:** SPEC-LANG-0200
+- **Source:** REQ-089, REQ-090, SSOT Section 4.4, 4.1
+- **Type:** SUB-NODE
+- **Scope:** Type System - Advanced
+- **Statement:** Infer and check lifetimes, apply type coercions.
+- **Children:**
+  - SPEC-LANG-0205: Lifetime Inference (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0206: Type Coercion Rules (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-LANG-0200-4: Type Aliases and Helpers**
+- **Parent:** SPEC-LANG-0200
+- **Source:** REQ-091, REQ-092, REQ-093, SSOT Section 4.5
+- **Type:** SUB-NODE
+- **Scope:** Type System - Convenience
+- **Statement:** Provide type aliases and teaching keywords for better ergonomics.
+- **Children:**
+  - SPEC-LANG-0208: Text and Bytes Aliases (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0209: Ref[T] and Mut[T] Aliases (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0210: Teaching Argument Keywords (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-0200-5: Literal Type Resolution**
+- **Parent:** SPEC-LANG-0200
+- **Source:** REQ-094, REQ-095, SSOT Section 4.6
+- **Type:** SUB-NODE
+- **Scope:** Type System - Literals
+- **Statement:** Resolve types for integer and float literals with defaulting rules.
+- **Children:**
+  - SPEC-LANG-0211: Integer Literal Type Resolution (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0212: Floating-point Literal Type Resolution (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+================================================================================
+SUB-NODE Decomposition: SPEC-LANG-0300 (Memory Model)
+================================================================================
+
+**Parent NODE:** SPEC-LANG-0300: Memory Model and Ownership
+**Source:** REQ-104-115, SSOT Section 5
+**Decomposition Rationale:** Memory model covers ownership, borrowing, and safety. Organize by mechanism.
+
+**SUB-NODE-LANG-0300-1: Ownership System**
+- **Parent:** SPEC-LANG-0300
+- **Source:** REQ-104, SSOT Section 5.1
+- **Type:** SUB-NODE
+- **Scope:** Memory Model - Ownership
+- **Statement:** Implement ownership tracking and move semantics.
+- **Children:**
+  - SPEC-LANG-0301: Move Semantics Analysis (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0304: Copy vs Move Type Classification (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0305: Ownership Error Diagnostics (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-LANG-0300-2: Borrow Checking**
+- **Parent:** SPEC-LANG-0300
+- **Source:** REQ-106, REQ-107, SSOT Section 5.2
+- **Type:** SUB-NODE
+- **Scope:** Memory Model - Borrowing
+- **Statement:** Implement borrow checker with flow analysis and exclusivity rules.
+- **Children:**
+  - SPEC-LANG-0306: Borrow Checker Driver and Flow Analysis (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0307: Immutable vs Mutable Borrow Exclusivity (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0308: Re-borrowing and Borrow Stack Management (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0309: Partial Moves and Field-level Tracking (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0310: Borrow Checker Diagnostic Generation (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-LANG-0300-3: Reference Safety**
+- **Parent:** SPEC-LANG-0300
+- **Source:** REQ-109, REQ-110, SSOT Section 5.3
+- **Type:** SUB-NODE
+- **Scope:** Memory Model - References
+- **Statement:** Ensure reference validity and null safety.
+- **Children:**
+  - SPEC-LANG-0311: Non-null Reference Guarantees (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0312: Borrowing Semantics (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0313: Raw Pointer Semantics (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-LANG-0300-4: Resource Management**
+- **Parent:** SPEC-LANG-0300
+- **Source:** REQ-112, REQ-115, SSOT Section 5.4, 5.5
+- **Type:** SUB-NODE
+- **Scope:** Memory Model - RAII
+- **Statement:** Implement RAII, deterministic destruction, and unsafe contexts.
+- **Children:**
+  - SPEC-LANG-0314: Variable Immutability by Default (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0315: RAII and Deterministic Destruction (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0316: Explicit Unsafe Contexts (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+================================================================================
+SUB-NODE Decomposition: SPEC-LANG-0800 (Standard Library Collections)
+================================================================================
+
+**Parent NODE:** SPEC-LANG-0800: Standard Library Core Collections
+**Source:** REQ-063, SSOT Section 9.1
+**Decomposition Rationale:** Collections are distinct types. Organize each collection type as SUB-NODE.
+
+**SUB-NODE-LANG-0800-1: Dynamic Arrays**
+- **Parent:** SPEC-LANG-0800
+- **Source:** SUB-REQ-063.1, SSOT Section 9.1
+- **Type:** SUB-NODE
+- **Scope:** Standard Library - List
+- **Statement:** Provide dynamic array (List[T]) implementation.
+- **Children:**
+  - SPEC-LANG-0820: List[T] Implementation (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-0800-2: Hash-based Collections**
+- **Parent:** SPEC-LANG-0800
+- **Source:** SUB-REQ-063.2, SUB-REQ-063.3, SSOT Section 9.1
+- **Type:** SUB-NODE
+- **Scope:** Standard Library - Hash Collections
+- **Statement:** Provide hash-based Map and Set implementations.
+- **Children:**
+  - SPEC-LANG-0821: Map[K, V] Implementation (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0822: Set[T] Implementation (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-0800-3: Iteration**
+- **Parent:** SPEC-LANG-0800
+- **Source:** SUB-REQ-063.4, SSOT Section 9.1
+- **Type:** SUB-NODE
+- **Scope:** Standard Library - Iterators
+- **Statement:** Provide lazy iterator system with zero-cost abstractions.
+- **Children:**
+  - SPEC-LANG-0823: Lazy Iterator System (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-0800-4: Serialization**
+- **Parent:** SPEC-LANG-0800
+- **Source:** REQ-299, SSOT Section 9.6
+- **Type:** SUB-NODE
+- **Scope:** Standard Library - Serialization
+- **Statement:** Provide built-in serialization for common formats.
+- **Children:**
+  - SPEC-LANG-0840: Built-in Serialization Formats (LEAF/ATOM-decomposed)
+  - SPEC-LANG-0841: Automated Serialization Derivation (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+================================================================================
+SUB-NODE Decomposition: SPEC-QUARRY-0010 (Build System)
+================================================================================
+
+**Parent NODE:** SPEC-QUARRY-0010: Integrated Build System
+**Source:** REQ-161, SSOT Section 8.1
+**Decomposition Rationale:** Build system has multiple subsystems. Organize by functionality.
+
+**SUB-NODE-QUARRY-0010-1: Build Execution**
+- **Parent:** SPEC-QUARRY-0010
+- **Source:** SUB-REQ-161.1, SSOT Section 8.1
+- **Type:** SUB-NODE
+- **Scope:** Build System - Execution
+- **Statement:** Orchestrate build phases and manage execution.
+- **Children:**
+  - SPEC-QUARRY-0014: Build Execution Orchestrator (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-QUARRY-0010-2: Caching and Incremental Build**
+- **Parent:** SPEC-QUARRY-0010
+- **Source:** SUB-REQ-161.2, SSOT Section 8.2
+- **Type:** SUB-NODE
+- **Scope:** Build System - Caching
+- **Statement:** Implement incremental compilation with intelligent caching.
+- **Children:**
+  - SPEC-QUARRY-0019: Build Caching and Incremental Bypass (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-QUARRY-0010-3: Artifact Management**
+- **Parent:** SPEC-QUARRY-0010
+- **Source:** SUB-REQ-161.3, SSOT Section 8.3
+- **Type:** SUB-NODE
+- **Scope:** Build System - Artifacts
+- **Statement:** Manage build output artifacts and directory structure.
+- **Children:**
+  - SPEC-QUARRY-0020: Output Artifact Management (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-QUARRY-0010-4: Dependency Management**
+- **Parent:** SPEC-QUARRY-0010
+- **Source:** REQ-162, SSOT Section 8.4
+- **Type:** SUB-NODE
+- **Scope:** Build System - Dependencies
+- **Statement:** Resolve and manage package dependencies.
+- **Children:**
+  - SPEC-QUARRY-0017: Package Dependency Resolution (LEAF/ATOM-decomposed)
+  - SPEC-QUARRY-0023: Official Package Registry Integration (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+================================================================================
+SUB-NODE Decomposition: SPEC-FORGE-0000 (Compiler Pipeline)
+================================================================================
+
+**Parent NODE:** SPEC-FORGE-0000: Compiler Pipeline
+**Source:** REQ-002, SSOT Section 2
+**Decomposition Rationale:** Compiler pipeline has distinct phases. Organize by compilation stage.
+
+**SUB-NODE-FORGE-0000-1: Frontend (Lexing and Parsing)**
+- **Parent:** SPEC-FORGE-0000
+- **Source:** REQ-004, SSOT Section 2.1
+- **Type:** SUB-NODE
+- **Scope:** Compiler - Frontend
+- **Statement:** Transform source code into AST through lexical and syntactic analysis.
+- **Children:**
+  - SPEC-FORGE-0001: Lexer Driver
+  - SPEC-FORGE-0009: Parser Driver and Error Recovery (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-FORGE-0000-2: Middle-end (Semantic Analysis)**
+- **Parent:** SPEC-FORGE-0000
+- **Source:** REQ-085-090, SSOT Section 2.2
+- **Type:** SUB-NODE
+- **Scope:** Compiler - Middle-end
+- **Statement:** Perform type checking, borrow checking, and semantic validation.
+- **Children:**
+  - Type System LEAFs (SPEC-LANG-0200 series)
+  - Memory Model LEAFs (SPEC-LANG-0300 series)
+- **Priority:** P0
+
+**SUB-NODE-FORGE-0000-3: Backend (Code Generation)**
+- **Parent:** SPEC-FORGE-0000
+- **Source:** REQ-002, SSOT Section 2.3
+- **Type:** SUB-NODE
+- **Scope:** Compiler - Backend
+- **Statement:** Generate LLVM IR and optimize to native code.
+- **Children:**
+  - SPEC-FORGE-0024: Codegen Driver (LEAF/ATOM-decomposed)
+  - SPEC-FORGE-0303: Code Generation
+  - SPEC-FORGE-0304: Optimization Passes
+- **Priority:** P0
+
+**SUB-NODE-FORGE-0000-4: Diagnostics**
+- **Parent:** SPEC-FORGE-0000
+- **Source:** REQ-025, SSOT Section 2.4
+- **Type:** SUB-NODE
+- **Scope:** Compiler - Diagnostics
+- **Statement:** Collect, format, and report errors and warnings.
+- **Children:**
+  - Error reporting in all phases
+  - SPEC-QUARRY-0030: Automated Code Fixes (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+================================================================================
+SUB-NODE Decomposition: SPEC-LANG-0500 (Closures)
+================================================================================
+
+**Parent NODE:** SPEC-LANG-0500: Closure System
+**Source:** REQ-161-163, SSOT Section 6
+**Decomposition Rationale:** Closures have distinct types and mechanisms. Organize by closure kind.
+
+**SUB-NODE-LANG-0500-1: Zero-Cost Closures**
+- **Parent:** SPEC-LANG-0500
+- **Source:** REQ-161, SSOT Section 6.1
+- **Type:** SUB-NODE
+- **Scope:** Language - Closures
+- **Statement:** Parameter closures (fn[...]) with zero-cost guarantees.
+- **Children:**
+  - SPEC-LANG-0501: Parameter Closure Syntax (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-0500-2: Runtime Closures**
+- **Parent:** SPEC-LANG-0500
+- **Source:** REQ-162, SSOT Section 6.1
+- **Type:** SUB-NODE
+- **Scope:** Language - Closures
+- **Statement:** Runtime closures (fn(...)) with heap allocation.
+- **Children:**
+  - SPEC-LANG-0502: Runtime Closure Syntax (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-0500-3: Capture Analysis**
+- **Parent:** SPEC-LANG-0500
+- **Source:** REQ-163, SSOT Section 6.1
+- **Type:** SUB-NODE
+- **Scope:** Compiler - Closures
+- **Statement:** Analyze variable capture for all closure types.
+- **Children:**
+  - SPEC-LANG-0503: Closure Capture Analysis (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+================================================================================
+SUB-NODE Decomposition: SPEC-QUARRY-0000 (Tooling Ecosystem)
+================================================================================
+
+**Parent NODE:** SPEC-QUARRY-0000: Integrated Tooling Ecosystem
+**Source:** REQ-161+, SSOT Section 8
+**Decomposition Rationale:** Tooling has many distinct tools. Organize by tool category.
+
+**SUB-NODE-QUARRY-0000-1: Core Build Tools**
+- **Parent:** SPEC-QUARRY-0000
+- **Source:** REQ-161, SSOT Section 8.1
+- **Type:** SUB-NODE
+- **Scope:** Tooling - Build
+- **Statement:** Core build system and compilation tools.
+- **Children:**
+  - SPEC-QUARRY-0014: Build Execution Orchestrator (LEAF/ATOM-decomposed)
+  - SPEC-QUARRY-0019: Build Caching (LEAF/ATOM-decomposed)
+  - SPEC-QUARRY-0020: Artifact Management (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-QUARRY-0000-2: Package Management**
+- **Parent:** SPEC-QUARRY-0000
+- **Source:** REQ-014, SSOT Section 8.4
+- **Type:** SUB-NODE
+- **Scope:** Tooling - Packages
+- **Statement:** Package dependency management and registry integration.
+- **Children:**
+  - SPEC-QUARRY-0017: Dependency Resolution (LEAF/ATOM-decomposed)
+  - SPEC-QUARRY-0023: Registry Integration (LEAF/ATOM-decomposed)
+- **Priority:** P0
+
+**SUB-NODE-QUARRY-0000-3: Code Quality Tools**
+- **Parent:** SPEC-QUARRY-0000
+- **Source:** REQ-210+, SSOT Section 8.13
+- **Type:** SUB-NODE
+- **Scope:** Tooling - Quality
+- **Statement:** Linter, formatter, and code quality tools.
+- **Children:**
+  - SPEC-QUARRY-0024: Formatter (LEAF/ATOM-decomposed)
+  - SPEC-QUARRY-0033: Linter (LEAF/ATOM-decomposed)
+  - SPEC-QUARRY-0030: Auto Fixes (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-QUARRY-0000-4: Testing and Analysis Tools**
+- **Parent:** SPEC-QUARRY-0000
+- **Source:** REQ-216+, SSOT Section 8.13
+- **Type:** SUB-NODE
+- **Scope:** Tooling - Testing
+- **Statement:** Testing, fuzzing, and profiling tools.
+- **Children:**
+  - SPEC-QUARRY-0031: Fuzzing (LEAF/ATOM-decomposed)
+  - SPEC-QUARRY-0032: Sanitizers (LEAF/ATOM-decomposed)
+  - SPEC-QUARRY-0103: Allocation Profiling (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-QUARRY-0000-5: Documentation Tools**
+- **Parent:** SPEC-QUARRY-0000
+- **Source:** REQ-219, SSOT Section 8.15
+- **Type:** SUB-NODE
+- **Scope:** Tooling - Documentation
+- **Statement:** Documentation generation and expansion tools.
+- **Children:**
+  - SPEC-QUARRY-0035: Documentation Generation (LEAF/ATOM-decomposed)
+  - SPEC-QUARRY-0034: Code Expansion (LEAF/ATOM-decomposed)
+- **Priority:** P2
+
+**SUB-NODE-QUARRY-0000-6: Developer Experience**
+- **Parent:** SPEC-QUARRY-0000
+- **Source:** REQ-205+, SSOT Section 8.13
+- **Type:** SUB-NODE
+- **Scope:** Tooling - DX
+- **Statement:** Learning modes, toolchain management, and migration tools.
+- **Children:**
+  - SPEC-QUARRY-0025: Learning Profile Mode (LEAF/ATOM-decomposed)
+  - SPEC-QUARRY-0036: Toolchain Management (LEAF/ATOM-decomposed)
+  - SPEC-QUARRY-0037: Edition Migration (LEAF/ATOM-decomposed)
+- **Priority:** P2
+
+================================================================================
+SUB-NODE Decomposition: SPEC-LANG-1000 (Concurrency)
+================================================================================
+
+**Parent NODE:** SPEC-LANG-1000: Concurrency System
+**Source:** REQ-339+, SSOT Section 9.9
+**Decomposition Rationale:** Concurrency has multiple mechanisms. Organize by concurrency primitive type.
+
+**SUB-NODE-LANG-1000-1: Thread Management**
+- **Parent:** SPEC-LANG-1000
+- **Source:** REQ-339, SSOT Section 9.9
+- **Type:** SUB-NODE
+- **Scope:** Standard Library - Threads
+- **Statement:** Thread creation, joining, and management.
+- **Children:**
+  - SPEC-LANG-1001: Thread Management API (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-1000-2: Thread Safety**
+- **Parent:** SPEC-LANG-1000
+- **Source:** REQ-340, SSOT Section 9.9
+- **Type:** SUB-NODE
+- **Scope:** Type System - Concurrency
+- **Statement:** Send/Sync marker traits for thread safety.
+- **Children:**
+  - SPEC-LANG-1002: Send/Sync Trait Enforcement (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-1000-3: Synchronization Primitives**
+- **Parent:** SPEC-LANG-1000
+- **Source:** REQ-341, SSOT Section 9.9
+- **Type:** SUB-NODE
+- **Scope:** Standard Library - Sync
+- **Statement:** Mutexes, channels, and other synchronization primitives.
+- **Children:**
+  - SPEC-LANG-1003: Synchronization Primitives (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-1000-4: Structured Concurrency**
+- **Parent:** SPEC-LANG-1000
+- **Source:** REQ-342+, SSOT Section 9.9
+- **Type:** SUB-NODE
+- **Scope:** Language - Async
+- **Statement:** Async/await and structured concurrency.
+- **Children:**
+  - SPEC-LANG-1004: Structured Concurrency (LEAF/ATOM-decomposed)
+  - SPEC-LANG-1005: Task Cancellation (LEAF/ATOM-decomposed)
+- **Priority:** P2
+
+================================================================================
+SUB-NODE Decomposition: SPEC-LANG-1100 (Observability)
+================================================================================
+
+**Parent NODE:** SPEC-LANG-1100: Observability System
+**Source:** REQ-351+, SSOT Section 9.10
+**Decomposition Rationale:** Observability has three pillars. Organize by observability type.
+
+**SUB-NODE-LANG-1100-1: Logging**
+- **Parent:** SPEC-LANG-1100
+- **Source:** REQ-351, SSOT Section 9.10
+- **Type:** SUB-NODE
+- **Scope:** Standard Library - Logging
+- **Statement:** Structured logging with levels and filtering.
+- **Children:**
+  - SPEC-LANG-1101: Structured Logging API (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-1100-2: Tracing**
+- **Parent:** SPEC-LANG-1100
+- **Source:** REQ-352, SSOT Section 9.10
+- **Type:** SUB-NODE
+- **Scope:** Standard Library - Tracing
+- **Statement:** Distributed tracing with spans and context propagation.
+- **Children:**
+  - SPEC-LANG-1102: Distributed Tracing Spans (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-1100-3: Metrics**
+- **Parent:** SPEC-LANG-1100
+- **Source:** REQ-353, SSOT Section 9.10
+- **Type:** SUB-NODE
+- **Scope:** Standard Library - Metrics
+- **Statement:** Type-safe metrics collection (counters, gauges, histograms).
+- **Children:**
+  - SPEC-LANG-1103: Type-safe Metrics Collection (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+**SUB-NODE-LANG-1100-4: Exporters**
+- **Parent:** SPEC-LANG-1100
+- **Source:** REQ-354, SSOT Section 9.10
+- **Type:** SUB-NODE
+- **Scope:** Standard Library - Export
+- **Statement:** OpenTelemetry-compatible exporters for observability data.
+- **Children:**
+  - SPEC-LANG-1104: OpenTelemetry Compatible Exporters (LEAF/ATOM-decomposed)
+- **Priority:** P1
+
+================================================================================
+Summary: Extended SUB-NODE Decomposition
+================================================================================
+
+**SUB-NODEs Created:** 40+ sub-nodes organizing entire system
+**Coverage Expanded:** Compiler Pipeline, Closures, Tooling, Concurrency, Observability
+**Benefit:** Complete hierarchical organization from requirements to implementation
+**Pattern:** Every major subsystem → SUB-NODEs for organization
+**Hierarchy Depth:** 7 levels fully utilized: REQ → SUB-REQ → NODE → SUB-NODE → LEAF → ATOM → QUARK
+**Navigation:** SUB-NODEs provide logical grouping for all ~160 LEAFs
+================================================================================
+

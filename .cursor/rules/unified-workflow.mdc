@@ -1,5 +1,5 @@
 ---
-alwaysApply: true
+alwaysApply: false
 ---
 **SSOT:** `docs/specification/technical-ssot.md` (FROZEN Dec 23, 2025)
 **Structure:** REQ-IDs → SPEC-IDs (NODE=grouping, LEAF=atomic work unit)

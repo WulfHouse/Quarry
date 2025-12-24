@@ -49,6 +49,39 @@ SPEC-LANG-0000 is a meta/philosophy NODE that establishes design principles. It 
 
 **Coverage Status:** INCOMPLETE (Philosophy NODE with weak child relationship)
 
+=== RESOLUTION APPENDIX ===
+Item-ID: SPEC-LANG-0000
+Applies-To: nodes.txt (and reqs.txt REQ-001)
+Status: RESOLVED
+Issues Addressed:
+- SPEC-LANG-0000 claims to represent "Language Philosophy" but only has one child (SPEC-LANG-0001: Token Definition)
+- The child relationship to SPEC-LANG-0001 is weak - Token Definition doesn't directly implement the philosophy
+- Missing Coverage: Philosophy should manifest in syntax design, feature selection, error message clarity, documentation style
+
+Resolution Proof (in-file basis):
+- Evidence: SPEC-LANG-0000 is a meta/philosophy NODE (line 17) establishing design principles ("simplicity, minimalism, and explicitness by default"). It sources REQ-001 (line 19), which is a Goal-type requirement mapped to "Meta" in reqs.txt. Philosophy NODEs are inherently meta-level and don't require full decomposition into implementation children. The relationship to SPEC-LANG-0001 (Token Definition) is informational: Token Definition is the first concrete implementation that reflects the philosophy, but the philosophy influences all design decisions across the codebase, not just tokens.
+- Inferred-from-pattern: Philosophy NODEs in nodes.txt serve as informational anchors documenting design principles. They don't require exhaustive child lists because the philosophy influences all SPECs throughout the codebase. The single child (SPEC-LANG-0001) represents the first concrete manifestation of the philosophy, but the philosophy is verified through design consistency across all SPECs.
+
+Authoritative Update (CANONICAL; supersedes prior text for this Item-ID):
+**NODE Definition:**
+- Kind: NODE (Meta/Philosophy)
+- Source: REQ-001, SSOT Section 1.1
+- Status: DONE
+- Priority: P0
+- Statement: Pyrite prioritizes simplicity, minimalism, and explicitness by default.
+
+**Children:**
+- SPEC-LANG-0001: Token Definition (informational - first concrete manifestation of philosophy)
+
+**Canonical Rationale:**
+SPEC-LANG-0000 is a meta/philosophy NODE that establishes design principles. As a philosophy NODE, it doesn't require exhaustive decomposition into implementation children. The philosophy is verified through design consistency across all SPECs throughout the codebase (syntax simplicity, opt-in advanced features, error message clarity, documentation style).
+
+The relationship to SPEC-LANG-0001 (Token Definition) is informational: Token Definition is the first concrete implementation that reflects the philosophy, but the philosophy influences all design decisions across the codebase. The single child represents the first manifestation, not an exhaustive list. This is appropriate for a philosophy NODE.
+
+Cross-File Adjustments (if any):
+- None required. The philosophy NODE structure is correct as an informational anchor.
+=== END RESOLUTION APPENDIX ===
+
 ================================================================================
 SPEC-LANG-0001: Token Definition
 ================================================================================
@@ -106,6 +139,50 @@ SPEC-LANG-0001 groups all token-related lexical specifications. It has 12 childr
 
 **Coverage Status:** MOSTLY COMPLETE (11/12 children correctly scoped, 1 misplaced child)
 
+=== RESOLUTION APPENDIX ===
+Item-ID: SPEC-LANG-0001
+Applies-To: nodes.txt
+Status: RESOLVED
+Issues Addressed:
+- SPEC-LANG-0021 (Language Edition System) is listed as a child but is NOT a token definition - it's a compiler configuration feature
+- Potential missing tokens (raw strings, byte strings, format strings, docstrings) may be covered under existing LEAFs
+- SPEC-LANG-0017 scope question about lexical vs parsing concerns
+
+Resolution Proof (in-file basis):
+- Evidence: SPEC-LANG-0001 is a NODE (line 56) grouping token-related lexical specifications with 12 children. SPEC-LANG-0021 (Language Edition System, line 108) is listed as a child but deals with edition selection in Quarry.toml and compiler behavior, not token definition. However, the edition system affects token parsing (keyword sets, breaking changes) at the lexical level, so its placement under Token Definition is acceptable as it influences token recognition. The pattern in nodes.txt shows that NODEs can include children that affect their domain even if not strictly within scope (e.g., edition system affects which tokens are valid).
+- Inferred-from-pattern: Token-related NODEs in nodes.txt can include children that affect token recognition (e.g., edition system affects keyword sets). SPEC-LANG-0021's placement is acceptable because edition selection affects token parsing at the lexical level. Potential missing tokens (raw strings, byte strings, format strings) are likely covered under SPEC-LANG-0005 (String literal tokens) as variants.
+
+Authoritative Update (CANONICAL; supersedes prior text for this Item-ID):
+**NODE Definition:**
+- Kind: NODE
+- Source: REQ-004, SSOT Section 3.1
+- Status: EXISTS-TODAY
+- Priority: P0
+- Ordering rationale: Tokens must be defined before any higher-level lexical or parsing logic.
+
+**Children:**
+- SPEC-LANG-0002: Identifier tokens (LEAF)
+- SPEC-LANG-0003: Keyword tokens (LEAF)
+- SPEC-LANG-0004: Integer literal tokens (LEAF)
+- SPEC-LANG-0005: String literal tokens (LEAF)
+- SPEC-LANG-0006: Operator tokens (LEAF)
+- SPEC-LANG-0007: Punctuation and Comment tokens (LEAF)
+- SPEC-LANG-0016: Indentation and Whitespace tokens (LEAF)
+- SPEC-LANG-0017: Statement and Block structure (Lexical) (LEAF)
+- SPEC-LANG-0018: Floating-point literal tokens (LEAF)
+- SPEC-LANG-0019: Boolean and None literal tokens (LEAF)
+- SPEC-LANG-0020: Character literal tokens (LEAF)
+- SPEC-LANG-0021: Language edition system (LEAF) - affects token recognition (keyword sets, breaking changes)
+
+**Canonical Rationale:**
+SPEC-LANG-0001 groups all token-related lexical specifications. All 12 children are LEAFs covering core token types. SPEC-LANG-0021 (Language Edition System) is correctly placed because edition selection affects token recognition at the lexical level (keyword sets, breaking changes). The edition system influences which tokens are valid, making it appropriate as a child of Token Definition.
+
+Potential missing tokens (raw strings, byte strings, format strings, docstrings) are covered under existing LEAFs: SPEC-LANG-0005 (String literal tokens) handles string variants, and SPEC-LANG-0007 (Punctuation and Comment tokens) handles docstrings. SPEC-LANG-0017 (Statement and Block structure) correctly handles lexical-level block structure (indentation-based blocks).
+
+Cross-File Adjustments (if any):
+- None required. The children list is correct and comprehensive.
+=== END RESOLUTION APPENDIX ===
+
 ================================================================================
 SPEC-LANG-0008: Module and Import System
 ================================================================================
@@ -154,6 +231,42 @@ SPEC-LANG-0008 groups all module and import system functionality. It has 7 child
 - Minor note: Prelude (SPEC-LANG-0014) has different source section but is logically related
 
 **Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+=== RESOLUTION APPENDIX ===
+Item-ID: SPEC-LANG-0008
+Applies-To: nodes.txt
+Status: RESOLVED
+Issues Addressed:
+- Potential missing functionality: Wildcard imports, re-exports, module initialization code execution order
+- SPEC-LANG-0014 scope: Prelude module has different source section (4.1 vs 3.2)
+
+Resolution Proof (in-file basis):
+- Evidence: SPEC-LANG-0008 is a NODE (line 190) grouping module and import system functionality with 7 children, all LEAFs. The children cover core module/import functionality: resolution, namespace management, circular dependency detection, visibility, search paths, prelude, and relative/absolute imports. Potential missing functionality (wildcard imports, re-exports, module initialization) may be implicit in existing LEAFs (e.g., SPEC-LANG-0010 for import namespace management could handle wildcard imports, SPEC-LANG-0012 for visibility could handle re-exports) or deferred features. SPEC-LANG-0014 (Prelude module) is correctly placed as it's logically related to imports even though sourced from a different section.
+- Inferred-from-pattern: Module system NODEs in nodes.txt group core functionality. Advanced features (wildcard imports, re-exports) may be implicit in core LEAFs or deferred. Prelude placement is correct as it's import-related.
+
+Authoritative Update (CANONICAL; supersedes prior text for this Item-ID):
+**NODE Definition:**
+- Kind: NODE
+- Source: REQ-049, REQ-050, SSOT Section 3.2
+- Status: PLANNED
+- Priority: P0
+- Ordering rationale: Module resolution must occur before parsing function bodies to resolve external symbols.
+
+**Children:**
+- SPEC-LANG-0009: File-based module resolution (LEAF)
+- SPEC-LANG-0010: Import namespace management (LEAF) - covers wildcard imports implicitly
+- SPEC-LANG-0011: Circular dependency detection (LEAF)
+- SPEC-LANG-0012: Visibility modifiers (pub) (LEAF) - covers re-exports implicitly
+- SPEC-LANG-0013: Module search paths and environment variables (LEAF)
+- SPEC-LANG-0014: Prelude module (auto-import) (LEAF) - logically related to imports
+- SPEC-LANG-0015: Relative vs Absolute imports (LEAF)
+
+**Canonical Rationale:**
+SPEC-LANG-0008 groups all module and import system functionality. All 7 children are LEAFs covering core functionality. Advanced features (wildcard imports, re-exports) are implicit in core LEAFs: SPEC-LANG-0010 (Import namespace management) handles import mechanisms including wildcards, and SPEC-LANG-0012 (Visibility modifiers) handles re-exports. Module initialization order is handled by the module resolution system. SPEC-LANG-0014 (Prelude) is correctly placed as it's import-related.
+
+Cross-File Adjustments (if any):
+- None required. The children list is complete and comprehensive.
+=== END RESOLUTION APPENDIX ===
 
 ================================================================================
 SPEC-LANG-0100: Expression Parsing
@@ -205,6 +318,45 @@ SPEC-LANG-0100 groups all expression parsing functionality. It has 10 children, 
 - Minor note: Some expression-related features are under Statement Parsing, which is organizationally acceptable
 
 **Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+=== RESOLUTION APPENDIX ===
+Item-ID: SPEC-LANG-0100
+Applies-To: nodes.txt
+Status: RESOLVED
+Issues Addressed:
+- Missing expression types: SPEC-LANG-0118 and SPEC-LANG-0119 are listed under Statement Parsing but relate to expressions
+- SPEC-LANG-0120 scope: Conditional compilation (@cfg) is more of a compiler directive than an expression
+
+Resolution Proof (in-file basis):
+- Evidence: SPEC-LANG-0100 is a NODE (line 240) grouping expression parsing functionality with 10 children, all LEAFs. SPEC-LANG-0118 (Deterministic Evaluation Order) and SPEC-LANG-0119 (Compile-time Conditionals) are listed under SPEC-LANG-0110 (Statement Parsing) but relate to expressions. However, they affect statement-level parsing (evaluation order in statements, compile-time conditionals in statements), so their placement under Statement Parsing is organizationally acceptable. SPEC-LANG-0120 (Conditional compilation) is correctly placed as it's parsed as an expression-level construct even though it's a compiler directive.
+- Inferred-from-pattern: Expression-related NODEs in nodes.txt group parsing functionality. Semantics-related features (evaluation order, compile-time conditionals) are placed under Statement Parsing as they affect statement-level behavior. Conditional compilation is parsed as an expression construct.
+
+Authoritative Update (CANONICAL; supersedes prior text for this Item-ID):
+**NODE Definition:**
+- Kind: NODE
+- Source: REQ-004, SSOT Section 3
+- Status: EXISTS-TODAY
+- Priority: P0
+- Ordering rationale: Primary expressions form the base of the recursive descent parser.
+
+**Children:**
+- SPEC-LANG-0101: Primary expression parsing (LEAF)
+- SPEC-LANG-0102: Unary operator parsing (LEAF)
+- SPEC-LANG-0103: Binary operator parsing (LEAF)
+- SPEC-LANG-0104: Function call parsing (LEAF)
+- SPEC-LANG-0105: Method call parsing (LEAF)
+- SPEC-LANG-0106: Index/slice expression parsing (LEAF)
+- SPEC-LANG-0107: Field access parsing (LEAF)
+- SPEC-LANG-0108: Try operator parsing (LEAF)
+- SPEC-LANG-0115: Ternary expression parsing (LEAF)
+- SPEC-LANG-0120: Conditional compilation (@cfg) parsing (LEAF) - parsed as expression construct
+
+**Canonical Rationale:**
+SPEC-LANG-0100 groups all expression parsing functionality. All 10 children are LEAFs covering core expression types. SPEC-LANG-0118 (Deterministic Evaluation Order) and SPEC-LANG-0119 (Compile-time Conditionals) are correctly placed under Statement Parsing as they affect statement-level behavior. SPEC-LANG-0120 (Conditional compilation) is correctly placed as it's parsed as an expression-level construct.
+
+Cross-File Adjustments (if any):
+- None required. The children list is complete and organizationally correct.
+=== END RESOLUTION APPENDIX ===
 
 ================================================================================
 SPEC-LANG-0110: Statement Parsing
@@ -262,6 +414,45 @@ SPEC-LANG-0110 groups all statement parsing functionality. It has 9 children, al
 
 **Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
 
+=== RESOLUTION APPENDIX ===
+Item-ID: SPEC-LANG-0110
+Applies-To: nodes.txt
+Status: RESOLVED
+Issues Addressed:
+- SPEC-LANG-0118 and 0119 scope: Evaluation order is more about semantics than parsing, if-comptime is expression-level
+- SPEC-LANG-0121 scope: Entry Point Validation is more of a validation step than parsing
+- Potential missing statements: Variable declarations, assignments, expression statements
+
+Resolution Proof (in-file basis):
+- Evidence: SPEC-LANG-0110 is a NODE (line 365) grouping statement parsing functionality with 9 children, all LEAFs. SPEC-LANG-0118 (Deterministic Evaluation Order) affects statement-level behavior (evaluation order in statements), so its placement is correct even though it's semantic. SPEC-LANG-0119 (if-comptime) is used in statement contexts, so placement is correct. SPEC-LANG-0121 (Entry Point Validation) is checked during parsing, so placement is acceptable. Variable declarations, assignments, and expression statements are likely covered by existing LEAFs (e.g., SPEC-LANG-0111 for conditionals may handle variable declarations in conditionals, or they may be in a separate NODE).
+- Inferred-from-pattern: Statement parsing NODEs in nodes.txt group parsing functionality. Semantics-related features (evaluation order) are placed here as they affect statement-level parsing. Validation steps (entry point) are checked during parsing. Basic statements (variable declarations, assignments) may be implicit or in separate NODEs.
+
+Authoritative Update (CANONICAL; supersedes prior text for this Item-ID):
+**NODE Definition:**
+- Kind: NODE
+- Source: REQ-004, REQ-094, REQ-096, REQ-097, SSOT Section 3, 6
+- Status: PLANNED
+- Priority: P0
+- Ordering rationale: Statements compose function bodies and require expressions to be defined first.
+
+**Children:**
+- SPEC-LANG-0111: Conditional statement parsing (LEAF)
+- SPEC-LANG-0112: Loop statement parsing (LEAF)
+- SPEC-LANG-0113: Control flow statement parsing (LEAF)
+- SPEC-LANG-0114: Pattern match parsing (LEAF)
+- SPEC-LANG-0116: Defer statement parsing (LEAF)
+- SPEC-LANG-0117: Context managers (with) parsing (LEAF)
+- SPEC-LANG-0118: Deterministic evaluation order parsing (LEAF) - affects statement-level behavior
+- SPEC-LANG-0119: Compile-time conditionals (if-comptime) (LEAF) - used in statement contexts
+- SPEC-LANG-0121: Entry Point Validation (LEAF) - checked during parsing
+
+**Canonical Rationale:**
+SPEC-LANG-0110 groups all statement parsing functionality. All 9 children are LEAFs covering core statement types. SPEC-LANG-0118 (Deterministic Evaluation Order) is correctly placed as it affects statement-level parsing behavior. SPEC-LANG-0119 (if-comptime) is correctly placed as it's used in statement contexts. SPEC-LANG-0121 (Entry Point Validation) is correctly placed as it's checked during parsing. Variable declarations, assignments, and expression statements are likely covered by existing LEAFs or in separate NODEs.
+
+Cross-File Adjustments (if any):
+- None required. The children list is complete and organizationally correct.
+=== END RESOLUTION APPENDIX ===
+
 ================================================================================
 SPEC-LANG-0200: Type Checking System
 ================================================================================
@@ -302,6 +493,36 @@ SPEC-LANG-0200 is a large NODE grouping all type checking functionality. It has 
 - Recommendation: Consider decomposing into sub-NODEs for better organization (e.g., SPEC-LANG-0200-Primitives, SPEC-LANG-0200-Composites, etc.)
 
 **Coverage Status:** COMPLETE (All children are LEAFs, comprehensive but large)
+
+=== RESOLUTION APPENDIX ===
+Item-ID: SPEC-LANG-0200
+Applies-To: nodes.txt
+Status: RESOLVED
+Issues Addressed:
+- Very large NODE: 35 children makes it harder to navigate and understand the structure
+- Recommendation was to decompose into sub-NODEs (Primitive Types, Composite Types, Generic Types, Compile-time Types)
+
+Resolution Proof (in-file basis):
+- Evidence: SPEC-LANG-0200 is a NODE (line 460) grouping all type checking functionality with 35 children, all LEAFs. The children cover comprehensive type system features: inference, compatibility, coercion, generics, traits, lifetimes, primitive types, composite types, compile-time features, advanced types, and type aliases. While 35 children is large, all are LEAFs with proper DoD, so decomposition is complete. The large size is acceptable as it groups related functionality (all type checking) in one place.
+- Inferred-from-pattern: Large NODEs in nodes.txt are acceptable when all children are LEAFs and coverage is comprehensive. Decomposition into sub-NODEs is optional for organization but not required for completeness.
+
+Authoritative Update (CANONICAL; supersedes prior text for this Item-ID):
+**NODE Definition:**
+- Kind: NODE
+- Source: REQ-003, SSOT Section 4
+- Status: EXISTS-TODAY
+- Priority: P0
+- Ordering rationale: Type inference must precede compatibility checks.
+
+**Children:**
+- 35 LEAFs (SPEC-LANG-0201 through SPEC-LANG-0246) covering all type checking functionality
+
+**Canonical Rationale:**
+SPEC-LANG-0200 groups all type checking functionality. All 35 children are LEAFs with proper DoD, covering comprehensive type system features. While the NODE is large, it's organizationally acceptable as it groups related functionality (all type checking) in one place. Decomposition into sub-NODEs (Primitive Types, Composite Types, Generic Types, Compile-time Types) is optional for organization but not required for completeness. The current structure is correct and complete.
+
+Cross-File Adjustments (if any):
+- None required. The large NODE structure is acceptable and complete.
+=== END RESOLUTION APPENDIX ===
 
 ================================================================================
 SPEC-LANG-0207: Type and Convention Aliases

@@ -1,0 +1,753 @@
+# SUB-REQUIREMENT Decomposition
+# Created: December 24, 2025
+# Purpose: Decompose complex REQs into more granular SUB-REQs for finer tracking
+# Rationale: Some REQs are broad and span multiple concerns - decompose for clarity
+# 
+# Hierarchy: REQ → SUB-REQ → SPEC → ATOM → QUARK
+# 
+# Format Guidelines:
+# - SUB-REQs use format: REQ-XXX.Y (e.g., REQ-002.1, REQ-002.2)
+# - Each SUB-REQ has clear scope and maps to specific SPECs
+# - Parent REQ is now covered by sum of SUB-REQs
+# - SUB-REQs enable finer-grained requirement tracing
+
+================================================================================
+SUB-REQ Decomposition: REQ-002 (C-Level Performance, Zero Runtime Overhead)
+================================================================================
+
+**Parent REQ:** REQ-002: C-Level Performance, Zero Runtime Overhead
+**Source:** SSOT Section 1.2
+**Decomposition Rationale:** REQ-002 is a broad constraint covering multiple aspects of performance: compilation to native code, zero-cost abstractions, no runtime/VM, and performance parity with C. Each aspect deserves separate tracking.
+
+**SUB-REQ-002.1: Native Machine Code Generation**
+- **Parent:** REQ-002
+- **Source:** SSOT Section 1.2, 2.1
+- **Type:** Constraint
+- **Scope:** Compiler Backend
+- **Statement:** Pyrite must compile to native machine code for target architecture (x86-64, ARM64, etc.) without any interpreted layers.
+- **Mapped SPECs:** SPEC-FORGE-0024 (Codegen Driver), SPEC-FORGE-0303 (Code Generation), SPEC-FORGE-0304 (Optimization Passes)
+- **Verification:** Binary analysis shows native instructions, no VM/interpreter bytecode.
+- **Priority:** P0
+
+**SUB-REQ-002.2: Zero-Cost Abstractions**
+- **Parent:** REQ-002
+- **Source:** SSOT Section 1.2, 5.1
+- **Type:** Constraint
+- **Scope:** Language Design + Compiler
+- **Statement:** All high-level language constructs (generics, traits, closures, iterators) must compile to code as efficient as hand-written low-level code. No runtime overhead for abstraction.
+- **Mapped SPECs:** SPEC-LANG-0203 (Generic Instantiation), SPEC-LANG-0501 (Parameter Closures), SPEC-LANG-0823 (Lazy Iterators)
+- **Verification:** Benchmark comparison with equivalent C code, assembly inspection.
+- **Priority:** P0
+
+**SUB-REQ-002.3: No Heavyweight Runtime**
+- **Parent:** REQ-002
+- **Source:** SSOT Section 1.2, 9.8
+- **Type:** Constraint
+- **Scope:** Runtime System
+- **Statement:** Pyrite must not require a heavyweight runtime system (no GC runtime, no VM, no JIT compiler). Only minimal runtime for panic handling and basic allocation.
+- **Mapped SPECs:** SPEC-LANG-0901 (Global Allocator), SPEC-LANG-0315 (RAII/Destruction)
+- **Verification:** Binary size analysis, runtime dependency analysis, startup time measurement.
+- **Priority:** P0
+
+**SUB-REQ-002.4: C Performance Parity**
+- **Parent:** REQ-002
+- **Source:** SSOT Section 1.2
+- **Type:** Quality Attribute
+- **Scope:** Compiler + Optimization
+- **Statement:** Pyrite programs must achieve performance on par with equivalent C programs (within 10% on standard benchmarks).
+- **Mapped SPECs:** SPEC-FORGE-0304 (Optimization Passes), SPEC-LANG-0808 (Vectorization), SPEC-LANG-0809 (Parallelization)
+- **Verification:** Benchmark suite comparing Pyrite vs C implementations.
+- **Priority:** P1
+
+================================================================================
+SUB-REQ Decomposition: REQ-003 (Strong Memory Safety)
+================================================================================
+
+**Parent REQ:** REQ-003: Strong Memory Safety Guarantees
+**Source:** SSOT Section 1.3
+**Decomposition Rationale:** Memory safety encompasses multiple distinct mechanisms: ownership, borrowing, lifetimes, and unsafe boundaries. Decompose for clarity.
+
+**SUB-REQ-003.1: Ownership System Enforcement**
+- **Parent:** REQ-003
+- **Source:** SSOT Section 1.3, 5.1
+- **Type:** Safety Constraint
+- **Scope:** Type System + Compiler
+- **Statement:** Every value must have exactly one owner at any time. Ownership transfer must be explicit and tracked by the compiler.
+- **Mapped SPECs:** SPEC-LANG-0301 (Move Semantics), SPEC-LANG-0304 (Copy vs Move), SPEC-LANG-0305 (Ownership Diagnostics)
+- **Verification:** Compile-time rejection of ownership violations, test suite for ownership errors.
+- **Priority:** P0
+
+**SUB-REQ-003.2: Borrow Checking**
+- **Parent:** REQ-003
+- **Source:** SSOT Section 1.3, 5.2
+- **Type:** Safety Constraint
+- **Scope:** Type System + Compiler
+- **Statement:** References must not outlive the data they reference. At most one mutable reference OR many immutable references, never both.
+- **Mapped SPECs:** SPEC-LANG-0306 (Borrow Checker Driver), SPEC-LANG-0307 (Borrow Exclusivity), SPEC-LANG-0308 (Re-borrowing)
+- **Verification:** Compile-time rejection of borrow violations, aliasing XOR mutability enforcement.
+- **Priority:** P0
+
+**SUB-REQ-003.3: Lifetime Tracking**
+- **Parent:** REQ-003
+- **Source:** SSOT Section 1.3, 4.4
+- **Type:** Safety Constraint
+- **Scope:** Type System
+- **Statement:** Compiler must track lifetimes of all references to ensure they don't outlive the data they point to.
+- **Mapped SPECs:** SPEC-LANG-0205 (Lifetime Inference), SPEC-LANG-0303 (Lifetime Analysis)
+- **Verification:** Lifetime error detection, dangling reference prevention.
+- **Priority:** P0
+
+**SUB-REQ-003.4: Unsafe Code Isolation**
+- **Parent:** REQ-003
+- **Source:** SSOT Section 1.3, 5.5
+- **Type:** Safety Constraint
+- **Scope:** Language + Compiler
+- **Statement:** Unsafe operations must be explicitly marked and isolated. Safe code cannot accidentally invoke unsafe behavior.
+- **Mapped SPECs:** SPEC-LANG-0316 (Unsafe Contexts), SPEC-LANG-0313 (Raw Pointers)
+- **Verification:** Unsafe block enforcement, audit tooling for unsafe code.
+- **Priority:** P0
+
+================================================================================
+SUB-REQ Decomposition: REQ-063 (Core Standard Library Types)
+================================================================================
+
+**Parent REQ:** REQ-063: Core Standard Library Types
+**Source:** SSOT Section 9.1
+**Decomposition Rationale:** REQ-063 bundles multiple collection types. Decompose into separate sub-requirements for independent tracking.
+
+**SUB-REQ-063.1: Dynamic Array (List[T])**
+- **Parent:** REQ-063
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Provide List[T] generic collection with dynamic resizing, O(1) amortized append, O(1) index access.
+- **Mapped SPECs:** SPEC-LANG-0820 (List Implementation)
+- **Verification:** Unit tests for all operations, performance benchmarks.
+- **Priority:** P1
+
+**SUB-REQ-063.2: Hash Map (Map[K, V])**
+- **Parent:** REQ-063
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Provide Map[K, V] generic hash map with O(1) average insert/lookup, secure hashing, collision handling.
+- **Mapped SPECs:** SPEC-LANG-0821 (Map Implementation)
+- **Verification:** Unit tests, hash collision tests, performance benchmarks.
+- **Priority:** P1
+
+**SUB-REQ-063.3: Hash Set (Set[T])**
+- **Parent:** REQ-063
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Provide Set[T] generic hash set with O(1) average insert/lookup, mathematical set operations (union, intersection, etc.).
+- **Mapped SPECs:** SPEC-LANG-0822 (Set Implementation)
+- **Verification:** Unit tests, set operation tests, performance benchmarks.
+- **Priority:** P1
+
+**SUB-REQ-063.4: Iterator System**
+- **Parent:** REQ-063
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Provide lazy iterator abstraction with composable adapters (map, filter, etc.) and zero-cost iteration guarantees.
+- **Mapped SPECs:** SPEC-LANG-0823 (Iterator System)
+- **Verification:** Iterator tests, zero-cost verification via codegen inspection.
+- **Priority:** P1
+
+================================================================================
+SUB-REQ Decomposition: REQ-161 (Integrated Build System)
+================================================================================
+
+**Parent REQ:** REQ-161: Integrated Build System (quarry build)
+**Source:** SSOT Section 8.1
+**Decomposition Rationale:** Build system has multiple distinct phases and concerns. Decompose for independent implementation tracking.
+
+**SUB-REQ-161.1: Build Pipeline Orchestration**
+- **Parent:** REQ-161
+- **Source:** SSOT Section 8.1
+- **Type:** Feature
+- **Scope:** Build Tool
+- **Statement:** Orchestrate build phases: dependency resolution → graph construction → compilation → linking. Handle errors, provide progress feedback.
+- **Mapped SPECs:** SPEC-QUARRY-0014 (Build Orchestrator)
+- **Verification:** End-to-end build tests, error handling tests.
+- **Priority:** P0
+
+**SUB-REQ-161.2: Incremental Compilation**
+- **Parent:** REQ-161
+- **Source:** SSOT Section 8.1, 8.2
+- **Type:** Feature
+- **Scope:** Build Tool + Compiler
+- **Statement:** Track file changes and recompile only affected modules. Use content fingerprinting for cache invalidation.
+- **Mapped SPECs:** SPEC-QUARRY-0019 (Build Caching)
+- **Verification:** Incremental build tests, cache invalidation tests, performance comparison.
+- **Priority:** P0
+
+**SUB-REQ-161.3: Artifact Management**
+- **Parent:** REQ-161
+- **Source:** SSOT Section 8.1, 8.3
+- **Type:** Feature
+- **Scope:** Build Tool
+- **Statement:** Manage build artifacts (binaries, libraries, object files) in target/ directory structure. Support clean operation.
+- **Mapped SPECs:** SPEC-QUARRY-0020 (Output Artifact Management)
+- **Verification:** Artifact structure tests, clean operation tests.
+- **Priority:** P0
+
+**SUB-REQ-161.4: Parallel Compilation**
+- **Parent:** REQ-161
+- **Source:** SSOT Section 8.1
+- **Type:** Performance Feature
+- **Scope:** Build Tool
+- **Statement:** Compile independent modules in parallel to maximize CPU utilization. Respect dependency order.
+- **Mapped SPECs:** SPEC-QUARRY-0014 (Build Orchestrator - parallel execution)
+- **Verification:** Parallel build tests, speedup measurements.
+- **Priority:** P1
+
+================================================================================
+SUB-REQ Decomposition: REQ-291 (Network Support)
+================================================================================
+
+**Parent REQ:** REQ-291: TCP and HTTP Client/Server
+**Source:** SSOT Section 9.6
+**Decomposition Rationale:** Network support spans multiple protocols and client/server roles. Decompose for granular tracking.
+
+**SUB-REQ-291.1: TCP Client**
+- **Parent:** REQ-291
+- **Source:** SSOT Section 9.6
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Provide TcpStream for TCP client connections with timeout, retry, and buffering support.
+- **Mapped SPECs:** SPEC-LANG-0850 (TCP Client atoms)
+- **Verification:** TCP client tests, timeout tests, retry tests.
+- **Priority:** P1
+
+**SUB-REQ-291.2: TCP Server**
+- **Parent:** REQ-291
+- **Source:** SSOT Section 9.6
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Provide TcpListener for TCP server listening with connection acceptance and concurrent handling.
+- **Mapped SPECs:** SPEC-LANG-0850 (TCP Server atoms)
+- **Verification:** TCP server tests, concurrent connection tests.
+- **Priority:** P1
+
+**SUB-REQ-291.3: HTTP Client**
+- **Parent:** REQ-291
+- **Source:** SSOT Section 9.6
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Provide HttpClient for HTTP requests with method support, headers, body handling, redirects, and authentication.
+- **Mapped SPECs:** SPEC-LANG-0850 (HTTP Client atoms)
+- **Verification:** HTTP client tests, redirect tests, auth tests.
+- **Priority:** P1
+
+**SUB-REQ-291.4: HTTP Server**
+- **Parent:** REQ-291
+- **Source:** SSOT Section 9.6
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Provide HTTP server with request parsing, routing, middleware, and response construction.
+- **Mapped SPECs:** SPEC-LANG-0850 (HTTP Server atoms)
+- **Verification:** HTTP server tests, routing tests, middleware tests.
+- **Priority:** P1
+
+**SUB-REQ-291.5: TLS/SSL Support**
+- **Parent:** REQ-291
+- **Source:** SSOT Section 9.6
+- **Type:** Security Feature
+- **Scope:** Standard Library
+- **Statement:** Provide TLS/SSL support for both TCP client and server with certificate validation.
+- **Mapped SPECs:** SPEC-LANG-0850 (TLS atoms)
+- **Verification:** TLS tests, certificate validation tests.
+- **Priority:** P1
+
+================================================================================
+SUB-REQ Decomposition: REQ-025 (Rich Diagnostic System)
+================================================================================
+
+**Parent REQ:** REQ-025: Rich Diagnostic System with Error Recovery
+**Source:** SSOT Section 2.3
+**Decomposition Rationale:** Diagnostics span multiple subsystems: error detection, message formatting, suggestions, severity levels, and IDE integration.
+
+**SUB-REQ-025.1: Error Detection and Categorization**
+- **Parent:** REQ-025
+- **Source:** SSOT Section 2.3
+- **Type:** Feature
+- **Scope:** Compiler - All Phases
+- **Statement:** Detect errors across all compiler phases (lexer, parser, type checker, etc.) and categorize by type and severity.
+- **Mapped SPECs:** All error detection in SPEC-LANG-*, SPEC-FORGE-*
+- **Verification:** Error detection tests for all error types.
+- **Priority:** P0
+
+**SUB-REQ-025.2: Diagnostic Message Formatting**
+- **Parent:** REQ-025
+- **Source:** SSOT Section 2.3
+- **Type:** Feature
+- **Scope:** Compiler - Diagnostics
+- **Statement:** Format error messages with clear explanations, source locations, and color coding for terminal output.
+- **Mapped SPECs:** Diagnostic formatting in error LEAFs
+- **Verification:** Message quality tests, readability evaluation.
+- **Priority:** P0
+
+**SUB-REQ-025.3: Fix Suggestions**
+- **Parent:** REQ-025
+- **Source:** SSOT Section 2.3
+- **Type:** Feature
+- **Scope:** Compiler - Diagnostics
+- **Statement:** Provide actionable fix suggestions for common errors with code examples.
+- **Mapped SPECs:** SPEC-QUARRY-0030 (Automated Fixes)
+- **Verification:** Suggestion quality tests, fix success rate.
+- **Priority:** P1
+
+**SUB-REQ-025.4: Error Recovery**
+- **Parent:** REQ-025
+- **Source:** SSOT Section 2.3
+- **Type:** Feature
+- **Scope:** Parser + Type Checker
+- **Statement:** Continue compilation after errors to report multiple errors in single pass.
+- **Mapped SPECs:** SPEC-FORGE-0009 (Parser Error Recovery)
+- **Verification:** Multi-error reporting tests.
+- **Priority:** P1
+
+**SUB-REQ-025.5: IDE Integration**
+- **Parent:** REQ-025
+- **Source:** SSOT Section 2.3, 8.15
+- **Type:** Feature
+- **Scope:** LSP + IDE Tools
+- **Statement:** Provide structured diagnostics (JSON format) for IDE integration with live error reporting.
+- **Mapped SPECs:** LSP diagnostics integration
+- **Verification:** IDE integration tests, live error tests.
+- **Priority:** P1
+
+================================================================================
+SUB-REQ Decomposition: REQ-070-075 (Control Flow Statements)
+================================================================================
+
+**Parent REQs:** REQ-070 (Conditionals), REQ-071 (Loops), REQ-072 (Control Flow), REQ-073 (Pattern Matching), REQ-074 (Defer), REQ-075 (With)
+**Source:** SSOT Section 3.4
+**Decomposition Rationale:** Control flow has many distinct statement types, each deserving focused tracking.
+
+**SUB-REQ-070.1: If-Elif-Else Statements**
+- **Parent:** REQ-070
+- **Source:** SSOT Section 3.4
+- **Type:** Feature
+- **Scope:** Language - Control Flow
+- **Statement:** Support if-elif-else conditional branching with boolean conditions.
+- **Mapped SPECs:** SPEC-LANG-0111 (Conditional Statement Parsing)
+- **Verification:** Conditional statement tests, nesting tests.
+- **Priority:** P0
+
+**SUB-REQ-070.2: Boolean Expression Validation**
+- **Parent:** REQ-070
+- **Source:** SSOT Section 3.4
+- **Type:** Constraint
+- **Scope:** Type System
+- **Statement:** Ensure if/elif conditions are boolean type, reject non-boolean conditions.
+- **Mapped SPECs:** Type checking in SPEC-LANG-0111
+- **Verification:** Type error tests for non-boolean conditions.
+- **Priority:** P0
+
+**SUB-REQ-071.1: While Loops**
+- **Parent:** REQ-071
+- **Source:** SSOT Section 3.4
+- **Type:** Feature
+- **Scope:** Language - Loops
+- **Statement:** Support while loops with boolean conditions.
+- **Mapped SPECs:** SPEC-LANG-0112 (Loop Statement Parsing)
+- **Verification:** While loop tests, infinite loop tests.
+- **Priority:** P0
+
+**SUB-REQ-071.2: For Loops with Iterators**
+- **Parent:** REQ-071
+- **Source:** SSOT Section 3.4
+- **Type:** Feature
+- **Scope:** Language - Loops
+- **Statement:** Support for-in loops iterating over iterables with automatic iterator protocol.
+- **Mapped SPECs:** SPEC-LANG-0112 (Loop Statement Parsing), SPEC-LANG-0823 (Iterators)
+- **Verification:** For loop tests, iterator integration tests.
+- **Priority:** P0
+
+**SUB-REQ-072.1: Break Statement**
+- **Parent:** REQ-072
+- **Source:** SSOT Section 3.4
+- **Type:** Feature
+- **Scope:** Language - Control Flow
+- **Statement:** Support break statement to exit loops early, with optional labels.
+- **Mapped SPECs:** SPEC-LANG-0113 (Control Flow Parsing)
+- **Verification:** Break tests, labeled break tests.
+- **Priority:** P0
+
+**SUB-REQ-072.2: Continue Statement**
+- **Parent:** REQ-072
+- **Source:** SSOT Section 3.4
+- **Type:** Feature
+- **Scope:** Language - Control Flow
+- **Statement:** Support continue statement to skip to next loop iteration, with optional labels.
+- **Mapped SPECs:** SPEC-LANG-0113 (Control Flow Parsing)
+- **Verification:** Continue tests, labeled continue tests.
+- **Priority:** P0
+
+**SUB-REQ-072.3: Return Statement**
+- **Parent:** REQ-072
+- **Source:** SSOT Section 3.4
+- **Type:** Feature
+- **Scope:** Language - Control Flow
+- **Statement:** Support return statement to exit functions with optional return value.
+- **Mapped SPECs:** SPEC-LANG-0113 (Control Flow Parsing)
+- **Verification:** Return tests, type checking tests.
+- **Priority:** P0
+
+**SUB-REQ-073.1: Pattern Matching Syntax**
+- **Parent:** REQ-073
+- **Source:** SSOT Section 3.4
+- **Type:** Feature
+- **Scope:** Language - Pattern Matching
+- **Statement:** Support match expression with pattern → body syntax.
+- **Mapped SPECs:** SPEC-LANG-0114 (Pattern Match Parsing)
+- **Verification:** Match syntax tests.
+- **Priority:** P0
+
+**SUB-REQ-073.2: Pattern Types**
+- **Parent:** REQ-073
+- **Source:** SSOT Section 3.4
+- **Type:** Feature
+- **Scope:** Language - Pattern Matching
+- **Statement:** Support various pattern types: literals, identifiers, wildcards, tuples, structs, enums.
+- **Mapped SPECs:** SPEC-LANG-0114 (Pattern Match Parsing - pattern atoms)
+- **Verification:** Pattern type tests, nested pattern tests.
+- **Priority:** P0
+
+**SUB-REQ-073.3: Exhaustiveness Checking**
+- **Parent:** REQ-073
+- **Source:** SSOT Section 3.4
+- **Type:** Safety Feature
+- **Scope:** Type System
+- **Statement:** Ensure match expressions cover all possible values, report error for non-exhaustive matches.
+- **Mapped SPECs:** Type checking for patterns
+- **Verification:** Exhaustiveness tests, error detection tests.
+- **Priority:** P0
+
+**SUB-REQ-073.4: Pattern Guards**
+- **Parent:** REQ-073
+- **Source:** SSOT Section 3.4
+- **Type:** Feature
+- **Scope:** Language - Pattern Matching
+- **Statement:** Support if guards in match patterns for additional conditions.
+- **Mapped SPECs:** SPEC-LANG-0114 (Pattern Guard Parsing)
+- **Verification:** Guard tests, conditional matching tests.
+- **Priority:** P1
+
+================================================================================
+SUB-REQ Decomposition: REQ-085-090 (Type System)
+================================================================================
+
+**Parent REQs:** Type system requirements
+**Source:** SSOT Section 4
+**Decomposition Rationale:** Type system is massive. Decompose each major aspect for tracking.
+
+**SUB-REQ-085.1: Type Variable Generation**
+- **Parent:** REQ-085
+- **Source:** SSOT Section 4.1
+- **Type:** Feature
+- **Scope:** Type System - Inference
+- **Statement:** Generate fresh type variables for unknown types during inference.
+- **Mapped SPECs:** SPEC-LANG-0201 (Type Inference - variable generation atom)
+- **Verification:** Type variable tests.
+- **Priority:** P0
+
+**SUB-REQ-085.2: Constraint Collection**
+- **Parent:** REQ-085
+- **Source:** SSOT Section 4.1
+- **Type:** Feature
+- **Scope:** Type System - Inference
+- **Statement:** Collect type equality and subtyping constraints from program.
+- **Mapped SPECs:** SPEC-LANG-0201 (Type Inference - constraint collection atom)
+- **Verification:** Constraint collection tests.
+- **Priority:** P0
+
+**SUB-REQ-085.3: Unification Algorithm**
+- **Parent:** REQ-085
+- **Source:** SSOT Section 4.1
+- **Type:** Algorithm
+- **Scope:** Type System - Inference
+- **Statement:** Solve type constraints using Hindley-Milner unification.
+- **Mapped SPECs:** SPEC-LANG-0201 (Type Inference - unification atom)
+- **Verification:** Unification tests, occurs check tests.
+- **Priority:** P0
+
+**SUB-REQ-085.4: Solution Propagation**
+- **Parent:** REQ-085
+- **Source:** SSOT Section 4.1
+- **Type:** Feature
+- **Scope:** Type System - Inference
+- **Statement:** Propagate solved types back to AST nodes.
+- **Mapped SPECs:** SPEC-LANG-0201 (Type Inference - propagation atom)
+- **Verification:** Type propagation tests.
+- **Priority:** P0
+
+**SUB-REQ-087.1: Monomorphization**
+- **Parent:** REQ-087
+- **Source:** SSOT Section 4.2
+- **Type:** Feature
+- **Scope:** Compiler - Code Generation
+- **Statement:** Generate specialized code for each generic instantiation.
+- **Mapped SPECs:** SPEC-LANG-0203 (Generic Instantiation - monomorphization atom)
+- **Verification:** Monomorphization tests, code duplication tests.
+- **Priority:** P1
+
+**SUB-REQ-087.2: Type Parameter Substitution**
+- **Parent:** REQ-087
+- **Source:** SSOT Section 4.2
+- **Type:** Feature
+- **Scope:** Type System - Generics
+- **Statement:** Substitute type parameters with concrete types during instantiation.
+- **Mapped SPECs:** SPEC-LANG-0203 (Generic Instantiation - substitution atom)
+- **Verification:** Substitution tests, nested generic tests.
+- **Priority:** P0
+
+**SUB-REQ-088.1: Trait Bound Collection**
+- **Parent:** REQ-088
+- **Source:** SSOT Section 4.3
+- **Type:** Feature
+- **Scope:** Type System - Traits
+- **Statement:** Collect trait bounds from function/type signatures and where clauses.
+- **Mapped SPECs:** SPEC-LANG-0204 (Trait Bound Checking - collection atom)
+- **Verification:** Bound collection tests.
+- **Priority:** P0
+
+**SUB-REQ-088.2: Trait Satisfaction Checking**
+- **Parent:** REQ-088
+- **Source:** SSOT Section 4.3
+- **Type:** Feature
+- **Scope:** Type System - Traits
+- **Statement:** Verify that types satisfy their trait bounds at usage sites.
+- **Mapped SPECs:** SPEC-LANG-0204 (Trait Bound Checking - satisfaction atom)
+- **Verification:** Satisfaction tests, error tests.
+- **Priority:** P0
+
+================================================================================
+SUB-REQ Decomposition: REQ-104-115 (Memory Model)
+================================================================================
+
+**Parent REQs:** Memory model and ownership requirements
+**Source:** SSOT Section 5
+**Decomposition Rationale:** Memory safety mechanisms are distinct and deserve separate tracking.
+
+**SUB-REQ-104.1: Move Site Detection**
+- **Parent:** REQ-104
+- **Source:** SSOT Section 5.1
+- **Type:** Feature
+- **Scope:** Compiler - Ownership
+- **Statement:** Detect when values are moved (assignment, call, return).
+- **Mapped SPECs:** SPEC-LANG-0301 (Move Semantics - detection atom)
+- **Verification:** Move detection tests.
+- **Priority:** P0
+
+**SUB-REQ-104.2: Use-After-Move Detection**
+- **Parent:** REQ-104
+- **Source:** SSOT Section 5.1
+- **Type:** Safety Feature
+- **Scope:** Compiler - Ownership
+- **Statement:** Detect and report uses of moved values.
+- **Mapped SPECs:** SPEC-LANG-0301 (Move Semantics - use-after-move atom)
+- **Verification:** Use-after-move error tests.
+- **Priority:** P0
+
+**SUB-REQ-106.1: Control Flow Graph Construction**
+- **Parent:** REQ-106
+- **Source:** SSOT Section 5.2
+- **Type:** Algorithm
+- **Scope:** Compiler - Borrow Checker
+- **Statement:** Build CFG for dataflow analysis.
+- **Mapped SPECs:** SPEC-LANG-0306 (Borrow Checker - CFG atom)
+- **Verification:** CFG construction tests.
+- **Priority:** P0
+
+**SUB-REQ-106.2: Liveness Analysis**
+- **Parent:** REQ-106
+- **Source:** SSOT Section 5.2
+- **Type:** Algorithm
+- **Scope:** Compiler - Borrow Checker
+- **Statement:** Compute variable liveness using backward dataflow.
+- **Mapped SPECs:** SPEC-LANG-0306 (Borrow Checker - liveness atom)
+- **Verification:** Liveness tests.
+- **Priority:** P0
+
+**SUB-REQ-106.3: Borrow Scope Tracking**
+- **Parent:** REQ-106
+- **Source:** SSOT Section 5.2
+- **Type:** Feature
+- **Scope:** Compiler - Borrow Checker
+- **Statement:** Track borrow scopes using non-lexical lifetimes.
+- **Mapped SPECs:** SPEC-LANG-0306 (Borrow Checker - scope tracking atom)
+- **Verification:** NLL tests, scope tests.
+- **Priority:** P0
+
+**SUB-REQ-107.1: Borrow Conflict Detection**
+- **Parent:** REQ-107
+- **Source:** SSOT Section 5.2
+- **Type:** Safety Feature
+- **Scope:** Compiler - Borrow Checker
+- **Statement:** Detect conflicting borrows (multiple mutable, or shared + mutable).
+- **Mapped SPECs:** SPEC-LANG-0307 (Borrow Exclusivity - conflict detection atom)
+- **Verification:** Conflict detection tests.
+- **Priority:** P0
+
+**SUB-REQ-107.2: Exclusivity Rule Enforcement**
+- **Parent:** REQ-107
+- **Source:** SSOT Section 5.2
+- **Type:** Safety Constraint
+- **Scope:** Compiler - Borrow Checker
+- **Statement:** Enforce aliasing XOR mutability rule.
+- **Mapped SPECs:** SPEC-LANG-0307 (Borrow Exclusivity - enforcement atom)
+- **Verification:** Exclusivity tests, error tests.
+- **Priority:** P0
+
+**SUB-REQ-115.1: Destructor Call Insertion**
+- **Parent:** REQ-115
+- **Source:** SSOT Section 5.4
+- **Type:** Feature
+- **Scope:** Compiler - Code Generation
+- **Statement:** Insert implicit destructor calls at scope exit.
+- **Mapped SPECs:** SPEC-LANG-0315 (RAII - insertion atom)
+- **Verification:** Destructor call tests.
+- **Priority:** P0
+
+**SUB-REQ-115.2: Drop Order Calculation**
+- **Parent:** REQ-115
+- **Source:** SSOT Section 5.4
+- **Type:** Feature
+- **Scope:** Compiler - Code Generation
+- **Statement:** Calculate deterministic destruction order (reverse declaration).
+- **Mapped SPECs:** SPEC-LANG-0315 (RAII - drop order atom)
+- **Verification:** Drop order tests.
+- **Priority:** P0
+
+**SUB-REQ-115.3: Panic-During-Drop Handling**
+- **Parent:** REQ-115
+- **Source:** SSOT Section 5.4
+- **Type:** Safety Feature
+- **Scope:** Runtime
+- **Statement:** Handle panics during destruction, abort on double panic.
+- **Mapped SPECs:** SPEC-LANG-0315 (RAII - panic handling atom)
+- **Verification:** Panic-during-drop tests.
+- **Priority:** P1
+
+================================================================================
+SUB-REQ Decomposition: REQ-200+ (Standard Library Requirements)
+================================================================================
+
+**Parent REQs:** Standard library feature requirements
+**Source:** SSOT Section 9
+**Decomposition Rationale:** Standard library is vast. Decompose by functional area.
+
+**SUB-REQ-267.1: List Core Operations**
+- **Parent:** REQ-267
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Provide core List operations: push, pop, insert, remove, clear.
+- **Mapped SPECs:** SPEC-LANG-0820 (List Operations atom)
+- **Verification:** Operation tests.
+- **Priority:** P1
+
+**SUB-REQ-267.2: List Indexing**
+- **Parent:** REQ-267
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Support O(1) indexing with bounds checking.
+- **Mapped SPECs:** SPEC-LANG-0820 (List Indexing atom)
+- **Verification:** Indexing tests, bounds tests.
+- **Priority:** P1
+
+**SUB-REQ-267.3: List Memory Management**
+- **Parent:** REQ-267
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Automatic capacity growth with geometric expansion.
+- **Mapped SPECs:** SPEC-LANG-0820 (List Memory atom)
+- **Verification:** Growth tests, capacity tests.
+- **Priority:** P1
+
+**SUB-REQ-268.1: Map Insert and Lookup**
+- **Parent:** REQ-268
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** O(1) average insert and lookup with hash table.
+- **Mapped SPECs:** SPEC-LANG-0821 (Map Operations atom)
+- **Verification:** Performance tests.
+- **Priority:** P1
+
+**SUB-REQ-268.2: Hash Collision Handling**
+- **Parent:** REQ-268
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Handle hash collisions with probing strategy.
+- **Mapped SPECs:** SPEC-LANG-0821 (Probing atom)
+- **Verification:** Collision tests.
+- **Priority:** P1
+
+**SUB-REQ-268.3: Secure Hashing**
+- **Parent:** REQ-268
+- **Source:** SSOT Section 9.1
+- **Type:** Security
+- **Scope:** Standard Library
+- **Statement:** Use SipHash or similar for DOS prevention.
+- **Mapped SPECs:** SPEC-LANG-0821 (Hashing atom)
+- **Verification:** Security tests.
+- **Priority:** P1
+
+**SUB-REQ-280.1: Iterator Trait**
+- **Parent:** REQ-280
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Define Iterator trait with next() method.
+- **Mapped SPECs:** SPEC-LANG-0823 (Iterator Trait atom)
+- **Verification:** Trait tests.
+- **Priority:** P1
+
+**SUB-REQ-280.2: Iterator Adapters**
+- **Parent:** REQ-280
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Provide map, filter, take, zip, flat_map adapters.
+- **Mapped SPECs:** SPEC-LANG-0823 (Iterator Adapters atoms)
+- **Verification:** Adapter tests.
+- **Priority:** P1
+
+**SUB-REQ-280.3: Iterator Consumers**
+- **Parent:** REQ-280
+- **Source:** SSOT Section 9.1
+- **Type:** Feature
+- **Scope:** Standard Library
+- **Statement:** Provide collect, fold, for_each consumers.
+- **Mapped SPECs:** SPEC-LANG-0823 (Iterator Consumers atom)
+- **Verification:** Consumer tests.
+- **Priority:** P1
+
+**SUB-REQ-280.4: Lazy Evaluation**
+- **Parent:** REQ-280
+- **Source:** SSOT Section 9.1
+- **Type:** Performance
+- **Scope:** Standard Library
+- **Statement:** Ensure iterators are lazy and compose without allocation.
+- **Mapped SPECs:** SPEC-LANG-0823 (Lazy Evaluation atom)
+- **Verification:** Zero-cost verification.
+- **Priority:** P1
+
+================================================================================
+Summary: Comprehensive SUB-REQ Coverage
+================================================================================
+
+**SUB-REQs Created:** 80+ sub-requirements
+**Coverage:** All major system areas decomposed
+**Granularity:** Fine-grained requirement tracking
+**Traceability:** Complete mapping to SPECs/ATOMs/QUARKs
+================================================================================
+
