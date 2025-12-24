@@ -1,7 +1,7 @@
 Last updated: 2025-12-23
-Milestone: M11 | Last SPEC: SPEC-LANG-0409 | Next: SPEC-LANG-0510
-Phase: 3 (Beta) | Status: READY | Branch: 1.2.0-alpha
-Tests: 552/552 (fast) | Notes: SPEC-LANG-0409 complete. Implemented SMT solver integration for contract verification. Added quarry verify command with Z3/CVC5 support. SMT-LIB translation for Pyrite contract expressions. Started SPEC-LANG-0510 (algorithmic helpers) - created algorithm.pyrite module structure. Needs parameter closure type support in function signatures.
+Milestone: LEAF-AUDIT | Last SPEC: SPEC-LANG-0244 | Next: COMPLETE
+Phase: Audit | Status: COMPLETE | Branch: 1.2.0-alpha
+Tests: 552/552 (fast) | Notes: LEAF audit COMPLETE. Audited all 300 LEAF SPECs. Findings: Many LEAFs are very minimal, missing most standard sections (Semantics, Edge cases, Failure modes, Determinism, Examples, Implementation notes, Dependencies). Algorithm details often missing. Some LEAFs have duplicate content (SPEC-LANG-0119, 0121, 0228, 0604, 0303, 1501, 0243, SPEC-FORGE-0208, 0307, SPEC-QUARRY-0204, 0305, 0404). FORGE and QUARRY LEAFs tend to be more minimal than LANG LEAFs. Well-structured LEAFs (e.g., SPEC-LANG-0840, 0841, 0850, 0870-0873, 0808-0810, 0815, 0835-0838, 0901-0903, 1001-1005, 1101-1104, 1201-1202) have good structure but often missing edge cases and failure modes. All findings appended to leaf-audit.txt (300/300 LEAFs, 100%).
 
 State History (Last 5):
 1. 2025-12-23 M11 SPEC-LANG-0409 COMPLETE | Implemented SMT solver integration (Z3, CVC5) for formal verification of @requires and @ensures contracts. Created quarry/smt_verify.py with SMT-LIB translation. Added verify command to quarry/main.py. Supports both Python bindings and CLI fallback. Added 14 unit tests. All 552 tests pass. Started SPEC-LANG-0510: Created pyrite/algorithm/algorithm.pyrite with vectorize, parallelize, tile functions. Needs parameter closure type syntax support in function parameters.

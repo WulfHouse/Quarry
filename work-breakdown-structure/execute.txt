@@ -1,0 +1,188 @@
+# Work Breakdown Structure Issue Resolution Prompt
+
+## ⚠️ CRITICAL: Source of Truth
+**THESE FOUR FILES (`atoms.txt`, `leafs.txt`, `nodes.txt`, `reqs.txt`) ARE THE CANONICAL SSOT**
+
+- ❌ **DO NOT** reference `docs/specification/technical-ssot.md` or any external files
+- ✅ **DO** use only information within these four files
+- ✅ **DO** infer missing information from context within these files
+- ✅ **DO** cross-reference between files (REQ→SPEC, NODE→children, similar items)
+
+## Mission
+Systematically resolve all issues identified in `atoms.txt`, `leafs.txt`, `nodes.txt`, and `reqs.txt` by fixing the specifications and removing all audit artifacts. These four files will become the new canonical SSOT and must be sanitized of all issue tracking content.
+
+- **atoms.txt**: New decomposition level (currently empty, may contain ATOMs if LEAFs are decomposed)
+- **leafs.txt**: LEAF SPEC audits with issues, verdicts, and recommendations → Will become clean LEAF specifications
+- **nodes.txt**: NODE-to-children mapping audits with structural issues → Will become clean NODE specifications
+- **reqs.txt**: REQ-to-SPEC mapping audits with coverage gaps → Will become clean REQ-to-SPEC mappings
+
+## Quick Start
+1. **Scan all files** for "**Issues Identified:**" markers → Count total issues
+2. **Build cross-file index** (in-memory):
+   - SPEC-IDs → locations in all files
+   - REQ-IDs → mapped SPECs (from reqs.txt)
+   - NODE → children (from nodes.txt)
+   - Component patterns (LANG, FORGE, QUARRY)
+3. **Process in order**: reqs.txt → nodes.txt → leafs.txt → atoms.txt
+4. **For each item**: Read issues → Search files for context → Infer if needed → Fix specification → Delete entire issue section
+5. **Batch updates**: Process 10-20 items, then update files (sanitize as you go)
+
+## Issue Categories (Auto-Detect Pattern)
+- **Missing specs**: Unclear DoD, vague semantics, missing edge cases
+- **Structural**: Misplaced children, wrong parent-child relationships
+- **Coverage gaps**: Missing functionality, incomplete decomposition
+- **Inconsistencies**: Missing error codes, convention vs requirement confusion
+- **Test gaps**: Generic test requirements, missing specific cases
+- **Traceability**: Missing REQ citations, incorrect mappings
+
+## Resolution Rules (Pattern-Based)
+
+**1. Missing Specifications**
+- Search within these four files for related SPECs/REQs that might contain details
+- Infer from context: similar SPECs, parent NODEs, related REQs
+- If details found in files → Add missing details directly to the specification
+- If details not found → Infer from patterns in similar items and add to specification
+- Update the actual specification content (DoD, Behavior, Semantics, Edge cases, etc.)
+- Delete the "Issues Identified" section after fixing
+
+**2. Structural Issues**
+- Verify parent-child relationships within nodes.txt
+- Cross-reference with reqs.txt for REQ-to-SPEC mappings
+- Misplaced child → Fix the parent-child relationship directly in the specification
+- Large NODE → Decompose into sub-NODEs based on similar patterns (update specification)
+- Large LEAF → Create ATOMs if needed (check atoms.txt for patterns, add to specification)
+- Fix the specification structure, then delete the issue section
+
+**3. Coverage Gaps**
+- Search all four files for related SPECs that might cover the gap
+- Check parent NODEs and sibling LEAFs for implicit coverage
+- If covered by another SPEC → Add explicit reference to the specification
+- If missing → Add missing functionality to the specification (infer from context if needed)
+- Implicit → Add explicit clarification to the specification based on similar items
+- Fix the specification, then delete the issue section
+
+**4. Inconsistencies**
+- Authority: These four files are canonical - resolve conflicts by:
+  - Finding most common pattern across files
+  - Inferring from similar items
+  - Updating all affected specifications to be consistent
+- Missing error codes → Add error codes to specification (infer pattern from existing codes: ERR-COMP-NNN)
+- Convention vs requirement → Update specification to clarify: check if similar items enforce or allow
+- Fix inconsistencies in the actual specification content, then delete the issue section
+
+**5. Test Gaps**
+- Expand generic → Specific test cases by:
+  - Looking at similar SPECs in leafs.txt for test patterns
+  - Inferring edge cases from issues identified
+  - Using parent NODE context for test scope
+- Update the "Tests required" section in the specification with specific test cases
+- Add edge case tests to the specification
+- Fix the specification, then delete the issue section
+
+**6. Traceability Issues**
+- Verify REQ-to-SPEC mappings within reqs.txt
+- Cross-check with nodes.txt and leafs.txt for consistency
+- Incorrect REQ mapping → Fix the mapping directly in reqs.txt
+- Missing REQ citation → Add REQ citation to the specification (infer from related REQs if needed)
+- "Meta" mapping → Verify appropriate for Goal-type REQs (check reqs.txt patterns), fix if incorrect
+- Update the specification mappings, then delete the issue section
+
+## Processing Workflow
+
+**Order**: reqs.txt → nodes.txt → leafs.txt → atoms.txt
+
+**Per Item (Automated Loop)**:
+1. Read audit entry (item with "**Issues Identified:**")
+2. Search within all four files for related context:
+   - Related SPECs/REQs mentioned in the entry
+   - Parent NODEs (from nodes.txt)
+   - Similar items (same component, similar functionality)
+   - Patterns from other resolved items
+3. Infer missing information from context within files
+4. Apply resolution rules (1-6 above):
+   - Fix the actual specification content (add missing details, fix structure, add error codes, etc.)
+   - Update the specification to resolve all identified issues
+5. Delete the entire audit section:
+   - Delete "**Issues Identified:**" section
+   - Delete "**Verdict:**" section
+   - Delete "**Coverage Status:**" section
+   - Delete "**Recommendations:**" section (if present)
+   - Delete "**Analysis:**" section (if it only contains audit commentary)
+   - Keep only the clean specification content
+6. Move to next item
+
+**Sanitization Format** (after resolution):
+- Specification content is updated with fixes
+- All audit sections are completely removed:
+  - "**Issues Identified:**" → DELETED
+  - "**Verdict:**" → DELETED
+  - "**Coverage Status:**" → DELETED
+  - "**Recommendations:**" → DELETED
+  - "**Analysis:**" → DELETED (if audit-only)
+- Only clean specification remains (LEAF/NODE/REQ definition with DoD, Behavior, Semantics, etc.)
+
+## Validation & Completion
+
+**After all items processed:**
+1. **Verify specifications**: All issues resolved, specifications are complete and consistent
+2. **Check consistency**: REQ mappings, NODE children, LEAF DoD, error codes
+3. **Verify sanitization**: No audit sections remain (no "Issues Identified", "Verdict", "Coverage Status", etc.)
+4. **Generate summary**:
+   ```
+   Sanitization Summary
+   ====================
+   Processed: [X] items | Issues resolved: [Y] | Specifications updated: [Y]
+   
+   By file: reqs.txt [X items sanitized] | nodes.txt [X items sanitized] | leafs.txt [X items sanitized] | atoms.txt [X items sanitized]
+   By type: Missing specs [X fixed] | Structural [X fixed] | Coverage [X fixed] | Inconsistencies [X fixed] | Tests [X fixed] | Traceability [X fixed]
+   
+   Files are now clean SSOT-ready specifications.
+   ```
+
+## Optimization
+
+**Batch Processing**: 10-20 items per batch, update files incrementally
+**Pattern Recognition**: Common patterns (missing error codes, vague Unicode) → template resolutions
+**Cross-File Indexing**: Build in-memory index of:
+  - SPEC-IDs → file locations
+  - REQ-IDs → mapped SPECs
+  - NODE → children relationships
+  - Similar items by component/functionality
+**Incremental Updates**: Update files after each batch, not at end (sanitize as you go)
+**Inference Engine**: When information missing:
+  - Find similar items (same component prefix, similar functionality)
+  - Check parent NODEs for context
+  - Look for patterns across files
+  - Add inferred information directly to specification
+**Sanitization**: After fixing each item, immediately delete all audit sections
+**Checkpoints**: After each file → verify no audit sections remain; Final → full validation of clean specifications
+
+## Critical Rules
+
+1. **Always delete** audit sections after resolving issues - files must be clean specifications
+2. **Fix specifications directly** - update DoD, Behavior, Semantics, etc. with missing information
+3. **These files are SSOT** - do NOT reference external files (especially `docs/specification/technical-ssot.md`)
+4. **Inference required** - when information missing, infer from context within these four files only and add to specification
+5. **Cross-reference** - use relationships between files (REQ→SPEC, NODE→children, similar items)
+6. **Consistent format** - specifications should follow consistent structure (DoD, Behavior, Semantics, Edge cases, etc.)
+7. **Accuracy first** - add all necessary details to specifications, don't leave gaps
+8. **Sanitize completely** - remove ALL audit artifacts: "Issues Identified", "Verdict", "Coverage Status", "Recommendations", audit-only "Analysis" sections
+
+## Success Criteria
+
+✅ All items processed | ✅ All issues resolved (specifications updated) | ✅ All audit sections deleted
+✅ Specifications are complete and consistent | ✅ Files are clean SSOT-ready | ✅ No audit artifacts remain
+
+## Execution
+
+**Agent should**:
+- Work continuously (no stopping)
+- Process in order: reqs → nodes → leafs → atoms
+- Fix specifications directly (add missing details, fix structure, etc.)
+- Delete audit sections immediately after fixing each item
+- Update files incrementally (after each batch, sanitized)
+- Report progress every 10 items
+- Complete all items before finishing
+
+**Start command**: Begin systematic resolution of all issues in all four files. Fix specifications and remove all audit artifacts.
+

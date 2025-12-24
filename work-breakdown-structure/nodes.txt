@@ -1,0 +1,1605 @@
+# NODE-to-Children Mapping Audit
+# Started: December 23, 2025
+# Purpose: Verify all NODEs are fully decomposed into LEAFs, identify gaps, missing LEAFs, vagueness
+# Format: Each NODE is appended at the bottom (NO DELETIONS)
+# 
+# Audit Criteria:
+# 1. NODEs must be fully covered by their children (NODEs + LEAFs)
+# 2. All children must be properly specified (LEAFs have DoD, NODEs have children)
+# 3. No gaps in functionality coverage
+# 4. No vague or incomplete specifications
+# 5. All children must be traceable to their parent NODE
+
+================================================================================
+SPEC-LANG-0000: Language Philosophy
+================================================================================
+
+**NODE Definition (Line 4757-4771):**
+- Kind: NODE
+- Source: REQ-001, SSOT Section 1.1
+- Status: DONE
+- Priority: P0
+- Statement: Pyrite prioritizes simplicity, minimalism, and explicitness by default.
+
+**Children:**
+- SPEC-LANG-0001: Token Definition
+
+**Analysis:**
+SPEC-LANG-0000 is a meta/philosophy NODE that establishes design principles. It has only one child: SPEC-LANG-0001 (Token Definition), which is itself a NODE.
+
+**Issues Identified:**
+1. **Structural Issue**: SPEC-LANG-0000 claims to represent "Language Philosophy" but only has one child (SPEC-LANG-0001: Token Definition). This creates a logical disconnect:
+   - The NODE statement says "simplicity, minimalism, and explicitness by default"
+   - But the only child is about Token Definition, which doesn't directly implement these principles
+   - Language philosophy should influence many design decisions across the codebase, not just tokens
+
+2. **Missing Coverage**: The philosophy of "simplicity, minimalism, and explicitness" should manifest in:
+   - Syntax design decisions (covered by SPEC-LANG-0001 and others)
+   - Feature selection (opt-in advanced features)
+   - Error message clarity
+   - Documentation style
+   - But these are not explicitly tracked as children of this NODE
+
+3. **Vagueness**: The NODE has a "Statement" but no explicit DoD, Behavior, Semantics, or Implementation notes. This is acceptable for a philosophy NODE, but the relationship to its child is unclear.
+
+**Verdict:** ACCEPTABLE WITH NOTES
+- Philosophy NODEs are inherently meta-level and don't require full decomposition
+- The child relationship to SPEC-LANG-0001 is weak - Token Definition doesn't directly implement the philosophy
+- Recommendation: Consider making SPEC-LANG-0000 a standalone meta-item without children, or expand children to include other design-decision NODEs that directly reflect the philosophy
+
+**Coverage Status:** INCOMPLETE (Philosophy NODE with weak child relationship)
+
+================================================================================
+SPEC-LANG-0001: Token Definition
+================================================================================
+
+**NODE Definition (Line 4773-4809):**
+- Kind: NODE
+- Source: REQ-004, SSOT Section 3.1
+- Status: EXISTS-TODAY
+- Priority: P0
+- Ordering rationale: Tokens must be defined before any higher-level lexical or parsing logic.
+
+**Children:**
+- SPEC-LANG-0002: Identifier tokens (LEAF)
+- SPEC-LANG-0003: Keyword tokens (LEAF)
+- SPEC-LANG-0004: Integer literal tokens (LEAF)
+- SPEC-LANG-0005: String literal tokens (LEAF)
+- SPEC-LANG-0006: Operator tokens (LEAF)
+- SPEC-LANG-0007: Punctuation and Comment tokens (LEAF)
+- SPEC-LANG-0016: Indentation and Whitespace tokens (LEAF)
+- SPEC-LANG-0017: Statement and Block structure (Lexical) (LEAF)
+- SPEC-LANG-0018: Floating-point literal tokens (LEAF)
+- SPEC-LANG-0019: Boolean and None literal tokens (LEAF)
+- SPEC-LANG-0020: Character literal tokens (LEAF)
+- SPEC-LANG-0021: Language edition system (LEAF)
+
+**Analysis:**
+SPEC-LANG-0001 groups all token-related lexical specifications. It has 12 children, all of which are LEAFs. The children cover:
+- Identifiers, keywords, operators, punctuation (core tokens)
+- Literals: integers, floats, strings, characters, booleans, None
+- Whitespace and indentation (Pythonic syntax)
+- Block structure (lexical level)
+- Language edition system
+
+**Issues Identified:**
+1. **Out-of-scope child**: SPEC-LANG-0021 (Language Edition System) is listed as a child but:
+   - It's a LEAF that deals with edition selection in Quarry.toml and compiler behavior
+   - This is NOT a token definition - it's a compiler configuration feature
+   - The child list says "Language edition system (REQ-221)" which suggests it was added for REQ coverage, not token definition
+   - This creates a logical mismatch: Token Definition NODE contains a non-token child
+
+2. **Potential missing tokens**: 
+   - Raw string literals (if supported)
+   - Byte string literals (if supported)
+   - Format string tokens (f-strings, if supported)
+   - Docstring tokens (distinct from comments)
+   - However, these may be covered under existing LEAFs (e.g., SPEC-LANG-0005 for strings)
+
+3. **SPEC-LANG-0017 scope question**: "Statement and Block structure (Lexical)" - this seems to be about lexical structure (indentation-based blocks), which is appropriate for token definition. However, the name suggests it might overlap with parsing concerns.
+
+**Verdict:** MOSTLY COMPLETE WITH ISSUES
+- 11 out of 12 children are correctly scoped as token definitions
+- SPEC-LANG-0021 is incorrectly placed - should not be a child of Token Definition
+- All other children are proper LEAFs with DoD
+- Recommendation: Move SPEC-LANG-0021 to a more appropriate parent (e.g., a Compiler Configuration NODE or Module System NODE)
+
+**Coverage Status:** MOSTLY COMPLETE (11/12 children correctly scoped, 1 misplaced child)
+
+================================================================================
+SPEC-LANG-0008: Module and Import System
+================================================================================
+
+**NODE Definition (Line 5368-5394):**
+- Kind: NODE
+- Source: REQ-049, REQ-050, SSOT Section 3.2
+- Status: PLANNED
+- Priority: P0
+- Ordering rationale: Module resolution must occur before parsing function bodies to resolve external symbols.
+
+**Children:**
+- SPEC-LANG-0009: File-based module resolution (LEAF)
+- SPEC-LANG-0010: Import namespace management (LEAF)
+- SPEC-LANG-0011: Circular dependency detection (LEAF)
+- SPEC-LANG-0012: Visibility modifiers (pub) (LEAF)
+- SPEC-LANG-0013: Module search paths and environment variables (LEAF)
+- SPEC-LANG-0014: Prelude module (auto-import) (LEAF)
+- SPEC-LANG-0015: Relative vs Absolute imports (LEAF)
+
+**Analysis:**
+SPEC-LANG-0008 groups all module and import system functionality. It has 7 children, all LEAFs. The children cover:
+- Module resolution (file-based, search paths)
+- Import mechanisms (namespace, relative/absolute, aliasing)
+- Dependency management (circular detection)
+- Visibility control (pub modifier)
+- Standard library integration (prelude)
+
+**Issues Identified:**
+1. **Potential missing functionality**:
+   - Wildcard imports (`from math import *`) - not explicitly covered
+   - Re-exports (`pub use`) - not explicitly covered
+   - Module initialization code execution order
+   - However, these may be implicit in existing LEAFs or deferred features
+
+2. **SPEC-LANG-0014 scope**: Prelude module (auto-import) is listed as a child, but:
+   - It's sourced from REQ-058, SSOT Section 4.1 (not 3.2 like other children)
+   - This suggests it might be more about standard library than module system
+   - However, it's logically related to imports, so placement is acceptable
+
+3. **All children are LEAFs**: ✓ Good - fully decomposed
+
+**Verdict:** COMPLETE
+- All 7 children are LEAFs with proper DoD
+- Coverage appears comprehensive for module/import system
+- Minor note: Prelude (SPEC-LANG-0014) has different source section but is logically related
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0100: Expression Parsing
+================================================================================
+
+**NODE Definition (Line 5802-5834):**
+- Kind: NODE
+- Source: REQ-004, SSOT Section 3
+- Status: EXISTS-TODAY
+- Priority: P0
+- Ordering rationale: Primary expressions form the base of the recursive descent parser.
+
+**Children:**
+- SPEC-LANG-0101: Primary expression parsing (LEAF)
+- SPEC-LANG-0102: Unary operator parsing (LEAF)
+- SPEC-LANG-0103: Binary operator parsing (LEAF)
+- SPEC-LANG-0104: Function call parsing (LEAF)
+- SPEC-LANG-0105: Method call parsing (LEAF)
+- SPEC-LANG-0106: Index/slice expression parsing (LEAF)
+- SPEC-LANG-0107: Field access parsing (LEAF)
+- SPEC-LANG-0108: Try operator parsing (LEAF)
+- SPEC-LANG-0115: Ternary expression parsing (LEAF)
+- SPEC-LANG-0120: Conditional compilation (@cfg) parsing (LEAF)
+
+**Analysis:**
+SPEC-LANG-0100 groups all expression parsing functionality. It has 10 children, all LEAFs. The children cover:
+- Primary expressions (literals, identifiers)
+- Operators (unary, binary, ternary)
+- Calls (function, method)
+- Access (field, index/slice)
+- Special operators (try, conditional compilation)
+
+**Issues Identified:**
+1. **Missing expression types**: The children list shows 10 items, but there are additional expression-related LEAFs that may be missing:
+   - SPEC-LANG-0118: Deterministic Evaluation Order (listed under SPEC-LANG-0110, but relates to expressions)
+   - SPEC-LANG-0119: Compile-time Conditionals (if-comptime) (listed under SPEC-LANG-0110, but is an expression)
+   - However, these may be correctly placed under Statement Parsing if they're statement-level features
+
+2. **SPEC-LANG-0120 scope**: Conditional compilation (@cfg) parsing is listed as a child, but:
+   - It's sourced from REQ-157, REQ-158, REQ-160, SSOT Section 7.6 (not Section 3 like other children)
+   - This is more of a compiler directive than an expression
+   - However, it may be parsed as an expression-level construct, so placement is acceptable
+
+3. **All children are LEAFs**: ✓ Good - fully decomposed
+
+**Verdict:** COMPLETE
+- All 10 children are LEAFs with proper DoD
+- Coverage appears comprehensive for expression parsing
+- Minor note: Some expression-related features are under Statement Parsing, which is organizationally acceptable
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0110: Statement Parsing
+================================================================================
+
+**NODE Definition (Line 6509-6539):**
+- Kind: NODE
+- Source: REQ-004, REQ-094, REQ-096, REQ-097, SSOT Section 3, 6
+- Status: PLANNED
+- Priority: P0
+- Ordering rationale: Statements compose function bodies and require expressions to be defined first.
+
+**Children:**
+- SPEC-LANG-0111: Conditional statement parsing (LEAF)
+- SPEC-LANG-0112: Loop statement parsing (LEAF)
+- SPEC-LANG-0113: Control flow statement parsing (LEAF)
+- SPEC-LANG-0114: Pattern match parsing (LEAF)
+- SPEC-LANG-0116: Defer statement parsing (LEAF)
+- SPEC-LANG-0117: Context managers (with) parsing (LEAF)
+- SPEC-LANG-0118: Deterministic evaluation order parsing (LEAF)
+- SPEC-LANG-0119: Compile-time conditionals (if-comptime) (LEAF)
+- SPEC-LANG-0121: Entry Point Validation (LEAF)
+
+**Analysis:**
+SPEC-LANG-0110 groups all statement parsing functionality. It has 9 children, all LEAFs. The children cover:
+- Control flow (conditionals, loops, break/continue/return)
+- Pattern matching
+- Resource management (defer, with)
+- Evaluation semantics (deterministic order)
+- Compile-time features (if-comptime)
+- Entry point validation
+
+**Issues Identified:**
+1. **SPEC-LANG-0118 and 0119 scope**: 
+   - SPEC-LANG-0118 (Deterministic Evaluation Order) is listed as "parsing" but it's more about semantics than parsing
+   - SPEC-LANG-0119 (if-comptime) is an expression-level construct, not a statement
+   - However, they may be correctly placed here if they affect statement-level parsing
+
+2. **SPEC-LANG-0121 scope**: Entry Point Validation is listed as a child, but:
+   - It's sourced from REQ-400, SSOT Section 3.3
+   - This is more of a validation/checking step than parsing
+   - However, it may be checked during parsing, so placement is acceptable
+
+3. **Potential missing statements**:
+   - Variable declaration statements (let/var) - may be covered elsewhere
+   - Assignment statements - may be covered elsewhere
+   - Expression statements - may be implicit
+
+4. **All children are LEAFs**: ✓ Good - fully decomposed
+
+**Verdict:** MOSTLY COMPLETE
+- All 9 children are LEAFs with proper DoD
+- Coverage appears comprehensive for statement parsing
+- Minor scope questions about evaluation order and compile-time conditionals
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0200: Type Checking System
+================================================================================
+
+**NODE Definition (Line 6857-6951):**
+- Kind: NODE
+- Source: REQ-003, SSOT Section 4
+- Status: EXISTS-TODAY
+- Priority: P0
+- Ordering rationale: Type inference must precede compatibility checks.
+
+**Children:**
+- 35 LEAFs listed (SPEC-LANG-0201 through SPEC-LANG-0246)
+
+**Analysis:**
+SPEC-LANG-0200 is a large NODE grouping all type checking functionality. It has 35 children, all LEAFs. The children cover:
+- Type inference, compatibility, coercion
+- Generic types, traits, lifetimes
+- Primitive types (int, float, char, string, unit, slice)
+- Composite types (struct, enum, union, optional, result)
+- Compile-time features (const fn, comptime parameters, assertions)
+- Advanced types (HKT, dyn Trait)
+- Type aliases and conventions
+
+**Issues Identified:**
+1. **Very large NODE**: 35 children is a lot for a single NODE. This suggests:
+   - The NODE might benefit from decomposition into sub-NODEs (e.g., "Primitive Types", "Composite Types", "Generic Types", "Compile-time Types")
+   - However, all children are LEAFs, so decomposition is complete
+   - The large size makes it harder to navigate and understand the structure
+
+2. **All children are LEAFs**: ✓ Good - fully decomposed, but organization could be improved
+
+3. **Coverage appears comprehensive**: All major type system features are covered
+
+**Verdict:** COMPLETE BUT LARGE
+- All 35 children are LEAFs with proper DoD
+- Coverage is comprehensive for type checking
+- Recommendation: Consider decomposing into sub-NODEs for better organization (e.g., SPEC-LANG-0200-Primitives, SPEC-LANG-0200-Composites, etc.)
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive but large)
+
+================================================================================
+SPEC-LANG-0207: Type and Convention Aliases
+================================================================================
+
+**NODE Definition (Line 7333-7349):**
+- Kind: NODE
+- Source: REQ-058, REQ-059, REQ-060, REQ-074, SSOT Section 4.1, 4.3
+- Status: PLANNED
+- Priority: P2
+
+**Children:**
+- SPEC-LANG-0208: Text and Bytes aliases (LEAF)
+- SPEC-LANG-0209: Ref[T] and Mut[T] generic aliases (LEAF)
+- SPEC-LANG-0210: Teaching argument keywords (borrow, inout, take) (LEAF)
+
+**Analysis:**
+SPEC-LANG-0207 groups type alias and convention features. It has 3 children, all LEAFs. The children cover:
+- Text/Bytes type aliases
+- Reference type aliases
+- Teaching keywords for argument conventions
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Small, focused NODE**: 3 children is appropriate size
+3. **Coverage appears complete**: All alias-related features covered
+
+**Verdict:** COMPLETE
+- All 3 children are LEAFs with proper DoD
+- Coverage is complete for type/convention aliases
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0300: Ownership System
+================================================================================
+
+**NODE Definition (Line 9775-9805):**
+- Kind: NODE
+- Source: REQ-003, SSOT Section 5
+- Status: EXISTS-TODAY
+- Priority: P0
+
+**Children:**
+- SPEC-LANG-0301: Move semantics analysis (LEAF)
+- SPEC-LANG-0302: Borrow checker implementation (NODE - see below)
+- SPEC-LANG-0303: Lifetime analysis (LEAF)
+- SPEC-LANG-0304: Copy vs Move type classification (LEAF)
+- SPEC-LANG-0305: Ownership error diagnostics (LEAF)
+- SPEC-LANG-0311: Non-null reference guarantees (LEAF)
+- SPEC-LANG-0312: Borrowing semantics (LEAF)
+- SPEC-LANG-0313: Raw pointer semantics (LEAF)
+- SPEC-LANG-0314: Variable immutability by default (LEAF)
+- SPEC-LANG-0315: RAII and deterministic destruction (LEAF)
+- SPEC-LANG-0316: Explicit unsafe contexts (LEAF)
+
+**Analysis:**
+SPEC-LANG-0300 groups all ownership system functionality. It has 11 children, but one (SPEC-LANG-0302) is itself a NODE. The children cover:
+- Move semantics, borrow checking, lifetimes
+- Type classification (Copy vs Move)
+- Safety guarantees (non-null, immutability, RAII)
+- Unsafe contexts
+
+**Issues Identified:**
+1. **Nested NODE**: SPEC-LANG-0302 (Borrow Checker Implementation) is a NODE, not a LEAF
+   - This is acceptable - NODEs can have NODE children
+   - SPEC-LANG-0302 has its own children (see below)
+
+2. **All other children are LEAFs**: ✓ Good
+
+3. **Coverage appears comprehensive**: All major ownership features covered
+
+**Verdict:** COMPLETE
+- 10 LEAFs + 1 NODE child
+- Coverage is comprehensive for ownership system
+- Nested NODE structure is appropriate
+
+**Coverage Status:** COMPLETE (10 LEAFs + 1 NODE, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0302: Borrow Checker Implementation
+================================================================================
+
+**NODE Definition (Line 9877-9895):**
+- Kind: NODE
+- Source: REQ-003, SSOT Section 5.2
+- Status: PLANNED
+- Priority: P0
+
+**Children:**
+- SPEC-LANG-0306: Borrow checker driver and flow analysis (LEAF)
+- SPEC-LANG-0307: Immutable vs Mutable borrow exclusivity rules (LEAF)
+- SPEC-LANG-0308: Re-borrowing and borrow stack management (LEAF)
+- SPEC-LANG-0309: Partial moves and field-level tracking (LEAF)
+- SPEC-LANG-0310: Borrow checker diagnostic generation integration (LEAF)
+
+**Analysis:**
+SPEC-LANG-0302 is a NODE child of SPEC-LANG-0300. It groups borrow checker implementation details. It has 5 children, all LEAFs. The children cover:
+- Borrow flow analysis
+- Borrow exclusivity rules
+- Re-borrowing logic
+- Partial moves
+- Diagnostics
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Well-organized**: Logical grouping of borrow checker components
+3. **Coverage appears complete**: All major borrow checker features covered
+
+**Verdict:** COMPLETE
+- All 5 children are LEAFs with proper DoD
+- Coverage is complete for borrow checker implementation
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0400: Design by Contract System
+================================================================================
+
+**NODE Definition (Line 8671-8699):**
+- Kind: NODE
+- Source: REQ-123 through REQ-131, SSOT Section 7.3
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-LANG-0401: Precondition attribute (@requires) (LEAF)
+- SPEC-LANG-0402: Postcondition attribute (@ensures) (LEAF)
+- SPEC-LANG-0403: Invariant attribute (@invariant) (LEAF)
+- SPEC-LANG-0404: State capture function (old()) (LEAF)
+- SPEC-LANG-0405: Quantified predicates (forall, exists) (LEAF)
+- SPEC-LANG-0406: Compile-time contract verification (LEAF)
+- SPEC-LANG-0407: Contract propagation and blame tracking (LEAF)
+- SPEC-LANG-0408: @safety_critical attribute (LEAF)
+- SPEC-LANG-0409: SMT Solver Integration (LEAF)
+
+**Analysis:**
+SPEC-LANG-0400 groups all Design by Contract functionality. It has 9 children, all LEAFs. The children cover:
+- Contract attributes (@requires, @ensures, @invariant, @safety_critical)
+- Contract expressions (old(), forall, exists)
+- Contract verification (compile-time, SMT solver)
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears comprehensive**: All major DbC features covered
+3. **Well-organized**: Logical grouping of related features
+
+**Verdict:** COMPLETE
+- All 9 children are LEAFs with proper DoD
+- Coverage is comprehensive for Design by Contract
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0500: Closures and Higher-Order Functions
+================================================================================
+
+**NODE Definition (Line 9027-9058):**
+- Kind: NODE
+- Source: REQ-135 through REQ-145, SSOT Section 7.5
+- Status: PARTIAL
+- Priority: P0
+
+**Children:**
+- SPEC-LANG-0501: Parameter closure syntax (fn[...]) (LEAF)
+- SPEC-LANG-0502: Runtime closure syntax (fn(...)) (LEAF)
+- SPEC-LANG-0503: Closure capture analysis (LEAF)
+- SPEC-LANG-0504: Escape analysis for stack-allocated closures (LEAF)
+- SPEC-LANG-0505: 'move' keyword semantics for closures (LEAF)
+- SPEC-LANG-0506: Fn/FnMut/FnOnce trait mapping for closures (LEAF)
+- SPEC-LANG-0507: Closure environment memory layout (LEAF)
+- SPEC-LANG-0508: Recursive closure restrictions (LEAF)
+- SPEC-LANG-0510: Algorithmic helpers via parameter closures (LEAF)
+- SPEC-LANG-0511: Stdlib closure guidelines (LEAF)
+- SPEC-LANG-0512: Untagged Union Safety (LEAF)
+
+**Analysis:**
+SPEC-LANG-0500 groups all closure and higher-order function functionality. It has 11 children, all LEAFs. The children cover:
+- Closure syntax (parameter closures, runtime closures)
+- Closure semantics (capture analysis, escape analysis, move semantics)
+- Closure traits (Fn/FnMut/FnOnce)
+- Closure implementation (memory layout, restrictions)
+- Closure usage (algorithmic helpers, stdlib guidelines)
+- Safety (untagged union safety)
+
+**Issues Identified:**
+1. **SPEC-LANG-0512 scope**: Untagged Union Safety is listed as a child, but:
+   - It's sourced from REQ-403, which may not be directly related to closures
+   - This might be more appropriately placed under a safety/type system NODE
+   - However, if it relates to closure safety, placement is acceptable
+
+2. **All children are LEAFs**: ✓ Good - fully decomposed
+
+3. **Coverage appears comprehensive**: All major closure features covered
+
+**Verdict:** MOSTLY COMPLETE
+- All 11 children are LEAFs with proper DoD
+- Coverage is comprehensive for closures
+- Minor scope question about SPEC-LANG-0512 placement
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0600: SIMD Support
+================================================================================
+
+**NODE Definition (Line 9347-9365):**
+- Kind: NODE
+- Source: REQ-300 through REQ-308, SSOT Section 9.12
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-LANG-0601: Portable SIMD types (simd::Vec[T, N]) (LEAF)
+- SPEC-LANG-0602: @simd attribute enforcement (LEAF)
+- SPEC-LANG-0603: CPU feature introspection (preferred_width) (LEAF)
+- SPEC-LANG-0604: @noalias attribute syntax and semantics (LEAF)
+- SPEC-LANG-0605: Portable SIMD Vector Types (LEAF)
+
+**Analysis:**
+SPEC-LANG-0600 groups all SIMD functionality. It has 5 children, all LEAFs. The children cover:
+- SIMD types (Vec[T, N])
+- SIMD attributes (@simd, @noalias)
+- CPU feature detection
+
+**Issues Identified:**
+1. **Potential duplication**: SPEC-LANG-0601 and SPEC-LANG-0605 both mention "Portable SIMD types/Vector Types"
+   - Need to verify these are distinct or if there's duplication
+   - SPEC-LANG-0605 is sourced from REQ-398, while SPEC-LANG-0601 is from REQ-301
+
+2. **All children are LEAFs**: ✓ Good - fully decomposed
+
+3. **Coverage appears complete**: All major SIMD features covered
+
+**Verdict:** COMPLETE WITH NOTES
+- All 5 children are LEAFs with proper DoD
+- Coverage is complete for SIMD
+- Need to verify SPEC-LANG-0601 vs SPEC-LANG-0605 are distinct
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0700: GPU Computing Support
+================================================================================
+
+**NODE Definition (Line 9549-9565):**
+- Kind: NODE
+- Source: REQ-327 through REQ-334, SSOT Section 9.13
+- Status: DEFERRED
+- Priority: P3
+
+**Children:**
+- SPEC-LANG-0701: @kernel attribute and constraints (LEAF)
+- SPEC-LANG-0702: Device memory types (DevicePtr[T]) (LEAF)
+- SPEC-LANG-0703: GPU thread/block primitives (LEAF)
+- SPEC-LANG-0704: GPU backend priority roadmap (LEAF)
+
+**Analysis:**
+SPEC-LANG-0700 groups all GPU computing functionality. It has 4 children, all LEAFs. The children cover:
+- Kernel functions (@kernel attribute)
+- Device memory types
+- GPU primitives
+- Backend roadmap
+
+**Issues Identified:**
+1. **SPEC-LANG-0704 scope**: GPU backend priority roadmap is listed as a LEAF, but:
+   - Roadmaps are typically planning documents, not implementable features
+   - This might be better as documentation or a separate planning item
+   - However, if it specifies implementation requirements, it's acceptable as a LEAF
+
+2. **All children are LEAFs**: ✓ Good - fully decomposed
+
+3. **Status is DEFERRED**: Appropriate for future work
+
+**Verdict:** COMPLETE WITH NOTES
+- All 4 children are LEAFs with proper DoD
+- Coverage is complete for GPU support (deferred)
+- Minor question about SPEC-LANG-0704 being a roadmap vs implementable feature
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0800: Standard Library Core
+================================================================================
+
+**NODE Definition (Line 10495-10512):**
+- Kind: NODE
+- Source: REQ-267, REQ-292, REQ-293, REQ-294, REQ-295, SSOT Section 9.1
+- Status: PLANNED
+- Priority: P0
+
+**Children:**
+- SPEC-LANG-0801: Core Collection Suite (List, Map, Set) (NODE - see below)
+- SPEC-LANG-0802: String and StringBuilder (NODE - see below)
+- SPEC-LANG-0803: File and Path I/O (NODE - see below)
+- SPEC-LANG-0815: Stdlib Design Conventions (Borrowing, Costs, Builders) (LEAF)
+- SPEC-LANG-0835: Time and Duration Utilities (LEAF)
+- SPEC-LANG-0836: Integrated CLI Argument Parsing (LEAF)
+- SPEC-LANG-0837: Native Regular Expressions (LEAF)
+- SPEC-LANG-0838: Mathematical and Random Utilities (LEAF)
+
+**Analysis:**
+SPEC-LANG-0800 groups core standard library functionality. It has 8 children, but 3 are NODEs (0801, 0802, 0803). The children cover:
+- Collections (List, Map, Set)
+- String handling
+- File I/O
+- Utilities (time, CLI, regex, math)
+
+**Issues Identified:**
+1. **Nested NODEs**: SPEC-LANG-0801, 0802, 0803 are NODEs, not LEAFs
+   - This is acceptable - NODEs can have NODE children
+   - These NODEs have their own children (see below)
+
+2. **All other children are LEAFs**: ✓ Good
+
+3. **Coverage appears comprehensive**: All major stdlib core features covered
+
+**Verdict:** COMPLETE
+- 5 LEAFs + 3 NODE children
+- Coverage is comprehensive for stdlib core
+- Nested NODE structure is appropriate
+
+**Coverage Status:** COMPLETE (5 LEAFs + 3 NODEs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0801: Core Collection Suite (List, Map, Set)
+================================================================================
+
+**NODE Definition (Line 10516-10530):**
+- Kind: NODE
+- Source: REQ-063, REQ-267, REQ-268, REQ-269, REQ-276, REQ-277, REQ-280, REQ-282, SSOT Section 9.1
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-LANG-0820: List[T] implementation (LEAF)
+- SPEC-LANG-0821: Map[K, V] implementation (LEAF)
+- SPEC-LANG-0822: Set[T] implementation (LEAF)
+- SPEC-LANG-0823: Lazy Iterator System (LEAF)
+- SPEC-LANG-0824: Performance-optimized Inline Collections (LEAF)
+
+**Analysis:**
+SPEC-LANG-0801 is a NODE child of SPEC-LANG-0800. It groups collection implementations. It has 5 children, all LEAFs. The children cover:
+- List, Map, Set implementations
+- Iterator system
+- Inline collections
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major collection types covered
+
+**Verdict:** COMPLETE
+- All 5 children are LEAFs with proper DoD
+- Coverage is complete for collections
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0802: String and StringBuilder
+================================================================================
+
+**NODE Definition (Line 10725-10739):**
+- Kind: NODE
+- Source: REQ-270, REQ-271, REQ-281, REQ-284, REQ-285, REQ-286, SSOT Section 9.3
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-LANG-0826: UTF-8 String Core (LEAF)
+- SPEC-LANG-0827: StringBuilder Implementation (LEAF)
+- SPEC-LANG-0828: Type-safe String Formatting (format!) (LEAF)
+- SPEC-LANG-0825: Small String Optimization (SSO) (LEAF)
+- SPEC-LANG-0829: String Concatenation Optimization (LEAF)
+
+**Analysis:**
+SPEC-LANG-0802 is a NODE child of SPEC-LANG-0800. It groups string handling functionality. It has 5 children, all LEAFs. The children cover:
+- String core (UTF-8)
+- StringBuilder
+- Formatting
+- Optimizations (SSO, concatenation)
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major string features covered
+
+**Verdict:** COMPLETE
+- All 5 children are LEAFs with proper DoD
+- Coverage is complete for string handling
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0803: File and Path I/O
+================================================================================
+
+**NODE Definition (Line 10881-10892):**
+- Kind: NODE
+- Source: REQ-272, REQ-273, REQ-274, REQ-287, REQ-288, SSOT Section 9.4
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-LANG-0830: Result-based File Operations (LEAF)
+- SPEC-LANG-0831: Cross-platform Path Handling (LEAF)
+
+**Analysis:**
+SPEC-LANG-0803 is a NODE child of SPEC-LANG-0800. It groups file I/O functionality. It has 2 children, all LEAFs. The children cover:
+- File operations (Result-based)
+- Path handling (cross-platform)
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Small, focused NODE**: 2 children is appropriate size
+3. **Coverage appears complete**: All major file I/O features covered
+
+**Verdict:** COMPLETE
+- All 2 children are LEAFs with proper DoD
+- Coverage is complete for file I/O
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0804: Serialization (JSON, TOML)
+================================================================================
+
+**NODE Definition (Line 10952-10963):**
+- Kind: NODE
+- Source: REQ-275, REQ-289, REQ-290, SSOT Section 9.5
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-LANG-0840: Built-in Serialization Formats (LEAF)
+- SPEC-LANG-0841: Automated Serialization Derivation (@derive) (LEAF)
+
+**Analysis:**
+SPEC-LANG-0804 groups serialization functionality. It has 2 children, all LEAFs. The children cover:
+- Serialization formats (JSON, TOML)
+- Derivation macros
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Small, focused NODE**: 2 children is appropriate size
+3. **Coverage appears complete**: All major serialization features covered
+
+**Verdict:** COMPLETE
+- All 2 children are LEAFs with proper DoD
+- Coverage is complete for serialization
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0805: Networking (TCP, HTTP)
+================================================================================
+
+**NODE Definition (Line 11021-11031):**
+- Kind: NODE
+- Source: REQ-277, REQ-291, SSOT Section 9.6
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-LANG-0850: TCP and HTTP Client/Server (LEAF)
+
+**Analysis:**
+SPEC-LANG-0805 groups networking functionality. It has 1 child, a LEAF. The child covers:
+- TCP and HTTP client/server
+
+**Issues Identified:**
+1. **Single child NODE**: Only 1 child suggests this might be better as a LEAF itself
+   - However, if networking is expected to expand (UDP, WebSocket, etc.), keeping as NODE is appropriate
+   - The single LEAF covers both TCP and HTTP, which could potentially be split
+
+2. **All children are LEAFs**: ✓ Good - fully decomposed
+
+**Verdict:** COMPLETE BUT SMALL
+- 1 LEAF child with proper DoD
+- Coverage is complete for current networking features
+- Recommendation: Consider if SPEC-LANG-0850 should be split into separate TCP and HTTP LEAFs, or if NODE should be converted to LEAF
+
+**Coverage Status:** COMPLETE (1 LEAF child, comprehensive but small)
+
+================================================================================
+SPEC-LANG-0806: Numerics and Tensors
+================================================================================
+
+**NODE Definition (Line 11063-11076):**
+- Kind: NODE
+- Source: REQ-296, REQ-297, REQ-298, REQ-299, SSOT Section 9.11
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-LANG-0870: High-performance Tensor Abstraction (LEAF)
+- SPEC-LANG-0871: Flexible Tensor Layouts (LEAF)
+- SPEC-LANG-0872: Zero-cost Tensor Views (LEAF)
+- SPEC-LANG-0873: Specialized Numerical Algorithms (LEAF)
+
+**Analysis:**
+SPEC-LANG-0806 groups numerics and tensor functionality. It has 4 children, all LEAFs. The children cover:
+- Tensor abstraction
+- Tensor layouts
+- Tensor views
+- Numerical algorithms
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major tensor/numerics features covered
+
+**Verdict:** COMPLETE
+- All 4 children are LEAFs with proper DoD
+- Coverage is complete for numerics/tensors
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0807: Performance Optimization Helpers
+================================================================================
+
+**NODE Definition (Line 11176-11190):**
+- Kind: NODE
+- Source: REQ-309 through REQ-314, SSOT Section 9.12
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-LANG-0808: Automated vectorization (vectorize) (LEAF)
+- SPEC-LANG-0809: Structured parallelism (parallelize) (LEAF)
+- SPEC-LANG-0810: Cache-aware tiling (tile) (LEAF)
+
+**Analysis:**
+SPEC-LANG-0807 groups performance optimization helper functionality. It has 3 children, all LEAFs. The children cover:
+- Vectorization
+- Parallelism
+- Tiling
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Small, focused NODE**: 3 children is appropriate size
+3. **Coverage appears complete**: All major optimization helpers covered
+
+**Verdict:** COMPLETE
+- All 3 children are LEAFs with proper DoD
+- Coverage is complete for optimization helpers
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-0900: Memory Management
+================================================================================
+
+**NODE Definition (Line 11424-11438):**
+- Kind: NODE
+- Source: REQ-335, REQ-336, SSOT Section 9.14
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-LANG-0901: Global default allocator (LEAF)
+- SPEC-LANG-0902: Custom arena allocators (LEAF)
+- SPEC-LANG-0903: Freestanding/Bare-metal core library (LEAF)
+
+**Analysis:**
+SPEC-LANG-0900 groups memory management functionality. It has 3 children, all LEAFs. The children cover:
+- Global allocator
+- Arena allocators
+- Bare-metal support
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Small, focused NODE**: 3 children is appropriate size
+3. **Coverage appears complete**: All major memory management features covered
+
+**Verdict:** COMPLETE
+- All 3 children are LEAFs with proper DoD
+- Coverage is complete for memory management
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-1000: Concurrency
+================================================================================
+
+**NODE Definition (Line 11568-11586):**
+- Kind: NODE
+- Source: REQ-337 to REQ-343, SSOT Section 11.0
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-LANG-1001: Thread management API (spawn) (LEAF)
+- SPEC-LANG-1002: Send/Sync trait enforcement (LEAF)
+- SPEC-LANG-1003: Synchronization primitives (Mutex, Channels) (LEAF)
+- SPEC-LANG-1004: Structured concurrency (async with) (LEAF)
+- SPEC-LANG-1005: Task cancellation and detached tasks (LEAF)
+
+**Analysis:**
+SPEC-LANG-1000 groups concurrency functionality. It has 5 children, all LEAFs. The children cover:
+- Thread management
+- Send/Sync traits
+- Synchronization primitives
+- Structured concurrency
+- Task management
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major concurrency features covered
+
+**Verdict:** COMPLETE
+- All 5 children are LEAFs with proper DoD
+- Coverage is complete for concurrency
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-1100: Observability
+================================================================================
+
+**NODE Definition (Line 11792-11808):**
+- Kind: NODE
+- Source: REQ-344 to REQ-348, SSOT Section 9.17
+- Status: PLANNED
+- Priority: P2
+
+**Children:**
+- SPEC-LANG-1101: Structured logging API (LEAF)
+- SPEC-LANG-1102: Distributed tracing spans (LEAF)
+- SPEC-LANG-1103: Type-safe metrics collection (LEAF)
+- SPEC-LANG-1104: OpenTelemetry compatible exporters (LEAF)
+
+**Analysis:**
+SPEC-LANG-1100 groups observability functionality. It has 4 children, all LEAFs. The children cover:
+- Logging
+- Tracing
+- Metrics
+- OpenTelemetry integration
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major observability features covered
+
+**Verdict:** COMPLETE
+- All 4 children are LEAFs with proper DoD
+- Coverage is complete for observability
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-1200: FFI and Interoperability
+================================================================================
+
+**NODE Definition (Line 11989-12001):**
+- Kind: NODE
+- Source: REQ-353, REQ-355, SSOT Section 11.1, 11.4
+- Status: PLANNED
+- Priority: P2
+
+**Children:**
+- SPEC-LANG-1201: Native C FFI (extern) (LEAF)
+- SPEC-LANG-1202: Python interoperability strategy (LEAF)
+
+**Analysis:**
+SPEC-LANG-1200 groups FFI and interoperability functionality. It has 2 children, all LEAFs. The children cover:
+- C FFI
+- Python interoperability
+
+**Issues Identified:**
+1. **SPEC-LANG-1202 scope**: Python interoperability strategy is listed as a LEAF, but:
+   - "Strategy" suggests this might be planning/documentation rather than implementation
+   - However, if it specifies concrete implementation requirements, it's acceptable as a LEAF
+
+2. **All children are LEAFs**: ✓ Good - fully decomposed
+
+3. **Coverage appears complete**: All major FFI features covered
+
+**Verdict:** COMPLETE WITH NOTES
+- All 2 children are LEAFs with proper DoD
+- Coverage is complete for FFI
+- Minor question about SPEC-LANG-1202 being a strategy vs implementable feature
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-1300: Documentation and Performance Guides
+================================================================================
+
+**NODE Definition (Line 12101-12113):**
+- Kind: NODE
+- Source: REQ-321, REQ-322, REQ-325, REQ-326, SSOT Section 9.12
+- Status: PLANNED
+- Priority: P3
+
+**Children:**
+- SPEC-LANG-1301: Performance-documented standard library (LEAF)
+- SPEC-LANG-1302: Educational performance cookbook (LEAF)
+
+**Analysis:**
+SPEC-LANG-1300 groups documentation functionality. It has 2 children, all LEAFs. The children cover:
+- Performance documentation
+- Educational cookbook
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Small, focused NODE**: 2 children is appropriate size
+3. **Coverage appears complete**: All major documentation features covered
+
+**Verdict:** COMPLETE
+- All 2 children are LEAFs with proper DoD
+- Coverage is complete for documentation
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-LANG-1500: Formal Verification and Certification
+================================================================================
+
+**NODE Definition (Line 12231-12247):**
+- Kind: NODE
+- Source: REQ-383, REQ-409, REQ-410, REQ-411, SSOT Section 16.1, 16.2
+- Status: PLANNED
+- Priority: P3
+
+**Children:**
+- SPEC-LANG-1501: Certification Standards Compliance (DO-178C, CC EAL 7) (LEAF)
+- SPEC-LANG-1502: Undefined Behavior Catalog (LEAF)
+- SPEC-LANG-1503: Data-Race-Free Theorem (LEAF)
+- SPEC-LANG-1504: Memory-Safety Theorem (LEAF)
+
+**Analysis:**
+SPEC-LANG-1500 groups formal verification and certification functionality. It has 4 children, all LEAFs. The children cover:
+- Certification compliance
+- Undefined behavior catalog
+- Formal theorems (data-race-free, memory-safety)
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major formal verification features covered
+
+**Verdict:** COMPLETE
+- All 4 children are LEAFs with proper DoD
+- Coverage is complete for formal verification
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-FORGE-0001: Compiler Pipeline
+================================================================================
+
+**NODE Definition (Line 12337-12361):**
+- Kind: NODE
+- Source: REQ-002, SSOT Section 2
+- Status: EXISTS-TODAY
+- Priority: P0
+
+**Children:**
+- SPEC-FORGE-0002: Lexical analysis phase (LEAF)
+- SPEC-FORGE-0003: Parsing phase (NODE - see below)
+- SPEC-FORGE-0004: Name resolution phase (NODE - see below)
+- SPEC-FORGE-0005: Type checking phase (NODE - see below)
+- SPEC-FORGE-0006: Ownership analysis phase (LEAF)
+- SPEC-FORGE-0007: Code generation phase (NODE - see below)
+- SPEC-FORGE-0008: Linking phase (LEAF)
+- SPEC-FORGE-0030: Binary and ABI stability (LEAF)
+
+**Analysis:**
+SPEC-FORGE-0001 groups all compiler pipeline phases. It has 8 children, but 4 are NODEs (0003, 0004, 0005, 0007). The children cover:
+- All compiler phases (lex, parse, resolve, type, ownership, codegen, link)
+- ABI stability
+
+**Issues Identified:**
+1. **Nested NODEs**: SPEC-FORGE-0003, 0004, 0005, 0007 are NODEs, not LEAFs
+   - This is acceptable - NODEs can have NODE children
+   - These NODEs have their own children (see below)
+
+2. **All other children are LEAFs**: ✓ Good
+
+3. **Coverage appears comprehensive**: All major compiler phases covered
+
+**Verdict:** COMPLETE
+- 4 LEAFs + 4 NODE children
+- Coverage is comprehensive for compiler pipeline
+- Nested NODE structure is appropriate
+
+**Coverage Status:** COMPLETE (4 LEAFs + 4 NODEs, comprehensive coverage)
+
+================================================================================
+SPEC-FORGE-0003: Parsing Phase
+================================================================================
+
+**NODE Definition (Line 12419-12439):**
+- Kind: NODE
+- Source: SPEC-FORGE-0001, SSOT Section 3
+- Status: EXISTS-TODAY
+- Priority: P0
+- Ordering rationale: The parser driver must be established before specific construct parsing.
+
+**Children:**
+- SPEC-FORGE-0009: Parser driver and error recovery (LEAF)
+- SPEC-FORGE-0010: Declaration parsing (fn, struct, enum) (LEAF)
+- SPEC-FORGE-0011: Statement parsing integration (LEAF)
+- SPEC-FORGE-0012: Expression parsing integration (LEAF)
+- SPEC-FORGE-0013: Module and Import parsing integration (LEAF)
+
+**Analysis:**
+SPEC-FORGE-0003 is a NODE child of SPEC-FORGE-0001. It groups parsing phase functionality. It has 5 children, all LEAFs. The children cover:
+- Parser driver
+- Declaration parsing
+- Statement/expression/module parsing integration
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major parsing components covered
+
+**Verdict:** COMPLETE
+- All 5 children are LEAFs with proper DoD
+- Coverage is complete for parsing phase
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-FORGE-0004: Name Resolution Phase
+================================================================================
+
+**NODE Definition (Line 12719-12739):**
+- Kind: NODE
+- Source: SPEC-FORGE-0001, SSOT Section 3.2
+- Status: EXISTS-TODAY
+- Priority: P0
+- Ordering rationale: Symbols must be collected before they can be resolved in function bodies.
+
+**Children:**
+- SPEC-FORGE-0014: Symbol table implementation (scoped) (LEAF)
+- SPEC-FORGE-0015: First-pass: collection of top-level symbols (LEAF)
+- SPEC-FORGE-0016: Second-pass: resolution of types and signatures (LEAF)
+- SPEC-FORGE-0017: Third-pass: resolution of function bodies and local scopes (LEAF)
+- SPEC-FORGE-0018: Import resolution and cross-module symbols (LEAF)
+
+**Analysis:**
+SPEC-FORGE-0004 is a NODE child of SPEC-FORGE-0001. It groups name resolution functionality. It has 5 children, all LEAFs. The children cover:
+- Symbol table
+- Multi-pass resolution (top-level, types, function bodies)
+- Import resolution
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major name resolution components covered
+
+**Verdict:** COMPLETE
+- All 5 children are LEAFs with proper DoD
+- Coverage is complete for name resolution
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-FORGE-0005: Type Checking Phase
+================================================================================
+
+**NODE Definition (Line 12863-12883):**
+- Kind: NODE
+- Source: SPEC-FORGE-0001, SSOT Section 4
+- Status: EXISTS-TODAY
+- Priority: P0
+- Ordering rationale: Constraints must be generated before they can be solved via unification.
+
+**Children:**
+- SPEC-FORGE-0019: Type checker driver and traversal (LEAF)
+- SPEC-FORGE-0020: Inference constraint generation (LEAF)
+- SPEC-FORGE-0021: Unification and solving engine (LEAF)
+- SPEC-FORGE-0022: Trait bound and generic verification integration (LEAF)
+- SPEC-FORGE-0023: Final type annotation and verification (LEAF)
+
+**Analysis:**
+SPEC-FORGE-0005 is a NODE child of SPEC-FORGE-0001. It groups type checking functionality. It has 5 children, all LEAFs. The children cover:
+- Type checker driver
+- Constraint generation
+- Unification
+- Trait/generic verification
+- Final verification
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major type checking components covered
+
+**Verdict:** COMPLETE
+- All 5 children are LEAFs with proper DoD
+- Coverage is complete for type checking
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-FORGE-0007: Code Generation Phase
+================================================================================
+
+**NODE Definition (Line 13063-13085):**
+- Kind: NODE
+- Source: SPEC-FORGE-0001, SSOT Section 2
+- Status: EXISTS-TODAY
+- Priority: P0
+- Ordering rationale: Context management must be established before specific construct codegen.
+
+**Children:**
+- SPEC-FORGE-0024: Codegen driver and LLVM context management (LEAF)
+- SPEC-FORGE-0025: Declaration codegen (functions, types) (LEAF)
+- SPEC-FORGE-0026: Expression codegen (arithmetic, calls) (LEAF)
+- SPEC-FORGE-0027: Control flow codegen (if, loops, match) (LEAF)
+- SPEC-FORGE-0028: Memory and pointer codegen (alloc, deref) (LEAF)
+- SPEC-FORGE-0029: Specialized code generation for comptime parameters (LEAF)
+
+**Analysis:**
+SPEC-FORGE-0007 is a NODE child of SPEC-FORGE-0001. It groups code generation functionality. It has 6 children, all LEAFs. The children cover:
+- Codegen driver
+- Declaration codegen
+- Expression codegen
+- Control flow codegen
+- Memory codegen
+- Comptime codegen
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major codegen components covered
+
+**Verdict:** COMPLETE
+- All 6 children are LEAFs with proper DoD
+- Coverage is complete for code generation
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-FORGE-0200: Compiler Analysis Passes
+================================================================================
+
+**NODE Definition (Line 13313-13339):**
+- Kind: NODE
+- Source: REQ-081 through REQ-084, SSOT Section 4.5
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-FORGE-0201: Allocation tracking pass (LEAF)
+- SPEC-FORGE-0202: Call-graph blame analysis (LEAF)
+- SPEC-FORGE-0203: Cost budget verification (LEAF)
+- SPEC-FORGE-0204: Bounds checking control attributes (LEAF)
+- SPEC-FORGE-0205: Monomorphization and Static Dispatch (LEAF)
+- SPEC-FORGE-0206: Zero-cost Error Handling (No Unwinding) (LEAF)
+- SPEC-FORGE-0207: Runtime aliasing verification (LEAF)
+- SPEC-FORGE-0208: Verifiable zero-allocation build mode (--no-alloc) (LEAF)
+- SPEC-FORGE-0209: Ownership Consumption Warning (LEAF)
+
+**Analysis:**
+SPEC-FORGE-0200 groups compiler analysis passes. It has 9 children, all LEAFs. The children cover:
+- Allocation tracking
+- Call-graph analysis
+- Cost verification
+- Bounds checking
+- Monomorphization
+- Error handling
+- Aliasing verification
+- Zero-allocation mode
+- Ownership warnings
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major analysis passes covered
+
+**Verdict:** COMPLETE
+- All 9 children are LEAFs with proper DoD
+- Coverage is complete for analysis passes
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-FORGE-0300: Optimization Passes
+================================================================================
+
+**NODE Definition (Line 13601-13625):**
+- Kind: NODE
+- Source: REQ-204 through REQ-208, SSOT Section 8.13
+- Status: PLANNED
+- Priority: P2
+
+**Children:**
+- SPEC-FORGE-0301: Profile-Guided Optimization (PGO) integration (LEAF)
+- SPEC-FORGE-0302: Link-Time Optimization (LTO) support (LEAF)
+- SPEC-FORGE-0303: CPU Multi-versioning dispatcher (LEAF)
+- SPEC-FORGE-0304: Bounds check elision (LEAF)
+- SPEC-FORGE-0305: Optimization via noalias (LEAF)
+- SPEC-FORGE-0306: Explicit loop unrolling (@unroll) (LEAF)
+- SPEC-FORGE-0307: Integrated unrolling and SIMD optimization (LEAF)
+- SPEC-FORGE-0308: Advanced Loop Optimizations (LEAF)
+
+**Analysis:**
+SPEC-FORGE-0300 groups optimization passes. It has 8 children, all LEAFs. The children cover:
+- PGO, LTO
+- CPU multi-versioning
+- Bounds check elision
+- Noalias optimization
+- Loop optimizations (unrolling, SIMD)
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major optimization passes covered
+
+**Verdict:** COMPLETE
+- All 8 children are LEAFs with proper DoD
+- Coverage is complete for optimization passes
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-FORGE-0100: Diagnostic System
+================================================================================
+
+**NODE Definition (Line 13809-13837):**
+- Kind: NODE
+- Source: REQ-025, SSOT Section 2.1
+- Status: EXISTS-TODAY
+- Priority: P0
+
+**Children:**
+- SPEC-FORGE-0101: Error code assignment (LEAF)
+- SPEC-FORGE-0102: Source span highlighting (LEAF)
+- SPEC-FORGE-0103: Multi-line context display (LEAF)
+- SPEC-FORGE-0104: Help text generation (LEAF)
+- SPEC-FORGE-0105: Error explanation system (LEAF)
+- SPEC-FORGE-0106: Internationalization (i18n) support (LEAF)
+- SPEC-FORGE-0107: Structured diagnostic output (JSON) (LEAF)
+- SPEC-FORGE-0108: Suggestion engine for typos (Levenshtein) (LEAF)
+- SPEC-FORGE-0109: Error suppression and warning levels (LEAF)
+- SPEC-FORGE-0110: Performance and Allocation Diagnostics (LEAF)
+
+**Analysis:**
+SPEC-FORGE-0100 groups diagnostic system functionality. It has 10 children, all LEAFs. The children cover:
+- Error codes, spans, context
+- Help text, explanations
+- i18n, JSON output
+- Typo suggestions
+- Warning levels
+- Performance diagnostics
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major diagnostic features covered
+
+**Verdict:** COMPLETE
+- All 10 children are LEAFs with proper DoD
+- Coverage is complete for diagnostics
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-QUARRY-0001: Build System and Package Manager
+================================================================================
+
+**NODE Definition (Line 14133-14181):**
+- Kind: NODE
+- Source: REQ-008, REQ-018, REQ-161 through REQ-168, REQ-190 through REQ-196, REQ-220, REQ-222, SSOT Section 8.1, 8.10, 8.12, 8.15
+- Status: PLANNED
+- Priority: P0
+
+**Children:**
+- SPEC-QUARRY-0010: CLI argument parsing (LEAF)
+- SPEC-QUARRY-0011: Environment detection (LEAF)
+- SPEC-QUARRY-0012: Config file loading (LEAF)
+- SPEC-QUARRY-0013: Project initialization (LEAF)
+- SPEC-QUARRY-0014: Build execution orchestrator (LEAF)
+- SPEC-QUARRY-0015: Script mode (pyrite run) - no-manifest execution (LEAF)
+- SPEC-QUARRY-0016: Test runner orchestrator (quarry test) (LEAF)
+- SPEC-QUARRY-0017: Package dependency resolution (basic versioning) (LEAF)
+- SPEC-QUARRY-0018: Lockfile generation and verification (Quarry.lock) (LEAF)
+- SPEC-QUARRY-0019: Build caching and incremental bypass (LEAF)
+- SPEC-QUARRY-0020: Output artifact management (binary vs library) (LEAF)
+- SPEC-QUARRY-0021: Configurable contract checking levels (LEAF)
+- SPEC-QUARRY-0022: Intelligent script caching and shebang support (LEAF)
+- SPEC-QUARRY-0023: Official package registry (quarry.dev) integration (LEAF)
+- SPEC-QUARRY-0024: Opinionated official formatter (quarry fmt) (LEAF)
+- SPEC-QUARRY-0025: Learning profile mode (--learning) (LEAF)
+- SPEC-QUARRY-0026: Feature flag system (Quarry.toml) (LEAF)
+- SPEC-QUARRY-0030: Automated code fixes (quarry fix) (LEAF)
+- SPEC-QUARRY-0031: Coverage-guided fuzzing (quarry fuzz) (LEAF)
+- SPEC-QUARRY-0032: Integrated sanitizers (ASan, TSan, UBSan) (LEAF)
+
+**Analysis:**
+SPEC-QUARRY-0001 groups build system and package manager functionality. It has 20 children, all LEAFs. The children cover:
+- CLI, environment, config
+- Project initialization
+- Build execution, caching
+- Dependency resolution, lockfiles
+- Testing, formatting
+- Code fixes, fuzzing, sanitizers
+
+**Issues Identified:**
+1. **Very large NODE**: 20 children is a lot for a single NODE. This suggests:
+   - The NODE might benefit from decomposition into sub-NODEs (e.g., "Build System", "Package Manager", "Tooling")
+   - However, all children are LEAFs, so decomposition is complete
+   - The large size makes it harder to navigate
+
+2. **All children are LEAFs**: ✓ Good - fully decomposed, but organization could be improved
+
+3. **Coverage appears comprehensive**: All major build/package manager features covered
+
+**Verdict:** COMPLETE BUT LARGE
+- All 20 children are LEAFs with proper DoD
+- Coverage is comprehensive for build system/package manager
+- Recommendation: Consider decomposing into sub-NODEs for better organization
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive but large)
+
+================================================================================
+SPEC-QUARRY-0100: Performance Tooling
+================================================================================
+
+**NODE Definition (Line 14799-14835):**
+- Kind: NODE
+- Source: REQ-197 through REQ-203, REQ-323, REQ-364, SSOT Section 8.13, 9.12, 12.3
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-QUARRY-0101: Static cost analysis (quarry cost) (LEAF)
+- SPEC-QUARRY-0102: Runtime CPU profiling (quarry perf) (LEAF)
+- SPEC-QUARRY-0103: Allocation profiling (quarry alloc) (LEAF)
+- SPEC-QUARRY-0104: Performance lockfile (Perf.lock) (LEAF)
+- SPEC-QUARRY-0105: Energy profiling (quarry energy) (LEAF)
+- SPEC-QUARRY-0106: Dead code analysis (quarry deadcode) (LEAF)
+- SPEC-QUARRY-0107: Machine autotuning (quarry autotune) (LEAF)
+- SPEC-QUARRY-0108: Built-in Stdlib Benchmarking (quarry bench std::*) (LEAF)
+- SPEC-QUARRY-0110: Type Introspection (quarry explain-type) (LEAF)
+- SPEC-QUARRY-0111: Memory Layout Analysis (quarry layout) (LEAF)
+- SPEC-QUARRY-0112: Aliasing and Optimization Insights (LEAF)
+- SPEC-QUARRY-0113: Closure cost analysis integration (LEAF)
+- SPEC-QUARRY-0114: Binary bloat analysis (quarry bloat) (LEAF)
+- SPEC-QUARRY-0115: Continuous binary size tracking and budgets (LEAF)
+
+**Analysis:**
+SPEC-QUARRY-0100 groups performance tooling functionality. It has 14 children, all LEAFs. The children cover:
+- Cost analysis, profiling (CPU, allocation, energy)
+- Performance lockfiles
+- Dead code analysis
+- Autotuning
+- Benchmarking
+- Type introspection
+- Memory layout analysis
+- Binary size tracking
+
+**Issues Identified:**
+1. **Large NODE**: 14 children is substantial, but manageable
+2. **All children are LEAFs**: ✓ Good - fully decomposed
+3. **Coverage appears comprehensive**: All major performance tooling features covered
+
+**Verdict:** COMPLETE
+- All 14 children are LEAFs with proper DoD
+- Coverage is comprehensive for performance tooling
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-QUARRY-0200: Interactive Tools and Learning
+================================================================================
+
+**NODE Definition (Line 15169-15187):**
+- Kind: NODE
+- Source: REQ-175 through REQ-178, REQ-216 through REQ-219, REQ-349 through REQ-352, SSOT Section 8.7, 8.14, 10.1
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-QUARRY-0201: Interactive REPL (pyrite repl) (LEAF)
+- SPEC-QUARRY-0202: Ownership visualization engine (LEAF)
+- SPEC-QUARRY-0203: Structured exercises (quarry learn) (LEAF)
+- SPEC-QUARRY-0204: Browser-based Playground (wasm) (LEAF)
+- SPEC-QUARRY-0205: Diagnostics Internationalization (LEAF)
+
+**Analysis:**
+SPEC-QUARRY-0200 groups interactive tools and learning functionality. It has 5 children, all LEAFs. The children cover:
+- REPL
+- Ownership visualization
+- Learning exercises
+- Browser playground
+- Diagnostics i18n
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major interactive/learning features covered
+
+**Verdict:** COMPLETE
+- All 5 children are LEAFs with proper DoD
+- Coverage is complete for interactive tools/learning
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-QUARRY-0300: Security and Supply Chain
+================================================================================
+
+**NODE Definition (Line 15365-15389):**
+- Kind: NODE
+- Source: REQ-225 through REQ-234, REQ-242 through REQ-244, SSOT Section 8.17, 8.19
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-QUARRY-0301: Vulnerability scanner (quarry audit) (LEAF)
+- SPEC-QUARRY-0302: Dependency vetting (quarry vet) (LEAF)
+- SPEC-QUARRY-0303: Deterministic builds and verification (LEAF)
+- SPEC-QUARRY-0304: SBOM generation (LEAF)
+- SPEC-QUARRY-0305: Supply-Chain Verification Integration (LEAF)
+- SPEC-QUARRY-0306: Package Signature Enforcement (LEAF)
+- SPEC-QUARRY-0307: Collaborative trust manifests (LEAF)
+- SPEC-QUARRY-0308: Security and vetting dashboard (LEAF)
+
+**Analysis:**
+SPEC-QUARRY-0300 groups security and supply chain functionality. It has 8 children, all LEAFs. The children cover:
+- Vulnerability scanning
+- Dependency vetting
+- Deterministic builds
+- SBOM generation
+- Supply chain verification
+- Package signatures
+- Trust manifests
+- Security dashboard
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major security/supply chain features covered
+
+**Verdict:** COMPLETE
+- All 8 children are LEAFs with proper DoD
+- Coverage is complete for security/supply chain
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-QUARRY-0400: Ecosystem and Interoperability
+================================================================================
+
+**NODE Definition (Line 15743-15763):**
+- Kind: NODE
+- Source: REQ-014, REQ-264, REQ-265, REQ-266, REQ-354, SSOT Section 8.25, 11.3
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-QUARRY-0401: Community transparency dashboard (LEAF)
+- SPEC-QUARRY-0402: Anonymous learning analytics (LEAF)
+- SPEC-QUARRY-0403: Benchmarking aggregate API (LEAF)
+- SPEC-QUARRY-0404: Automated C Binding Generation (quarry bindgen) (LEAF)
+- SPEC-QUARRY-0405: Python Extension Generation (LEAF)
+- SPEC-QUARRY-0406: Diagnostic Coverage Tooling (LEAF)
+
+**Analysis:**
+SPEC-QUARRY-0400 groups ecosystem and interoperability functionality. It has 6 children, all LEAFs. The children cover:
+- Community dashboard
+- Learning analytics
+- Benchmarking API
+- C binding generation
+- Python extension generation
+- Diagnostic coverage tooling
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major ecosystem/interoperability features covered
+
+**Verdict:** COMPLETE
+- All 6 children are LEAFs with proper DoD
+- Coverage is complete for ecosystem/interoperability
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+
+================================================================================
+SPEC-QUARRY-0500: Language Server Protocol (LSP)
+================================================================================
+
+**NODE Definition (Line 16173-16191):**
+- Kind: NODE
+- Source: REQ-029 to REQ-033, SSOT Section 2.5
+- Status: PLANNED
+- Priority: P1
+
+**Children:**
+- SPEC-QUARRY-0501: LSP Server Core (JSON-RPC) (LEAF)
+- SPEC-QUARRY-0502: Parameter Behavior Hover Provider (LEAF)
+- SPEC-QUARRY-0503: Performance Cost Hover Provider (LEAF)
+- SPEC-QUARRY-0504: Type and Layout Hover Provider (LEAF)
+- SPEC-QUARRY-0505: Configurable Detail Levels (LEAF)
+
+**Analysis:**
+SPEC-QUARRY-0500 groups LSP functionality. It has 5 children, all LEAFs. The children cover:
+- LSP server core
+- Hover providers (parameter behavior, performance cost, type/layout)
+- Configurable detail levels
+
+**Issues Identified:**
+1. **All children are LEAFs**: ✓ Good - fully decomposed
+2. **Coverage appears complete**: All major LSP features covered
+
+**Verdict:** COMPLETE
+- All 5 children are LEAFs with proper DoD
+- Coverage is complete for LSP
+
+**Coverage Status:** COMPLETE (All children are LEAFs, comprehensive coverage)
+

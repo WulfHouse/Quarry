@@ -1,7 +1,7 @@
 # Remaining Functionality Map
 **Generated:** 2025-12-23  
 **Source:** `docs/specification/technical-ssot.md` (SSOT)  
-**Current State:** M11 in progress (SPEC-LANG-0405 complete, next: SPEC-LANG-0409)
+**Current State:** M11 in progress (SPEC-LANG-0409 complete, next: SPEC-LANG-0510)
 
 ## Executive Summary
 
@@ -13,9 +13,9 @@ Based on the SSOT analysis:
 ## Current Status (from memory.txt)
 
 - **Milestone:** M11 (Language Features & Verification)
-- **Last Completed:** SPEC-LANG-0405 (Compound assignment operators)
-- **Next:** SPEC-LANG-0409
-- **Test Status:** 1964/1967 tests passing (99.8%)
+- **Last Completed:** SPEC-LANG-0409 (SMT Solver Integration)
+- **Next:** SPEC-LANG-0510 (Algorithmic Helpers via Parameter Closures)
+- **Test Status:** 552/552 tests passing (fast suite)
 
 ---
 
@@ -34,9 +34,9 @@ Based on the SSOT analysis:
 - ✅ SPEC-LANG-0406: Compile-time contract verification - EXISTS-TODAY
 - ✅ SPEC-LANG-0407: Contract propagation and blame - EXISTS-TODAY
 - ✅ SPEC-LANG-0408: @safety_critical attribute - EXISTS-TODAY
-- ⏳ **SPEC-LANG-0409: Contract inheritance** - PLANNED (NEXT)
-- ⏳ SPEC-LANG-0510: Result type error propagation - PLANNED
-- ⏳ SPEC-LANG-0511: Try operator (? operator) - PLANNED
+- ✅ SPEC-LANG-0409: SMT Solver Integration - DONE
+- ⏳ **SPEC-LANG-0510: Algorithmic helpers via parameter closures** - IN PROGRESS (blocked on parameter closure type support in function signatures)
+- ⏳ SPEC-LANG-0511: Stdlib Closure Guidelines - PLANNED
 - ⏳ SPEC-LANG-1101: Observability hooks - PLANNED
 - ⏳ SPEC-LANG-1102: Allocation tracking - PLANNED
 - ⏳ SPEC-LANG-1103: Performance counters - PLANNED
@@ -179,7 +179,7 @@ Based on the SSOT analysis:
 - **Phase 3 (Beta):** 🔄 In Progress
   - M9: ✅ Complete
   - M10: ✅ Complete
-  - M11: 🔄 ~40% complete (9/33 SPECs)
+  - M11: 🔄 ~42% complete (10/33 SPECs)
   - M12: ⏳ Not started (0/24 SPECs)
 - **Phase 4 (Stabilization):** ⏳ Not started
   - M13: ⏳ Not started (0/24 SPECs)
@@ -189,8 +189,8 @@ Based on the SSOT analysis:
 ### Remaining Work Breakdown
 
 **Immediate (M11):**
-- 24 SPECs remaining in current milestone
-- Focus: Contract inheritance, Result types, observability, FFI safety
+- 23 SPECs remaining in current milestone
+- Focus: Algorithmic helpers (blocked on type system), Result types, observability, FFI safety
 
 **Short-term (M12):**
 - 24 SPECs for developer tooling
@@ -209,7 +209,7 @@ Based on the SSOT analysis:
 ## Critical Path Items (High Priority)
 
 ### Blocking Stage2 Self-Hosting
-1. **SPEC-LANG-0409:** Contract inheritance (needed for compiler modules)
+1. **SPEC-LANG-0510:** Algorithmic helpers (blocked on parameter closure type support in function signatures)
 2. **SPEC-LANG-0510/0511:** Result types and try operator (error handling)
 3. **SPEC-FORGE-0201:** Contract codegen (runtime contract checking)
 
@@ -239,11 +239,14 @@ Based on the SSOT analysis:
 - **Gap:** 3 failing tests (bootstrap-related, now fixed for Stage1)
 
 ### Next Steps
-1. Complete SPEC-LANG-0409 (Contract inheritance)
+1. Complete SPEC-LANG-0510 (Algorithmic helpers - needs parameter closure type support in parser/type checker)
 2. Implement Result types (SPEC-LANG-0510, 0511)
 3. Add contract codegen (SPEC-FORGE-0201)
 4. Verify Stage2 can build
 5. Proceed to M12 (Learning tools)
+
+### Recent Completions
+- **SPEC-LANG-0409:** SMT Solver Integration - Implemented `quarry verify` command with Z3/CVC5 support for formal contract verification. Added SMT-LIB translation for Pyrite contract expressions. 14 unit tests added, all passing.
 
 ---
 
