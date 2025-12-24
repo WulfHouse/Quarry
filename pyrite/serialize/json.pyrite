@@ -80,4 +80,113 @@ fn from_str(s: &String) -> Result[JsonValue, String]:
             if last == string_new("\""):
                 return Ok(JsonValue.String(trimmed.substring(1, len - 1)))
     
-    return Err(string_new("JSON parsing not yet fully implemented"))
+    # Handle arrays: [value1, value2, ...]
+    if trimmed.starts_with(string_new("[")):
+        let len = trimmed.len()
+        if len >= 2 and trimmed.substring(len - 1, len) == string_new("]"):
+            # Empty array
+            if len == 2:
+                return Ok(JsonValue.Array(List.new()))
+            
+            # Parse array elements (simplified - assumes comma-separated values)
+            # For MVP, we'll parse a simple array like ["a", "b", "c"]
+            # Full implementation would recursively parse nested structures
+            var elements = List.new()
+            var i = 1  # Skip opening '['
+            var start = i
+            while i < len - 1:  # Stop before closing ']'
+                let ch = trimmed.substring(i, i + 1)
+                if ch == string_new(",") or (i == len - 2):
+                    # Parse element from start to i (or end)
+                    var end_idx = i
+                    if ch == string_new(","):
+                        end_idx = i
+                    else:
+                        end_idx = i + 1
+                    
+                    if end_idx > start:
+                        let elem_str = trimmed.substring(start, end_idx).trim()
+                        # Recursively parse element
+                        match from_str(elem_str):
+                            Ok(val):
+                                elements.append(val)
+                            Err(e):
+                                return Err(e)
+                    
+                    start = i + 1
+                i = i + 1
+            
+            return Ok(JsonValue.Array(elements))
+    
+    # Handle objects: {"key1": value1, "key2": value2, ...}
+    if trimmed.starts_with(string_new("{")):
+        let len = trimmed.len()
+        if len >= 2 and trimmed.substring(len - 1, len) == string_new("}"):
+            # Empty object
+            if len == 2:
+                return Ok(JsonValue.Object(Map.new()))
+            
+            # Parse object entries (simplified - assumes "key": value pairs)
+            # For MVP, we'll parse a simple object like {"key": "value"}
+            # Full implementation would handle nested objects and arrays
+            var entries = Map.new()
+            var i = 1  # Skip opening '{'
+            while i < len - 1:  # Stop before closing '}'
+                # Skip whitespace
+                let ch = trimmed.substring(i, i + 1)
+                if ch != string_new(" ") and ch != string_new("\t") and ch != string_new("\n"):
+                    # Parse key (quoted string)
+                    if ch == string_new("\""):
+                        var key_start = i + 1
+                        var key_end = key_start
+                        while key_end < len - 1:
+                            let key_ch = trimmed.substring(key_end, key_end + 1)
+                            if key_ch == string_new("\""):
+                                break
+                            key_end = key_end + 1
+                        
+                        if key_end >= len - 1:
+                            return Err(string_new("Unterminated key in JSON object"))
+                        
+                        let key = trimmed.substring(key_start, key_end)
+                        
+                        # Skip colon
+                        i = key_end + 1
+                        while i < len - 1:
+                            let colon_ch = trimmed.substring(i, i + 1)
+                            if colon_ch == string_new(":"):
+                                i = i + 1
+                                break
+                            if colon_ch != string_new(" ") and colon_ch != string_new("\t"):
+                                return Err(string_new("Expected ':' after key in JSON object"))
+                            i = i + 1
+                        
+                        # Parse value (simplified - assumes string values for MVP)
+                        var value_start = i
+                        while i < len - 1:
+                            let val_ch = trimmed.substring(i, i + 1)
+                            if val_ch == string_new(",") or val_ch == string_new("}"):
+                                break
+                            i = i + 1
+                        
+                        let value_str = trimmed.substring(value_start, i).trim()
+                        # Recursively parse value
+                        match from_str(value_str):
+                            Ok(val):
+                                entries.set(key, val)
+                            Err(e):
+                                return Err(e)
+                        
+                        # Skip comma if present
+                        if i < len - 1:
+                            let comma_ch = trimmed.substring(i, i + 1)
+                            if comma_ch == string_new(","):
+                                i = i + 1
+                    else:
+                        i = i + 1
+                else:
+                    i = i + 1
+            
+            return Ok(JsonValue.Object(entries))
+    
+    return Err(string_new("JSON parsing not yet fully implemented for this format"))

@@ -171,6 +171,16 @@ impl Tensor:
             layout: TensorLayout.Strided(row_stride, col_stride) 
         }
     
+    fn to_layout(&self, layout: TensorLayout) -> Tensor:
+        # Convert to specified layout (SSOT-required API)
+        match layout:
+            TensorLayout.RowMajor:
+                return self.to_row_major()
+            TensorLayout.ColMajor:
+                return self.to_col_major()
+            TensorLayout.Strided(row_stride, col_stride):
+                return self.with_strided_layout(row_stride, col_stride)
+    
     # Tensor Views (SPEC-LANG-0872)
     fn view(&self, r_start: i64, r_end: i64, c_start: i64, c_end: i64) -> TensorView:
         # Create zero-cost view - no data copy
