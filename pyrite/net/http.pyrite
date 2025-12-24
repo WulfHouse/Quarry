@@ -30,6 +30,14 @@ impl HttpClient:
     fn post(&self, url: &String, body: &String) -> Result[HttpResponse, String]:
         # Simple HTTP POST implementation placeholder
         return Err(string_new("HTTP POST not yet fully implemented"))
+    
+    fn put(&self, url: &String, body: &String) -> Result[HttpResponse, String]:
+        # Simple HTTP PUT implementation placeholder
+        return Err(string_new("HTTP PUT not yet fully implemented"))
+    
+    fn delete(&self, url: &String) -> Result[HttpResponse, String]:
+        # Simple HTTP DELETE implementation placeholder
+        return Err(string_new("HTTP DELETE not yet fully implemented"))
 
 struct HttpServer:
     listener: TcpListener

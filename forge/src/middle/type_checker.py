@@ -690,7 +690,7 @@ class TypeChecker:
                         # Compile-time verification (SPEC-LANG-0406)
                         val = self.evaluate_constant_bool(expr)
                         if val is False:
-                            self.error(f"Precondition will always fail: {self._expr_to_string(expr)}", expr.span)
+                            self.error(f"Precondition will always fail", expr.span)
                         elif val is True:
                             expr.is_proven = True
             elif attr.name == "ensures":
@@ -889,7 +889,7 @@ class TypeChecker:
                             # Compile-time verification
                             val = self.evaluate_constant_bool(expr)
                             if val is False:
-                                self.error(f"Loop invariant will always fail: {self._expr_to_string(expr)}", expr.span)
+                                self.error(f"Loop invariant will always fail", expr.span)
                             elif val is True:
                                 expr.is_proven = True
         
@@ -912,7 +912,7 @@ class TypeChecker:
                             # Compile-time verification
                             val = self.evaluate_constant_bool(expr)
                             if val is False:
-                                self.error(f"Loop invariant will always fail: {self._expr_to_string(expr)}", expr.span)
+                                self.error(f"Loop invariant will always fail", expr.span)
                             elif val is True:
                                 expr.is_proven = True
         

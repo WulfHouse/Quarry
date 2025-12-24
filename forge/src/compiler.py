@@ -10,7 +10,7 @@ from llvmlite import binding
 from .frontend import lex, LexerError, parse, ParseError, Span
 from .middle import type_check, TypeCheckError, analyze_ownership, check_borrows, resolve_modules, ModuleError
 from .backend import generate_llvm, compile_to_executable, LLVMCodeGen, link_with_stdlib, link_llvm_ir, monomorphize_program
-from .passes import ClosureInlinePass, WithDesugarPass
+from .passes import ClosureInlinePass, WithDesugarPass, DerivePass
 from .utils import ErrorFormatter
 from pathlib import Path
 
@@ -127,6 +127,11 @@ def compile_source(source: str, filename: str = "<input>", output_path: Optional
         except Exception as e:
             # If module resolution fails, continue without imports (backward compatibility)
             print(f"Warning: Module resolution failed: {e}, continuing without imports")
+        
+        # Phase 2.4: Derive pass (@derive trait generation)
+        print(f"[2.4/7] Processing @derive attributes...")
+        derive_pass = DerivePass()
+        program_ast = derive_pass.derive_program(program_ast)
         
         # Phase 2.5: Desugar with statements (with → let + defer)
         print(f"[2.5/7] Desugaring with statements...")

@@ -1,11 +1,11 @@
 Last updated: 2025-12-23
-Milestone: M11 | Last SPEC: SPEC-LANG-0404 | Next: SPEC-LANG-0406
+Milestone: M10 | Last SPEC: SPEC-LANG-0873 | Next: SPEC-LANG-0406
 Phase: 3 (Beta) | Status: READY | Branch: 1.2.0-alpha
-Tests: 1825/1826 (full) OR 466/466 (fast) | Notes: Completed State Capture Function (old()) support.
+Tests: 1904/1905 (full) OR 531/531 (fast) | Notes: Completed M10 remediation - all LEAF specs certified.
 
 State History (Last 5):
-1. 2025-12-23 M11 SPEC-LANG-0404->SPEC-LANG-0406 | Implemented old() support in Parser, TypeChecker, and Codegen.
-2. 2025-12-23 M11 SPEC-LANG-0403->SPEC-LANG-0404 | Implemented @invariant support for loops and structs.
-3. 2025-12-23 M11 SPEC-LANG-0402->SPEC-LANG-0403 | Implemented @ensures support in Parser, TypeChecker, and Codegen.
-4. 2025-12-23 M11 SPEC-LANG-0401->SPEC-LANG-0402 | Implemented @requires support in Parser, TypeChecker, and Codegen.
-5. 2025-12-23 M10 SPEC-LANG-0806->SPEC-LANG-0401 | Implemented Tensor stdlib primitives in C and Pyrite.
+1. 2025-12-23 M10 REMEDIATION | Completed all 7 M10 LEAF specs: 0840,0841,0850,0870,0871,0872,0873. Fixed contract verification bug.
+2. 2025-12-23 M11 SPEC-LANG-0404->SPEC-LANG-0406 | Implemented old() support in Parser, TypeChecker, and Codegen.
+3. 2025-12-23 M11 SPEC-LANG-0403->SPEC-LANG-0404 | Implemented @invariant support for loops and structs.
+4. 2025-12-23 M11 SPEC-LANG-0402->SPEC-LANG-0403 | Implemented @ensures support in Parser, TypeChecker, and Codegen.
+5. 2025-12-23 M11 SPEC-LANG-0401->SPEC-LANG-0402 | Implemented @requires support in Parser, TypeChecker, and Codegen.
