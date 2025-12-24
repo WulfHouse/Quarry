@@ -1,0 +1,114 @@
+# Algorithmic helpers via parameter closures (SPEC-LANG-0510)
+# 
+# These functions use parameter closures (fn[...]) to provide zero-cost
+# abstractions for high-performance algorithms.
+
+# vectorize - SIMD vectorization helper
+# 
+# Generates SIMD loops from scalar operations using parameter closures.
+# The parameter closure is inlined at compile time, ensuring zero runtime overhead.
+#
+# Example:
+#   algorithm.vectorize[width=8](data.len(), fn[i: int]:
+#       data[i] = data[i] * factor
+#   )
+#
+# Parameters:
+#   - width: SIMD width (auto, 4, 8, 16, etc.)
+#   - unroll: Loop unrolling factor (optional)
+#
+# The closure parameter is the loop index.
+# Note: width and unroll are compile-time parameters (no defaults in current syntax)
+# The compiler will handle "auto" values during optimization passes
+fn vectorize[width: int, unroll: int](
+    count: int,
+    body: fn[i: int]:
+):
+    # Parameter closure is inlined by the compiler
+    # This function serves as a marker for the compiler to generate SIMD code
+    # The actual implementation is handled by compiler passes that:
+    # 1. Inline the parameter closure body
+    # 2. Generate SIMD loop for aligned chunks
+    # 3. Generate scalar loop for remainder
+    # 4. Handle alignment constraints
+    
+    # For now, this is a placeholder that will be transformed by compiler passes
+    # In the full implementation, the compiler will:
+    # - Detect this call pattern
+    # - Inline the parameter closure
+    # - Generate optimized SIMD code
+    pass
+
+# parallelize - Structured parallelism helper
+#
+# Provides safe, multi-core execution with automatic work distribution.
+# Uses parameter closures to avoid allocation overhead.
+#
+# Example:
+#   algorithm.parallelize[workers=4](data.len(), fn[i: int]:
+#       data[i] = expensive_computation(data[i])
+#   )
+#
+# Parameters:
+#   - workers: Number of worker threads (auto = use all cores)
+#   - chunk_size: Items per thread (auto = optimal distribution)
+#
+# Safety:
+#   - All worker threads are joined before returning
+#   - Errors in worker threads are caught and propagated
+#   - Parameter closure body must be Send (checked at compile time)
+# Note: workers and chunk_size are compile-time parameters
+# The compiler will handle "auto" values during optimization passes
+fn parallelize[workers: int, chunk_size: int](
+    count: int,
+    body: fn[i: int]:
+):
+    # Parameter closure is inlined into each thread's work loop
+    # The compiler will:
+    # 1. Inline the parameter closure
+    # 2. Generate thread spawning code
+    # 3. Distribute work across threads
+    # 4. Join all threads before returning
+    # 5. Propagate errors from worker threads
+    
+    # For now, this is a placeholder
+    # Full implementation requires:
+    # - Thread primitives (SPEC-LANG-1001)
+    # - Channel for error propagation
+    # - Work distribution logic
+    pass
+
+# tile - Cache-aware blocking helper
+#
+# Enables cache-friendly access patterns by processing data in blocks (tiles)
+# that fit within the CPU's cache hierarchy.
+#
+# Example:
+#   algorithm.tile[block_size=64](rows, cols, fn[i_block: int, j_block: int]:
+#       # Process 64x64 block
+#       for i in i_block..min(i_block + 64, rows):
+#           for j in j_block..min(j_block + 64, cols):
+#               result[i, j] = compute(i, j)
+#   )
+#
+# Parameters:
+#   - block_size: Tile size (typically 32-128 for L1 cache)
+#
+# The parameter closure receives block indices, not individual element indices.
+fn tile[block_size: int](
+    dim1: int,
+    dim2: int,
+    body: fn[i_block: int, j_block: int]:
+):
+    # Parameter closure is inlined into the tiling loop
+    # The compiler will:
+    # 1. Inline the parameter closure
+    # 2. Generate nested loops for tiles
+    # 3. Ensure cache-friendly access patterns
+    
+    # For now, this is a placeholder
+    # Full implementation requires:
+    # - Loop generation with tile boundaries
+    # - Cache-aware loop ordering
+    pass
+

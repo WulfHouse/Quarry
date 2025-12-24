@@ -1,10 +1,11 @@
 Last updated: 2025-12-23
-Milestone: M11 | Last SPEC: SPEC-LANG-0405 | Next: SPEC-LANG-0409
+Milestone: M11 | Last SPEC: SPEC-LANG-0409 | Next: SPEC-LANG-0510
 Phase: 3 (Beta) | Status: READY | Branch: 1.2.0-alpha
-Tests: 538/538 (fast) | Notes: Added compound assignment operators (+=, -=, *=, /=) support. Implemented parser, type checker, and codegen. All tests pass.
+Tests: 552/552 (fast) | Notes: SPEC-LANG-0409 complete. Implemented SMT solver integration for contract verification. Added quarry verify command with Z3/CVC5 support. SMT-LIB translation for Pyrite contract expressions. Started SPEC-LANG-0510 (algorithmic helpers) - created algorithm.pyrite module structure. Needs parameter closure type support in function signatures.
 
 State History (Last 5):
-1. 2025-12-23 M11 FEATURE ADD | Implemented compound assignment operators (+=, -=, *=, /=). Updated AST Assignment node with op field. Parser handles compound operators. Type checker validates numeric types. Codegen generates appropriate LLVM instructions. Added 13 tests (6 parser, 7 integration). All 538 tests pass.
+1. 2025-12-23 M11 SPEC-LANG-0409 COMPLETE | Implemented SMT solver integration (Z3, CVC5) for formal verification of @requires and @ensures contracts. Created quarry/smt_verify.py with SMT-LIB translation. Added verify command to quarry/main.py. Supports both Python bindings and CLI fallback. Added 14 unit tests. All 552 tests pass. Started SPEC-LANG-0510: Created pyrite/algorithm/algorithm.pyrite with vectorize, parallelize, tile functions. Needs parameter closure type syntax support in function parameters.
+2. 2025-12-23 M11 FEATURE ADD | Implemented compound assignment operators (+=, -=, *=, /=). Updated AST Assignment node with op field. Parser handles compound operators. Type checker validates numeric types. Codegen generates appropriate LLVM instructions. Added 13 tests (6 parser, 7 integration). All 538 tests pass.
 2. 2025-12-23 M11 SPEC-LANG-0405 COMPLETE | Implemented full loop desugaring for forall/exists with short-circuiting logic. Added 10 codegen tests. ForAll: returns false on first failed predicate. Exists: returns true on first successful predicate. All 542 tests pass.
 2. 2025-12-23 M11 SPEC-LANG-0408 | Implemented @safety_critical attribute parsing and tracking. Added checks in codegen to ensure contracts are always checked for safety-critical functions (ready for future build-mode conditional checks). All 534 tests pass.
 3. 2025-12-23 M11 SPEC-LANG-0407 | Implemented contract propagation and blame tracking. Enhanced error messages to identify caller vs callee blame. Preconditions blame caller, postconditions blame callee. All 532 tests pass.
