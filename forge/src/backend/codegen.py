@@ -1680,17 +1680,103 @@ class LLVMCodeGen:
     def gen_quantified_expr(self, quantified: ast.QuantifiedExpr) -> ir.Value:
         """Generate code for quantified expression (forall/exists) (SPEC-LANG-0405)
         
-        Simplified implementation: desugars to loops that check all elements.
-        For now, returns a placeholder - full implementation requires proper loop generation.
+        Desugars to short-circuiting loops:
+        - forall: returns false on first failed predicate, true if all pass
+        - exists: returns true on first successful predicate, false if none pass
         """
-        # TODO: Full implementation requires:
-        # 1. Proper iteration over collection (List, Array, Slice)
-        # 2. Short-circuiting for forall (stop on first false) and exists (stop on first true)
-        # 3. Proper variable scoping for bound variable
+        # Create alloca for result variable
+        # forall starts with true, exists starts with false
+        initial_value = 1 if quantified.quantifier == "forall" else 0
+        result_alloca = self.builder.alloca(ir.IntType(1), name="quantified_result")
+        self.builder.store(ir.Constant(ir.IntType(1), initial_value), result_alloca)
         
-        # For now, return a constant true as placeholder
-        # This allows parsing and type checking to work, but runtime behavior is not correct yet
-        return ir.Constant(ir.IntType(1), 1)
+        # Generate collection expression
+        collection = self.gen_expression(quantified.collection)
+        
+        # For List/Array/Slice, we need to iterate over elements
+        # List is { T*, i64, i64 } (pointer, length, capacity)
+        # Extract pointer and length
+        collection_ptr = self.builder.extract_value(collection, 0, name="collection_ptr")
+        collection_len = self.builder.extract_value(collection, 1, name="collection_len")
+        
+        # Create loop counter (index variable)
+        index_alloca = self.builder.alloca(ir.IntType(64), name="quantified_index")
+        self.builder.store(ir.Constant(ir.IntType(64), 0), index_alloca)
+        
+        # Create basic blocks for loop
+        cond_block = self.function.append_basic_block(name="quantified.cond")
+        body_block = self.function.append_basic_block(name="quantified.body")
+        check_block = self.function.append_basic_block(name="quantified.check")
+        end_block = self.function.append_basic_block(name="quantified.end")
+        
+        # Branch to condition
+        self.builder.branch(cond_block)
+        
+        # Generate condition block: while index < length
+        self.builder.position_at_end(cond_block)
+        index_val = self.builder.load(index_alloca, name="index")
+        cond = self.builder.icmp_signed('<', index_val, collection_len, name="loop_cond")
+        self.builder.cbranch(cond, body_block, end_block)
+        
+        # Generate body block
+        self.builder.position_at_end(body_block)
+        
+        # Load current element: collection_ptr[index]
+        current_index = self.builder.load(index_alloca, name="current_index")
+        element_ptr = self.builder.gep(collection_ptr, [current_index], name="element_ptr")
+        element_val = self.builder.load(element_ptr, name="element")
+        
+        # Save current variable table state
+        old_variables = self.variables.copy()
+        
+        # Bind the loop variable to the current element
+        var_alloca = self.builder.alloca(element_val.type, name=quantified.variable)
+        self.builder.store(element_val, var_alloca)
+        self.variables[quantified.variable] = var_alloca
+        
+        # Evaluate predicate
+        predicate_result = self.gen_expression(quantified.predicate)
+        
+        # Restore variable table
+        self.variables = old_variables
+        
+        # Increment index
+        next_index = self.builder.add(current_index, ir.Constant(ir.IntType(64), 1), name="next_index")
+        self.builder.store(next_index, index_alloca)
+        
+        # Branch to check block
+        self.builder.branch(check_block)
+        
+        # Generate check block: decide whether to continue or short-circuit
+        self.builder.position_at_end(check_block)
+        
+        if quantified.quantifier == "forall":
+            # For forall: if predicate is false, set result to false and break
+            # Otherwise continue to next iteration
+            with self.builder.if_else(predicate_result) as (then_block, else_block):
+                with then_block:
+                    # Predicate is true, continue looping
+                    self.builder.branch(cond_block)
+                with else_block:
+                    # Predicate is false, set result to false and exit
+                    self.builder.store(ir.Constant(ir.IntType(1), 0), result_alloca)
+                    self.builder.branch(end_block)
+        else:  # exists
+            # For exists: if predicate is true, set result to true and break
+            # Otherwise continue to next iteration
+            with self.builder.if_else(predicate_result) as (then_block, else_block):
+                with then_block:
+                    # Predicate is true, set result to true and exit
+                    self.builder.store(ir.Constant(ir.IntType(1), 1), result_alloca)
+                    self.builder.branch(end_block)
+                with else_block:
+                    # Predicate is false, continue looping
+                    self.builder.branch(cond_block)
+        
+        # Position at end block and load result
+        self.builder.position_at_end(end_block)
+        result = self.builder.load(result_alloca, name="quantified_final_result")
+        return result
     
     def gen_list_literal(self, literal: ast.ListLiteral) -> ir.Value:
         """Generate code for list literal

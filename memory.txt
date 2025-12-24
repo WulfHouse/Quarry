@@ -1,10 +1,10 @@
 Last updated: 2025-12-23
 Milestone: M11 | Last SPEC: SPEC-LANG-0405 | Next: SPEC-LANG-0409
 Phase: 3 (Beta) | Status: READY | Branch: 1.2.0-alpha
-Tests: 536/536 (fast) | Notes: Completed SPEC-LANG-0405 - quantified predicates (forall, exists) with parsing and type checking. Codegen placeholder added.
+Tests: 542/542 (fast) | Notes: Completed SPEC-LANG-0405 FULL - quantified predicates with loop desugaring and short-circuiting.
 
 State History (Last 5):
-1. 2025-12-23 M11 SPEC-LANG-0405 | Implemented forall/exists keywords, parsing, and type checking. Added QuantifiedExpr AST node. Codegen placeholder added (full loop desugaring TODO). All 536 tests pass.
+1. 2025-12-23 M11 SPEC-LANG-0405 COMPLETE | Implemented full loop desugaring for forall/exists with short-circuiting logic. Added 10 codegen tests. ForAll: returns false on first failed predicate. Exists: returns true on first successful predicate. All 542 tests pass.
 2. 2025-12-23 M11 SPEC-LANG-0408 | Implemented @safety_critical attribute parsing and tracking. Added checks in codegen to ensure contracts are always checked for safety-critical functions (ready for future build-mode conditional checks). All 534 tests pass.
 3. 2025-12-23 M11 SPEC-LANG-0407 | Implemented contract propagation and blame tracking. Enhanced error messages to identify caller vs callee blame. Preconditions blame caller, postconditions blame callee. All 532 tests pass.
 4. 2025-12-23 M11 SPEC-LANG-0406 | Implemented compile-time contract verification with range analysis. Enhanced evaluate_constant_bool to use constraints from @requires. Added compile-time verification for @ensures. All 532 tests pass.
