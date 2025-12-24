@@ -69,6 +69,49 @@ def find_pyrite_modules():
     return sorted(pyrite_files)
 
 
+def compile_c_files(stage1_dir, linker):
+    """Compile C FFI files needed by Pyrite modules"""
+    pyrite_dir = repo_root / "pyrite"
+    c_files_needed = [
+        "build_graph/build_graph.c",
+        "dep_fingerprint/dep_fingerprint.c",
+        "dep_source/dep_source.c",
+        "lockfile/lockfile.c",
+        "path_utils/path_utils.c",
+        "toml/toml.c",
+        "version/version.c",
+    ]
+    
+    c_object_files = []
+    
+    for c_file_rel in c_files_needed:
+        c_file = pyrite_dir / c_file_rel
+        if not c_file.exists():
+            print(f"  [WARN] C file not found: {c_file_rel}")
+            continue
+        
+        obj_file = stage1_dir / f"{c_file.stem}.o"
+        print(f"  Compiling {c_file.name}...", end=" ")
+        
+        # Compile C file to object file
+        compile_cmd = [linker, '-c', str(c_file), '-o', str(obj_file), '-O2']
+        # Note: -fPIC is not needed on Windows (MSVC target doesn't support it)
+        
+        try:
+            result = subprocess.run(compile_cmd, capture_output=True, text=True, timeout=30)
+            if result.returncode == 0 and obj_file.exists():
+                c_object_files.append(obj_file)
+                print("[OK]")
+            else:
+                print(f"[FAIL]")
+                if result.stderr:
+                    print(f"      {result.stderr[:200]}")
+        except Exception as e:
+            print(f"[ERROR] {e}")
+    
+    return c_object_files
+
+
 def build_stage1():
     """Build Stage1 compiler from Pyrite source"""
     print("=" * 60)
@@ -155,8 +198,6 @@ def build_stage1():
         print(f"\n  Compiled modules: {len([f for f in pyrite_modules if (stage1_dir / f'{f.stem}.o').exists()])}/{len(pyrite_modules)}")
         return True  # Not a failure, just nothing to link
     
-    print(f"  Linking {len(object_files)} object file(s) from {len(pyrite_modules)} module(s)...")
-    
     # Find linker - prefer clang, then gcc
     linker = None
     for cmd in ['clang', 'gcc']:
@@ -175,11 +216,20 @@ def build_stage1():
         print("  You can link manually later")
         return True  # Not a failure, just can't link automatically
     
+    # Compile C FFI files
+    print("  Compiling C FFI files...")
+    c_object_files = compile_c_files(stage1_dir, linker)
+    if c_object_files:
+        print(f"  [OK] Compiled {len(c_object_files)} C file(s)")
+    
+    print(f"  Linking {len(object_files)} Pyrite object file(s) + {len(c_object_files)} C object file(s)...")
+    
     # Build linker command
     link_cmd = [linker, '-o', str(stage1_exe)]
     
-    # Add all object files
+    # Add all object files (Pyrite + C)
     link_cmd.extend([str(obj) for obj in object_files])
+    link_cmd.extend([str(obj) for obj in c_object_files])
     
     # Try to link with runtime library if it exists
     runtime_lib = compiler_dir / "runtime" / "libpyrite.a"

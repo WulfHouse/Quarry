@@ -358,8 +358,18 @@ class OwnershipAnalyzer:
                 obj_name = decl.initializer.object.name
                 field_name = decl.initializer.field
                 
-                # Check if object itself is valid (whole move check)
-                self.check_field_use(obj_name, field_name, decl.initializer.span)
+                # Check if this is a type name (enum variant construction like Type.BoolType)
+                is_type_name = False
+                if self.type_checker and self.type_checker.resolver:
+                    type_obj = self.type_checker.resolver.global_scope.lookup_type(obj_name)
+                    if type_obj is not None:
+                        # This is a type name, not a variable - skip ownership check
+                        is_type_name = True
+                
+                # Only check ownership if this is a variable, not a type name (enum variant construction)
+                if not is_type_name and obj_name in self.variable_types:
+                    # Check if object itself is valid (whole move check)
+                    self.check_field_use(obj_name, field_name, decl.initializer.span)
                 
                 # Infer field type (simplified)
                 obj_type = self.variable_types.get(obj_name)
@@ -369,7 +379,7 @@ class OwnershipAnalyzer:
                 
                 # Only make ownership decisions when we have actual type information
                 # Don't treat UNKNOWN as always-move (conservative approach)
-                if (field_type and 
+                if (not is_type_name and field_type and 
                     field_type != UNKNOWN and 
                     not isinstance(field_type, UnknownType) and 
                     not is_copy_type(field_type)):
@@ -622,7 +632,18 @@ class OwnershipAnalyzer:
             if isinstance(expr.object, ast.Identifier):
                 obj_name = expr.object.name
                 field_name = expr.field
-                self.check_field_use(obj_name, field_name, expr.span)
+                # Check if this is a type name (enum variant construction like Type.BoolType)
+                is_type_name = False
+                if self.type_checker and self.type_checker.resolver:
+                    type_obj = self.type_checker.resolver.global_scope.lookup_type(obj_name)
+                    if type_obj is not None:
+                        # This is a type name, not a variable - skip ownership check
+                        is_type_name = True
+                
+                # Only check ownership if this is a variable, not a type name (enum variant construction)
+                if not is_type_name and obj_name in self.variable_types:
+                    self.check_field_use(obj_name, field_name, expr.span)
+                # If it's not a variable, it's likely a type name (e.g., Type.BoolType), so skip ownership check
             else:
                 self.analyze_expression(expr.object)
             return False

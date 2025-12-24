@@ -928,6 +928,132 @@ class LLVMCodeGen:
     
     def gen_assignment(self, assign: ast.Assignment):
         """Generate code for assignment"""
+        # Handle compound assignment operators (+=, -=, *=, /=)
+        if assign.op:
+            # For compound assignments, we need to:
+            # 1. Load the current value of the target
+            # 2. Perform the binary operation
+            # 3. Store the result back
+            
+            # Generate the right-hand side value
+            rhs_value = self.gen_expression(assign.value)
+            
+            # Load the current value of the target
+            if isinstance(assign.target, ast.Identifier):
+                target_name = assign.target.name
+                if target_name in self.variables:
+                    target_val = self.variables[target_name]
+                    if isinstance(target_val.type, ir.PointerType):
+                        # Load current value
+                        current_value = self.builder.load(target_val)
+                        # Generate right-hand side value
+                        rhs_value = self.gen_expression(assign.value)
+                        # Perform binary operation directly in LLVM
+                        if assign.op == '+':
+                            if isinstance(current_value.type, ir.IntType):
+                                result = self.builder.add(current_value, rhs_value)
+                            else:
+                                result = self.builder.fadd(current_value, rhs_value)
+                        elif assign.op == '-':
+                            if isinstance(current_value.type, ir.IntType):
+                                result = self.builder.sub(current_value, rhs_value)
+                            else:
+                                result = self.builder.fsub(current_value, rhs_value)
+                        elif assign.op == '*':
+                            if isinstance(current_value.type, ir.IntType):
+                                result = self.builder.mul(current_value, rhs_value)
+                            else:
+                                result = self.builder.fmul(current_value, rhs_value)
+                        elif assign.op == '/':
+                            if isinstance(current_value.type, ir.IntType):
+                                result = self.builder.sdiv(current_value, rhs_value)
+                            else:
+                                result = self.builder.fdiv(current_value, rhs_value)
+                        else:
+                            raise CodeGenError(f"Unsupported compound assignment operator: {assign.op}=", assign.span)
+                        # Store result back
+                        self.builder.store(result, target_val)
+                        return
+                    else:
+                        # SSA-style variable - need to handle differently
+                        # For now, treat as error (compound assignment requires mutable variable)
+                        raise CodeGenError(
+                            f"Compound assignment {assign.op}= requires a mutable variable",
+                            assign.span
+                        )
+                else:
+                    raise CodeGenError(f"Undefined variable: {target_name}", assign.span)
+            elif isinstance(assign.target, ast.FieldAccess):
+                # Field compound assignment: obj.field += value
+                # Load current field value
+                current_value = self.gen_expression(assign.target)
+                # Generate right-hand side value
+                rhs_value = self.gen_expression(assign.value)
+                # Perform binary operation directly in LLVM
+                if assign.op == '+':
+                    if isinstance(current_value.type, ir.IntType):
+                        result = self.builder.add(current_value, rhs_value)
+                    else:
+                        result = self.builder.fadd(current_value, rhs_value)
+                elif assign.op == '-':
+                    if isinstance(current_value.type, ir.IntType):
+                        result = self.builder.sub(current_value, rhs_value)
+                    else:
+                        result = self.builder.fsub(current_value, rhs_value)
+                elif assign.op == '*':
+                    if isinstance(current_value.type, ir.IntType):
+                        result = self.builder.mul(current_value, rhs_value)
+                    else:
+                        result = self.builder.fmul(current_value, rhs_value)
+                elif assign.op == '/':
+                    if isinstance(current_value.type, ir.IntType):
+                        result = self.builder.sdiv(current_value, rhs_value)
+                    else:
+                        result = self.builder.fdiv(current_value, rhs_value)
+                else:
+                    raise CodeGenError(f"Unsupported compound assignment operator: {assign.op}=", assign.span)
+                # Store result back to field
+                self.gen_field_assignment(assign.target, result)
+                return
+            elif isinstance(assign.target, ast.IndexAccess):
+                # Index compound assignment: obj[index] += value
+                # Load current index value
+                current_value = self.gen_expression(assign.target)
+                # Generate right-hand side value
+                rhs_value = self.gen_expression(assign.value)
+                # Perform binary operation directly in LLVM
+                if assign.op == '+':
+                    if isinstance(current_value.type, ir.IntType):
+                        result = self.builder.add(current_value, rhs_value)
+                    else:
+                        result = self.builder.fadd(current_value, rhs_value)
+                elif assign.op == '-':
+                    if isinstance(current_value.type, ir.IntType):
+                        result = self.builder.sub(current_value, rhs_value)
+                    else:
+                        result = self.builder.fsub(current_value, rhs_value)
+                elif assign.op == '*':
+                    if isinstance(current_value.type, ir.IntType):
+                        result = self.builder.mul(current_value, rhs_value)
+                    else:
+                        result = self.builder.fmul(current_value, rhs_value)
+                elif assign.op == '/':
+                    if isinstance(current_value.type, ir.IntType):
+                        result = self.builder.sdiv(current_value, rhs_value)
+                    else:
+                        result = self.builder.fdiv(current_value, rhs_value)
+                else:
+                    raise CodeGenError(f"Unsupported compound assignment operator: {assign.op}=", assign.span)
+                # Store result back to index
+                self.gen_index_assignment(assign.target, result)
+                return
+            else:
+                raise CodeGenError(
+                    f"Compound assignment target not supported: {type(assign.target)}",
+                    assign.span
+                )
+        
+        # Regular assignment (no compound operator)
         value = self.gen_expression(assign.value)
         
         if isinstance(assign.target, ast.Identifier):

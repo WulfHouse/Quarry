@@ -1306,6 +1306,7 @@ Usage:
     quarry bloat            Analyze binary size
     quarry perf --baseline  Generate performance baseline (Perf.lock)
     quarry perf --check     Check for performance regressions
+    quarry verify [function] [--solver=z3|cvc5] [--file=path]  Verify contracts using SMT solver
     quarry --help           Show this help
 
 Examples:
@@ -1465,6 +1466,29 @@ def main():
         dry_run = "--dry-run" in sys.argv
         no_test = "--no-test" in sys.argv
         return cmd_publish(dry_run=dry_run, no_test=no_test)
+    
+    elif command == "verify":
+        from quarry.smt_verify import cmd_verify
+        
+        # Parse arguments
+        function_name = None
+        solver = "z3"
+        file_path = None
+        
+        for i, arg in enumerate(sys.argv):
+            if arg == "--solver" and i + 1 < len(sys.argv):
+                solver = sys.argv[i + 1]
+            elif arg.startswith("--solver="):
+                solver = arg.split("=", 1)[1]
+            elif arg == "--file" and i + 1 < len(sys.argv):
+                file_path = sys.argv[i + 1]
+            elif arg.startswith("--file="):
+                file_path = arg.split("=", 1)[1]
+            elif i == 2 and not arg.startswith("--"):
+                # Function name as positional argument
+                function_name = arg
+        
+        return cmd_verify(function_name=function_name, solver=solver, file_path=file_path)
     
     elif command in ["--help", "-h", "help"]:
         print_usage()

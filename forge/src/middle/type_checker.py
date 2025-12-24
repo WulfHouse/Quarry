@@ -803,11 +803,37 @@ class TypeChecker:
         target_type = self.check_expression(assign.target)
         value_type = self.check_expression(assign.value)
         
-        if not types_compatible(target_type, value_type):
-            self.error(
-                f"Type mismatch: cannot assign {value_type} to {target_type}",
-                assign.span
-            )
+        # Handle compound assignment operators (+=, -=, *=, /=)
+        if assign.op:
+            # For compound assignments, check that the operation is valid
+            # and that the result type is compatible with the target
+            if assign.op in ['+', '-', '*', '/']:
+                # Arithmetic compound assignment requires numeric types
+                if not is_numeric_type(target_type) or not is_numeric_type(value_type):
+                    self.error(
+                        f"Compound assignment {assign.op}= requires numeric types, got {target_type} and {value_type}",
+                        assign.span
+                    )
+                else:
+                    # Check that the result of the operation is compatible with target
+                    result_type = common_numeric_type(target_type, value_type) or INT
+                    if not types_compatible(target_type, result_type):
+                        self.error(
+                            f"Type mismatch: result of {target_type} {assign.op} {value_type} ({result_type}) is not compatible with {target_type}",
+                            assign.span
+                        )
+            else:
+                self.error(
+                    f"Unknown compound assignment operator: {assign.op}=",
+                    assign.span
+                )
+        else:
+            # Regular assignment
+            if not types_compatible(target_type, value_type):
+                self.error(
+                    f"Type mismatch: cannot assign {value_type} to {target_type}",
+                    assign.span
+                )
         
         # Check if target is mutable (simplified for now)
         # TODO: More sophisticated mutability checking

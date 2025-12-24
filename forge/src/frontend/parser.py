@@ -204,11 +204,16 @@ class Parser:
             self.advance()
             return_type = self.parse_type()
         
-        # No body for extern functions - just a declaration
-        self.expect(TokenType.NEWLINE)
-        
-        # Create empty body (extern functions have no implementation)
-        body = ast.Block(statements=[], span=self.current().span)
+        # Extern functions can have bodies (for FFI wrappers) or be declarations only
+        if self.match_token(TokenType.COLON):
+            # Has body - parse like regular function
+            self.expect(TokenType.COLON)
+            self.expect(TokenType.NEWLINE)
+            body = self.parse_block()
+        else:
+            # Declaration only - no body
+            self.expect(TokenType.NEWLINE)
+            body = ast.Block(statements=[], span=self.current().span)
         
         return ast.FunctionDef(
             name=name,
@@ -235,7 +240,15 @@ class Parser:
             self.advance()
         
         self.expect(TokenType.FN)
-        name = self.expect(TokenType.IDENTIFIER).value
+        # Function names can be identifiers or context-sensitive keywords (exists, forall)
+        if self.match_token(TokenType.IDENTIFIER):
+            name = self.advance().value
+        elif self.match_token(TokenType.EXISTS, TokenType.FORALL):
+            # Allow exists/forall as function names (they're context-sensitive keywords)
+            name = self.current().type.name.lower()  # EXISTS -> "exists", FORALL -> "forall"
+            self.advance()
+        else:
+            self.expect(TokenType.IDENTIFIER)  # Will raise error with proper message
         
         # Generic and compile-time parameters
         generic_params = []
@@ -515,7 +528,12 @@ class Parser:
                 break
             
             field_start = self.current().span
-            field_name = self.expect(TokenType.IDENTIFIER).value
+            # Allow 'type' as a field name (it's a keyword but valid as identifier in struct context)
+            if self.match_token(TokenType.TYPE):
+                field_name = "type"
+                self.advance()
+            else:
+                field_name = self.expect(TokenType.IDENTIFIER).value
             self.expect(TokenType.COLON)
             field_type = self.parse_type()
             self.expect(TokenType.NEWLINE)
@@ -1460,7 +1478,9 @@ class Parser:
                 break
             
             arm_start = self.current().span
-            self.expect(TokenType.CASE)
+            # Case keyword is optional (Python-like syntax: match value: pattern:)
+            if self.match_token(TokenType.CASE):
+                self.advance()
             pattern = self.parse_pattern()
             
             # Optional guard
@@ -1546,7 +1566,7 @@ class Parser:
         start_span = self.current().span
         expr = self.parse_expression()
         
-        # Check if it's an assignment
+        # Check if it's an assignment (regular or compound)
         if self.match_token(TokenType.ASSIGN):
             self.advance()
             value = self.parse_expression()
@@ -1555,6 +1575,26 @@ class Parser:
             return ast.Assignment(
                 target=expr,
                 value=value,
+                op=None,  # Regular assignment
+                span=self.make_span(start_span)
+            )
+        elif self.match_token(TokenType.PLUS_EQ, TokenType.MINUS_EQ, TokenType.STAR_EQ, TokenType.SLASH_EQ):
+            # Compound assignment: +=, -=, *=, /=
+            op_token = self.advance()
+            op_map = {
+                TokenType.PLUS_EQ: "+",
+                TokenType.MINUS_EQ: "-",
+                TokenType.STAR_EQ: "*",
+                TokenType.SLASH_EQ: "/",
+            }
+            op = op_map[op_token.type]
+            value = self.parse_expression()
+            self.expect(TokenType.NEWLINE)
+            
+            return ast.Assignment(
+                target=expr,
+                value=value,
+                op=op,
                 span=self.make_span(start_span)
             )
         else:
@@ -1847,15 +1887,19 @@ class Parser:
         while True:
             if self.match_token(TokenType.DOT):
                 self.advance()
-                # Allow IDENTIFIER or NONE (for enum variants like Option.None)
+                # Allow IDENTIFIER, NONE, or context-sensitive keywords (exists, forall)
                 if self.match_token(TokenType.IDENTIFIER):
                     field = self.advance().value
                 elif self.match_token(TokenType.NONE):
                     self.advance()
                     field = "None"
+                elif self.match_token(TokenType.EXISTS, TokenType.FORALL):
+                    # Allow exists/forall as method names
+                    field = self.current().type.name.lower()  # EXISTS -> "exists", FORALL -> "forall"
+                    self.advance()
                 else:
                     raise ParseError(
-                        f"Expected IDENTIFIER or NONE after '.', got {self.current().type.name}",
+                        f"Expected IDENTIFIER, NONE, EXISTS, or FORALL after '.', got {self.current().type.name}",
                         self.current().span
                     )
                 
@@ -2047,16 +2091,28 @@ class Parser:
             return ast.NoneLiteral(span=self.make_span(start_span))
         
         # Quantified expressions: forall x in collection: predicate or exists x in collection: predicate
+        # Only parse as quantified if followed by identifier + 'in' (not a function call)
         if self.match_token(TokenType.FORALL) or self.match_token(TokenType.EXISTS):
-            quantifier_token = self.advance()
-            quantifier = "forall" if quantifier_token.type == TokenType.FORALL else "exists"
-            
-            # Parse variable name
-            var_token = self.expect(TokenType.IDENTIFIER)
-            variable = var_token.value
-            
-            # Expect 'in'
-            self.expect(TokenType.IN)
+            # Peek ahead to see if this is a quantified expression or a function call
+            # If next tokens are IDENTIFIER + IN, it's a quantified expression
+            # Otherwise, treat as identifier (function call)
+            peek1 = self.peek(1)
+            peek2 = self.peek(2)
+            if (peek1.type == TokenType.IDENTIFIER and peek2.type == TokenType.IN):
+                quantifier_token = self.advance()
+                quantifier = "forall" if quantifier_token.type == TokenType.FORALL else "exists"
+                
+                # Parse variable name
+                var_token = self.expect(TokenType.IDENTIFIER)
+                variable = var_token.value
+                
+                # Expect 'in'
+                self.expect(TokenType.IN)
+            else:
+                # Not a quantified expression - treat as identifier (function call)
+                name = self.current().type.name.lower()  # EXISTS -> "exists", FORALL -> "forall"
+                self.advance()
+                return ast.Identifier(name=name, span=self.make_span(start_span))
             
             # Parse collection expression
             collection = self.parse_expression()

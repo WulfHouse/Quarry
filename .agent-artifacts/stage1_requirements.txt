@@ -1,0 +1,118 @@
+STAGE1 REQUIREMENTS ANALYSIS
+============================
+
+Based on bootstrap output, Stage1 successfully compiled 3/14 modules:
+- ast.pyrite ✓
+- diagnostics.pyrite ✓
+- main.pyrite ✓
+
+Failed modules and their issues:
+
+1. EXTERN FUNCTIONS WITH BODIES (7 modules)
+   Files: build_graph.pyrite, dep_fingerprint.pyrite, dep_source.pyrite, 
+          lockfile.pyrite, path_utils.pyrite, toml.pyrite, version.pyrite
+   
+   Issue: Parser expects `extern "C" fn name(...) -> type` (declaration only)
+          But code has: `extern "C" fn name(...) -> type:` (with body)
+   
+   Error: "Expected NEWLINE, got COLON"
+   
+   Location: forge/src/frontend/parser.py:176-225 (parse_extern)
+   
+   Fix Needed: Update parse_extern() to support function bodies when COLON is present
+               instead of NEWLINE. Should parse body like regular functions.
+
+2. MATCH EXPRESSION SYNTAX (1 module)
+   File: symbol_table.pyrite:63
+   
+   Issue: Match expression uses Python-like syntax WITHOUT `case` keyword:
+          `match value: pattern:` 
+          But parser expects: `match value: case pattern:`
+   
+   Error: "Expected CASE, got IDENTIFIER"
+   
+   Location: Line 63: `Option::Some(parent):` (missing `case` keyword)
+   
+   Specification: SSOT Section 6.3 shows match WITHOUT `case` keyword (Python-like)
+   
+   Fix Needed: Update parse_match() to support match arms without `case` keyword
+               When parsing match arms, if next token is not CASE, treat it as a pattern
+               Format: `pattern:` should be parsed directly (no `case` required)
+
+3. STRUCT FIELD NAMED 'type' (1 module)
+   File: tokens.pyrite:105
+   
+   Issue: Struct field named `type` conflicts with `TYPE` keyword
+   
+   Error: "Expected IDENTIFIER, got TYPE"
+   
+   Location: Line 105: `type: TokenType`
+   
+   Fix Needed: Allow `type` as a field name (it's a valid identifier in structs)
+               The parser should distinguish between `type` keyword (in type aliases)
+               and `type` as an identifier (in struct fields)
+
+4. INDENTATION ERROR (1 module)
+   File: locked_validate.pyrite:27
+   
+   Issue: Indentation doesn't match any outer level
+   
+   Error: "Indentation doesn't match any outer level"
+   
+   Location: Line 27
+   
+   Fix Needed: Check actual indentation in file - may be a syntax issue
+
+5. OWNERSHIP/MOVE ERRORS (1 module)
+   File: types.pyrite:72-90, 127
+   
+   Issue: Multiple "Cannot use already moved field" errors
+   
+   Errors:
+   - Line 72: Cannot use already moved field 'BoolType' of 'Type'
+   - Line 75: Cannot use already moved field 'CharType' of 'Type'
+   - Line 78: Cannot use already moved field 'StringType' of 'Type'
+   - Line 81: Cannot use already moved field 'VoidType' of 'Type'
+   - Line 84: Cannot use already moved field 'NoneType' of 'Type'
+   - Line 87: Cannot use already moved field 'UnknownType' of 'Type'
+   - Line 90: Cannot use already moved field 'SelfType' of 'Type'
+   - Line 127: Cannot use already moved field 'None' of 'Option'
+   
+   Location: Functions like `bool_type()`, `char_type()`, etc. returning enum variants
+   
+   Fix Needed: Ownership checker needs to handle enum variant construction properly
+               Enum variants should be Copy-able or the checker needs to understand
+               that constructing a variant doesn't move the enum type itself
+
+PRIORITY FIXES:
+==============
+
+1. HIGH: Extern functions with bodies (affects 7 modules)
+   - Update parse_extern() to check for COLON vs NEWLINE
+   - If COLON, parse function body like regular functions
+   - If NEWLINE, treat as declaration-only
+
+2. HIGH: Match expression syntax without `case` keyword (affects 1 module)
+   - Update parse_match() to make `case` keyword optional
+   - If no `case` keyword, parse pattern directly followed by colon
+   - Matches specification (SSOT Section 6.3) which shows Python-like syntax
+
+3. MEDIUM: Struct field named 'type' (affects 1 module)
+   - Update parser to allow 'type' as identifier in struct context
+   - Distinguish between keyword usage and identifier usage
+
+4. MEDIUM: Ownership errors with enum variants (affects 1 module)
+   - Fix ownership checker to handle enum variant construction
+   - Enum variants should be treated as values, not moves
+
+5. LOW: Indentation error (affects 1 module)
+   - Check actual file content for indentation issues
+
+ESTIMATED IMPACT:
+================
+- Fixing extern functions: +7 modules (50% of failures)
+- Fixing match enum variants: +1 module
+- Fixing 'type' field: +1 module
+- Fixing ownership: +1 module
+- Total potential: 10/14 modules (71% success rate)
+

@@ -247,9 +247,10 @@ class VarDecl(ASTNode):
 
 @dataclass
 class Assignment(ASTNode):
-    """Assignment: x = value"""
+    """Assignment: x = value or x += value, etc."""
     target: 'Expression'  # Lvalue
     value: 'Expression'
+    op: Optional[str] = None  # None for =, "+" for +=, "-" for -=, "*" for *=, "/" for /=
 
 
 @dataclass
