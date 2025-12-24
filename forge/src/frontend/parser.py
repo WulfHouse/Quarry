@@ -2046,6 +2046,35 @@ class Parser:
             self.advance()
             return ast.NoneLiteral(span=self.make_span(start_span))
         
+        # Quantified expressions: forall x in collection: predicate or exists x in collection: predicate
+        if self.match_token(TokenType.FORALL) or self.match_token(TokenType.EXISTS):
+            quantifier_token = self.advance()
+            quantifier = "forall" if quantifier_token.type == TokenType.FORALL else "exists"
+            
+            # Parse variable name
+            var_token = self.expect(TokenType.IDENTIFIER)
+            variable = var_token.value
+            
+            # Expect 'in'
+            self.expect(TokenType.IN)
+            
+            # Parse collection expression
+            collection = self.parse_expression()
+            
+            # Expect ':'
+            self.expect(TokenType.COLON)
+            
+            # Parse predicate expression
+            predicate = self.parse_expression()
+            
+            return ast.QuantifiedExpr(
+                quantifier=quantifier,
+                variable=variable,
+                collection=collection,
+                predicate=predicate,
+                span=self.make_span(start_span)
+            )
+        
         # Try expression - must parse the full expression, not just primary
         # try get_value() should parse as TryExpr(expression=FunctionCall(...))
         if self.match_token(TokenType.TRY):

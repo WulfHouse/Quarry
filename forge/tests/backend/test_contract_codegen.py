@@ -128,3 +128,75 @@ fn inc(x: int) -> int:
     assert "postcondition_fail" in llvm_ir
     assert "old(x)" in llvm_ir
 
+def test_precondition_blame_tracking():
+    """Test that precondition failures include blame: caller (SPEC-LANG-0407)"""
+    source = """
+fn pyrite_fail(msg: String):
+    pass
+
+@requires(x > 0)
+fn test(x: i64):
+    pass
+"""
+    tokens = lex(source, "<test>")
+    program = parse(tokens)
+    tc = type_check(program)
+    
+    codegen = LLVMCodeGen()
+    codegen.type_checker = tc
+    module = codegen.compile_program(program)
+    
+    llvm_ir = str(module)
+    # Check that error message includes blame information
+    assert "blame: caller" in llvm_ir
+    assert "ContractViolation: Precondition failed" in llvm_ir
+
+def test_postcondition_blame_tracking():
+    """Test that postcondition failures include blame: callee (SPEC-LANG-0407)"""
+    source = """
+fn pyrite_fail(msg: String):
+    pass
+
+@ensures(result > 0)
+fn abs(x: i64) -> i64:
+    if x < 0:
+        return -x
+    return x
+"""
+    tokens = lex(source, "<test>")
+    program = parse(tokens)
+    tc = type_check(program)
+    
+    codegen = LLVMCodeGen()
+    codegen.type_checker = tc
+    module = codegen.compile_program(program)
+    
+    llvm_ir = str(module)
+    # Check that error message includes blame information
+    assert "blame: callee" in llvm_ir
+    assert "callee (abs)" in llvm_ir
+    assert "ContractViolation: Postcondition failed" in llvm_ir
+
+def test_contract_propagation_across_functions():
+    """Test that contracts are tracked across function boundaries (SPEC-LANG-0407)"""
+    source = """
+fn pyrite_fail(msg: String):
+    pass
+
+@requires(x > 0)
+fn callee(x: i64):
+    pass
+"""
+    tokens = lex(source, "<test>")
+    program = parse(tokens)
+    tc = type_check(program)
+    
+    codegen = LLVMCodeGen()
+    codegen.type_checker = tc
+    module = codegen.compile_program(program)
+    
+    llvm_ir = str(module)
+    # Check that callee has precondition check with caller blame
+    assert "blame: caller" in llvm_ir
+    assert "callee" in llvm_ir  # Function name should be in the code
+

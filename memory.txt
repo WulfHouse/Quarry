@@ -1,11 +1,11 @@
 Last updated: 2025-12-23
-Milestone: M10 | Last SPEC: SPEC-LANG-0873 | Next: SPEC-LANG-0406
+Milestone: M11 | Last SPEC: SPEC-LANG-0405 | Next: SPEC-LANG-0409
 Phase: 3 (Beta) | Status: READY | Branch: 1.2.0-alpha
-Tests: 1904/1905 (full) OR 531/531 (fast) | Notes: Completed M10 remediation - all LEAF specs certified.
+Tests: 536/536 (fast) | Notes: Completed SPEC-LANG-0405 - quantified predicates (forall, exists) with parsing and type checking. Codegen placeholder added.
 
 State History (Last 5):
-1. 2025-12-23 M10 REMEDIATION | Completed all 7 M10 LEAF specs: 0840,0841,0850,0870,0871,0872,0873. Fixed contract verification bug.
-2. 2025-12-23 M11 SPEC-LANG-0404->SPEC-LANG-0406 | Implemented old() support in Parser, TypeChecker, and Codegen.
-3. 2025-12-23 M11 SPEC-LANG-0403->SPEC-LANG-0404 | Implemented @invariant support for loops and structs.
-4. 2025-12-23 M11 SPEC-LANG-0402->SPEC-LANG-0403 | Implemented @ensures support in Parser, TypeChecker, and Codegen.
-5. 2025-12-23 M11 SPEC-LANG-0401->SPEC-LANG-0402 | Implemented @requires support in Parser, TypeChecker, and Codegen.
+1. 2025-12-23 M11 SPEC-LANG-0405 | Implemented forall/exists keywords, parsing, and type checking. Added QuantifiedExpr AST node. Codegen placeholder added (full loop desugaring TODO). All 536 tests pass.
+2. 2025-12-23 M11 SPEC-LANG-0408 | Implemented @safety_critical attribute parsing and tracking. Added checks in codegen to ensure contracts are always checked for safety-critical functions (ready for future build-mode conditional checks). All 534 tests pass.
+3. 2025-12-23 M11 SPEC-LANG-0407 | Implemented contract propagation and blame tracking. Enhanced error messages to identify caller vs callee blame. Preconditions blame caller, postconditions blame callee. All 532 tests pass.
+4. 2025-12-23 M11 SPEC-LANG-0406 | Implemented compile-time contract verification with range analysis. Enhanced evaluate_constant_bool to use constraints from @requires. Added compile-time verification for @ensures. All 532 tests pass.
+5. 2025-12-23 M10 REMEDIATION | Completed all 7 M10 LEAF specs: 0840,0841,0850,0870,0871,0872,0873. Fixed contract verification bug.

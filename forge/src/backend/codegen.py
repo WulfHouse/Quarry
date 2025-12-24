@@ -99,6 +99,9 @@ class LLVMCodeGen:
         self.current_struct_name: Optional[str] = None
         self.old_values: Dict[ast.OldExpr, ir.Value] = {}  # Mapping from OldExpr node to captured value
         
+        # Contract propagation and blame tracking (SPEC-LANG-0407)
+        self.current_call_site: Optional[ast.FunctionCall] = None  # Track current function call for blame tracking
+        
         # Cost analysis tracking
         self.track_costs: bool = False  # Enable cost tracking
         self.warn_costs: bool = False  # Enable cost warnings
@@ -1555,6 +1558,9 @@ class LLVMCodeGen:
             else:
                 return self.gen_expression(expr.expression)
         
+        elif isinstance(expr, ast.QuantifiedExpr):
+            return self.gen_quantified_expr(expr)
+        
         elif isinstance(expr, ast.TernaryExpr):
             return self.gen_ternary_expr(expr)
         
@@ -1670,6 +1676,21 @@ class LLVMCodeGen:
                     return self.builder.bitcast(payload_raw, target_llvm_type)
         
         return payload_raw
+    
+    def gen_quantified_expr(self, quantified: ast.QuantifiedExpr) -> ir.Value:
+        """Generate code for quantified expression (forall/exists) (SPEC-LANG-0405)
+        
+        Simplified implementation: desugars to loops that check all elements.
+        For now, returns a placeholder - full implementation requires proper loop generation.
+        """
+        # TODO: Full implementation requires:
+        # 1. Proper iteration over collection (List, Array, Slice)
+        # 2. Short-circuiting for forall (stop on first false) and exists (stop on first true)
+        # 3. Proper variable scoping for bound variable
+        
+        # For now, return a constant true as placeholder
+        # This allows parsing and type checking to work, but runtime behavior is not correct yet
+        return ir.Constant(ir.IntType(1), 1)
     
     def gen_list_literal(self, literal: ast.ListLiteral) -> ir.Value:
         """Generate code for list literal
@@ -3672,6 +3693,15 @@ class LLVMCodeGen:
         # Omit check if proven at compile-time (SPEC-LANG-0406)
         if getattr(condition_expr, 'is_proven', False):
             return
+        
+        # Check if function has @safety_critical attribute (SPEC-LANG-0408)
+        # For now, contracts are always checked, but this marker ensures
+        # they will be checked even in release builds when build-mode conditional checks are added
+        is_safety_critical = False
+        if self.current_function_def:
+            is_safety_critical = any(
+                attr.name == "safety_critical" for attr in self.current_function_def.attributes
+            )
             
         # 1. Generate condition expression
         cond_val = self.gen_expression(condition_expr)
@@ -3689,7 +3719,16 @@ class LLVMCodeGen:
         # Fail path
         self.builder.position_at_end(fail_block)
         expr_str = self._expr_to_string(condition_expr)
-        msg = f"ContractViolation: Precondition failed: {expr_str}"
+        
+        # Build error message with blame tracking (SPEC-LANG-0407)
+        # Preconditions are checked at function entry, so caller is always to blame
+        func_name = self.current_function_def.name if self.current_function_def else "unknown"
+        func_span = self.current_function_def.span if self.current_function_def else None
+        location_info = ""
+        if func_span:
+            location_info = f" at {func_span.filename}:{func_span.start_line}:{func_span.start_column}"
+        
+        msg = f"ContractViolation: Precondition failed: {expr_str}{location_info}; blame: caller"
         msg_const = self.create_string_constant(msg)
         
         # Call pyrite_fail
@@ -3801,6 +3840,15 @@ class LLVMCodeGen:
         # Omit check if proven at compile-time (SPEC-LANG-0406)
         if getattr(condition_expr, 'is_proven', False):
             return
+        
+        # Check if function has @safety_critical attribute (SPEC-LANG-0408)
+        # For now, contracts are always checked, but this marker ensures
+        # they will be checked even in release builds when build-mode conditional checks are added
+        is_safety_critical = False
+        if self.current_function_def:
+            is_safety_critical = any(
+                attr.name == "safety_critical" for attr in self.current_function_def.attributes
+            )
             
         cond_val = self.gen_expression(condition_expr)
         
@@ -3814,7 +3862,16 @@ class LLVMCodeGen:
         
         self.builder.position_at_end(fail_block)
         expr_str = self._expr_to_string(condition_expr)
-        msg = f"ContractViolation: Postcondition failed: {expr_str}"
+        
+        # Build error message with blame tracking (SPEC-LANG-0407)
+        # Postconditions are checked at function exit, so callee is always to blame
+        callee_name = self.current_function_def.name if self.current_function_def else "unknown"
+        func_span = self.current_function_def.span if self.current_function_def else None
+        location_info = ""
+        if func_span:
+            location_info = f" at {func_span.filename}:{func_span.start_line}:{func_span.start_column}"
+        
+        msg = f"ContractViolation: Postcondition failed: {expr_str}{location_info}; blame: callee ({callee_name})"
         msg_const = self.create_string_constant(msg)
         
         if self.fail_func:

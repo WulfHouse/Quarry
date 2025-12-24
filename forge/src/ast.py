@@ -500,6 +500,15 @@ class OldExpr(ASTNode):
 
 
 @dataclass
+class QuantifiedExpr(ASTNode):
+    """Quantified expression: forall x in collection: predicate or exists x in collection: predicate"""
+    quantifier: str  # "forall" or "exists"
+    variable: str  # Bound variable name
+    collection: 'Expression'  # Collection to iterate over
+    predicate: 'Expression'  # Predicate to check
+
+
+@dataclass
 class ParameterClosure(ASTNode):
     """
     Parameter closure: fn[params] -> Type
@@ -644,7 +653,7 @@ Expression = (IntLiteral | FloatLiteral | StringLiteral | CharLiteral |
               BoolLiteral | NoneLiteral | Identifier | BinOp | UnaryOp |
               TernaryExpr | FunctionCall | MethodCall | FieldAccess |
               IndexAccess | SliceAccess | StructLiteral | ListLiteral | TupleLiteral | TryExpr |
-              GenericType | AsExpression | OldExpr)  # Allow GenericType as expression for Type[Args].method() syntax
+              GenericType | AsExpression | OldExpr | QuantifiedExpr)  # Allow GenericType as expression for Type[Args].method() syntax
 Pattern = (LiteralPattern | IdentifierPattern | TuplePattern | WildcardPattern |
            EnumPattern | OrPattern)
 Type = (PrimitiveType | ReferenceType | PointerType | ArrayType |

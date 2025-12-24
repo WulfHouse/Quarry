@@ -54,6 +54,9 @@ class TypeChecker:
         self.type_aliases: Dict[str, tuple[List[ast.GenericParam], Type]] = {}
         # Track if we are inside an @ensures attribute for old() validation
         self.is_inside_ensures = False
+        # Track constraints for compile-time contract verification (SPEC-LANG-0406)
+        # Maps variable name to list of constraint expressions (BinOp with comparisons)
+        self.variable_constraints: Dict[str, List[ast.Expression]] = {}
         self.register_builtins()
     
     def error(self, message: str, span: Span):
@@ -681,6 +684,9 @@ class TypeChecker:
             param_type = self.resolve_type(param.type_annotation)
             self.resolver.define_variable(param.name, param_type, False, param.span)
         
+        # Track constraints from @requires for compile-time verification (SPEC-LANG-0406)
+        self.variable_constraints = {}
+        
         # Check attributes (@requires, @ensures)
         for attr in func.attributes:
             if attr.name == "requires":
@@ -693,6 +699,9 @@ class TypeChecker:
                             self.error(f"Precondition will always fail", expr.span)
                         elif val is True:
                             expr.is_proven = True
+                        else:
+                            # Track constraint for range analysis
+                            self._track_constraint(expr)
             elif attr.name == "ensures":
                 # For @ensures, 'result' refers to the return value
                 self.resolver.enter_scope()
@@ -705,7 +714,12 @@ class TypeChecker:
                 for expr in attr.args:
                     if isinstance(expr, ast.Expression):
                         self.check_expression(expr, expected_type=BOOL)
-                        # Note: we don't prove postconditions easily as they depend on function logic
+                        # Compile-time verification for postconditions (SPEC-LANG-0406)
+                        val = self.evaluate_constant_bool(expr)
+                        if val is False:
+                            self.error(f"Postcondition will always fail", expr.span)
+                        elif val is True:
+                            expr.is_proven = True
                 self.is_inside_ensures = False
                 
                 self.resolver.exit_scope()
@@ -1138,6 +1152,8 @@ class TypeChecker:
             return self.check_try_expr(expr)
         elif isinstance(expr, ast.OldExpr):
             return self.check_old_expr(expr)
+        elif isinstance(expr, ast.QuantifiedExpr):
+            return self.check_quantified_expr(expr)
         elif isinstance(expr, ast.ParameterClosure):
             return self.check_parameter_closure(expr)
         elif isinstance(expr, ast.RuntimeClosure):
@@ -2156,6 +2172,120 @@ class TypeChecker:
         # Type of old(expr) is the same as type of expr
         return self.check_expression(old_expr.expression)
     
+    def check_quantified_expr(self, quantified: ast.QuantifiedExpr) -> Type:
+        """Type check quantified expression (forall/exists) (SPEC-LANG-0405)"""
+        # Check collection type - must be iterable (List, Array, Slice, etc.)
+        collection_type = self.check_expression(quantified.collection)
+        
+        # For now, check if it's a List, Array, or Slice
+        element_type = None
+        if isinstance(collection_type, ArrayType):
+            element_type = collection_type.element_type
+        elif isinstance(collection_type, SliceType):
+            element_type = collection_type.element_type
+        elif isinstance(collection_type, GenericType) and collection_type.name == "List":
+            if collection_type.type_args:
+                element_type = collection_type.type_args[0]
+        
+        if element_type is None:
+            self.error(f"Quantified expression requires an iterable collection (List, Array, or Slice), got {collection_type}", quantified.collection.span)
+            return BOOL  # Return bool as fallback
+        
+        # Enter scope for bound variable
+        self.resolver.enter_scope()
+        self.resolver.define_variable(quantified.variable, element_type, False, quantified.span)
+        
+        # Check predicate - must be boolean
+        predicate_type = self.check_expression(quantified.predicate)
+        if predicate_type != BOOL:
+            self.error(f"Predicate in quantified expression must be boolean, got {predicate_type}", quantified.predicate.span)
+        
+        # Exit scope
+        self.resolver.exit_scope()
+        
+        # Quantified expressions always return bool
+        return BOOL
+    
+    def _track_constraint(self, expr: ast.Expression):
+        """Track a constraint from @requires for range analysis (SPEC-LANG-0406)"""
+        # Track simple comparisons: x > 0, x >= 0, x < 10, etc.
+        if isinstance(expr, ast.BinOp) and expr.op in ('>', '>=', '<', '<=', '==', '!='):
+            # Check if left side is a variable and right side is a constant
+            if isinstance(expr.left, ast.Identifier):
+                var_name = expr.left.name
+                if var_name not in self.variable_constraints:
+                    self.variable_constraints[var_name] = []
+                self.variable_constraints[var_name].append(expr)
+            # Also check if right side is a variable and left side is a constant
+            elif isinstance(expr.right, ast.Identifier):
+                var_name = expr.right.name
+                if var_name not in self.variable_constraints:
+                    self.variable_constraints[var_name] = []
+                # Reverse the comparison for tracking
+                reversed_op = {'>': '<', '>=': '<=', '<': '>', '<=': '>=', '==': '==', '!=': '!='}[expr.op]
+                reversed_expr = ast.BinOp(expr.right, reversed_op, expr.left, expr.span)
+                self.variable_constraints[var_name].append(reversed_expr)
+    
+    def _prove_from_constraints(self, expr: ast.Expression) -> Optional[bool]:
+        """Try to prove an expression using tracked constraints (SPEC-LANG-0406)"""
+        # Handle simple comparisons using constraints
+        if isinstance(expr, ast.BinOp) and expr.op in ('>', '>=', '<', '<=', '==', '!='):
+            # Check if we can prove this from constraints
+            if isinstance(expr.left, ast.Identifier):
+                var_name = expr.left.name
+                constraints = self.variable_constraints.get(var_name, [])
+                right_const = self.evaluate_constant_int(expr.right)
+                
+                if right_const is not None:
+                    # Check each constraint
+                    for constraint in constraints:
+                        if isinstance(constraint, ast.BinOp) and isinstance(constraint.right, (ast.IntLiteral, ast.FloatLiteral)):
+                            constraint_const = self.evaluate_constant_int(constraint.right)
+                            if constraint_const is not None:
+                                # Try to prove the expression
+                                if constraint.op == '>' and expr.op == '>=':
+                                    # If we know x > 5, then x >= 4 is true
+                                    if constraint_const >= right_const:
+                                        return True
+                                elif constraint.op == '>=' and expr.op == '>=':
+                                    # If we know x >= 5, then x >= 4 is true
+                                    if constraint_const >= right_const:
+                                        return True
+                                elif constraint.op == '>' and expr.op == '>':
+                                    # If we know x > 5, then x > 4 is true
+                                    if constraint_const >= right_const:
+                                        return True
+                                elif constraint.op == '<' and expr.op == '<=':
+                                    # If we know x < 5, then x <= 6 is true
+                                    if constraint_const <= right_const:
+                                        return True
+                                elif constraint.op == '<=' and expr.op == '<=':
+                                    # If we know x <= 5, then x <= 6 is true
+                                    if constraint_const <= right_const:
+                                        return True
+                                elif constraint.op == '<' and expr.op == '<':
+                                    # If we know x < 5, then x < 6 is true
+                                    if constraint_const <= right_const:
+                                        return True
+                                elif constraint.op == '==' and expr.op == '==':
+                                    # If we know x == 5, then x == 5 is true
+                                    if constraint_const == right_const:
+                                        return True
+                                elif constraint.op == '==' and expr.op == '!=':
+                                    # If we know x == 5, then x != 4 is true
+                                    if constraint_const != right_const:
+                                        return True
+                                elif constraint.op == '>' and expr.op == '<':
+                                    # If we know x > 5, then x < 4 is false
+                                    if constraint_const >= right_const:
+                                        return False
+                                elif constraint.op == '<' and expr.op == '>':
+                                    # If we know x < 5, then x > 6 is false
+                                    if constraint_const <= right_const:
+                                        return False
+        
+        return None
+    
     def evaluate_constant_int(self, expr: ast.Expression) -> Optional[int]:
         """Evaluate a constant integer expression (SPEC-LANG-0216)"""
         if isinstance(expr, ast.IntLiteral):
@@ -2187,7 +2317,13 @@ class TypeChecker:
         return None
 
     def evaluate_constant_bool(self, expr: ast.Expression) -> Optional[bool]:
-        """Evaluate a constant boolean expression (SPEC-LANG-0406)"""
+        """Evaluate a constant boolean expression with range analysis (SPEC-LANG-0406)"""
+        # First try to prove from constraints
+        proven = self._prove_from_constraints(expr)
+        if proven is not None:
+            return proven
+        
+        # Fall back to constant evaluation
         if isinstance(expr, ast.BoolLiteral):
             return expr.value
         elif isinstance(expr, ast.BinOp):

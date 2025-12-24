@@ -45,6 +45,8 @@ class TokenType(Enum):
     NOT = auto()
     TYPE = auto()
     PASS = auto()
+    FORALL = auto()  # forall (quantified predicate)
+    EXISTS = auto()  # exists (quantified predicate)
     
     # Identifiers and Literals
     IDENTIFIER = auto()
@@ -147,6 +149,8 @@ KEYWORDS = {
     'not': TokenType.NOT,
     'type': TokenType.TYPE,
     'pass': TokenType.PASS,
+    'forall': TokenType.FORALL,
+    'exists': TokenType.EXISTS,
 }
 
 
