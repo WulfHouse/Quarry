@@ -172,10 +172,11 @@ class DerivePass:
             )
             
             # let field_name_val = deserializer.deserialize_str()?
-            field_var = ast.LetStmt(
-                name=field_var_name,
+            field_var = ast.VarDecl(
+                pattern=ast.IdentifierPattern(name=field_var_name, span=span),
+                mutable=False,
                 type_annotation=None,  # Type inference
-                value=deserialize_field,
+                initializer=deserialize_field,
                 span=span
             )
             statements.append(field_var)
@@ -185,14 +186,13 @@ class DerivePass:
         # return Ok(StructName { field1: field1_val, field2: field2_val, ... })
         struct_fields = []
         for field_name, var_name in field_vars:
-            struct_fields.append(ast.StructField(
-                name=field_name,
-                value=ast.Identifier(name=var_name, span=span),
-                span=span
+            struct_fields.append((
+                field_name,
+                ast.Identifier(name=var_name, span=span)
             ))
         
         struct_literal = ast.StructLiteral(
-            type_name=struct.name,
+            struct_name=struct.name,
             fields=struct_fields,
             span=span
         )
