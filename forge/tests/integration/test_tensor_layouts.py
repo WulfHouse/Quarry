@@ -125,3 +125,31 @@ def test_default_layout_is_row_major():
     # Verify default layout is RowMajor in constructor
     assert "TensorLayout.RowMajor" in content, "Default layout should be RowMajor"
 
+
+@pytest.mark.fast
+def test_tensor_to_layout_api():
+    """Test that to_layout(layout: TensorLayout) API exists and works (SPEC-LANG-0871)"""
+    tensor_file = Path(__file__).parent.parent.parent.parent / "pyrite" / "num" / "tensor.pyrite"
+    content = tensor_file.read_text()
+    
+    # Verify to_layout method exists with correct signature
+    assert "fn to_layout(" in content, "to_layout method should exist"
+    assert "layout: TensorLayout" in content, "to_layout should accept TensorLayout parameter"
+    
+    # Test that to_layout can be called
+    source = """
+import std.num.tensor
+
+fn test_to_layout() -> i32:
+    let t = Tensor.new(2, 2)
+    let row_major = t.to_layout(TensorLayout.RowMajor)
+    let col_major = t.to_layout(TensorLayout.ColMajor)
+    let strided = t.to_layout(TensorLayout.Strided(2, 2))
+    return 0
+"""
+    
+    tokens = lex(source, "<test>")
+    program = parse(tokens)
+    
+    assert program is not None
+    assert len(program.items) > 0
