@@ -6,7 +6,7 @@
 
 **Quarry** is the official SDK for the **Pyrite** programming language. This repository contains the Quarry SDK (currently in Alpha v1.1), including **Forge** (the Pyrite compiler), build system, package manager, language server, and development tools.
 
-**Pyrite** is a compiled systems programming language designed to combine the low-level power and performance of C with the readability and ease-of-use of Python, while integrating the safety of Rust and the simplicity of Zig.
+**Pyrite** is a compiled systems programming language designed to combine the low-level power and performance of C with the readability and ease-of-use of Python, while integrating the safety of Rust.
 
 **Created by Alexander Rose Wulf** (also known as **Aeowulf** and **WulfHouse**)
 
